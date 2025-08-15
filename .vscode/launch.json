@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flutter Web (Port 3101)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "web-server",
+                "--web-port=3101",
+                "--web-hostname=0.0.0.0"
+            ],
+            "env": {
+                "FLUTTER_WEB_PORT": "3101"
+            }
+        },
+        {
+            "name": "Flutter Web (Default)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "web-server"
+            ]
+        }
+    ]
+}
