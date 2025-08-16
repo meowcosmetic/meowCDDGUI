@@ -4,7 +4,7 @@ import '../models/child.dart';
 import '../models/test_models.dart';
 import 'test_taking_page.dart';
 import 'children/add_child_sheet.dart';
-import 'child_detail_view.dart';
+import '../features/child_management/views/child_detail_view.dart';
 
 class ChildrenListView extends StatefulWidget {
   const ChildrenListView({super.key});

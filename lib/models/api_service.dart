@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../constants/app_config.dart';
 import 'user.dart';
 import 'test_models.dart';
-import 'cdd_test.dart';
+import '../features/cdd_test_management/models/cdd_test.dart';
 
 class ApiService {
   final String baseUrl;

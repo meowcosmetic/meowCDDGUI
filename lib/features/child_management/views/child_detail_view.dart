@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../models/child.dart';
+import '../../../constants/app_colors.dart';
+import '../../../models/child.dart';
 import '../models/child_tracking.dart';
 import 'child_tracking_view.dart';
 import 'child_tracking_history_view.dart';
