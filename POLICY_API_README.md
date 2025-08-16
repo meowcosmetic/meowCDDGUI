@@ -32,6 +32,15 @@ POST http://localhost:8000/policy/read/mark
 
 **Response:** HTTP 200 OK (success) hoặc error status
 
+### 3. Check Policy Read Status Endpoint
+```
+GET http://localhost:8000/policy/read/hasByType?customerId=6898206d72a4fe2d1d105e0e&serviceName=CDD&policyType=terms&currentVersion=true
+```
+
+**Response:** 
+- `true`: User đã đọc policy
+- `false`: User chưa đọc policy
+
 ### Response Format
 ```json
 {
@@ -109,6 +118,12 @@ final policy = await PolicyService.getPolicy();
 - **Customer tracking**: Lưu và sử dụng customer ID cho tracking
 - **Guest mode**: Không gửi mark request cho guest users
 - **Error handling**: Xử lý lỗi khi gửi mark request
+
+### 6. Smart Policy Display Logic
+- **Read status check**: Kiểm tra user đã đọc policy chưa qua API
+- **Skip if read**: Bỏ qua màn hình policy nếu user đã đọc
+- **Show if not read**: Hiển thị policy nếu user chưa đọc
+- **Guest fallback**: Guest users vẫn dùng local storage
 
 ## Cấu hình
 

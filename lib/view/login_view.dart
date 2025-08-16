@@ -4,7 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_config.dart';
 import '../models/api_service.dart';
+import '../models/policy_service.dart';
 import '../dummy_data/dummy_users.dart';
+import '../models/user_session.dart';
 import 'policy_view.dart';
 import 'register_view.dart';
 
@@ -67,26 +69,18 @@ class _LoginViewState extends State<LoginView> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSubmitting = true);
 
-    try {
-      // Gọi API đăng nhập
+    try {      
       final response = await _api.login(
         email: _emailCtrl.text.trim(),
         password: _passwordCtrl.text,
       );
-
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        // Parse response body
-        Map<String, dynamic> responseData = {};
-        try {
-          responseData = jsonDecode(response.body);
-        } catch (e) {
-          // Nếu không parse được JSON, tạo response mặc định
-          responseData = {'token': 'dummy_token_${DateTime.now().millisecondsSinceEpoch}'};
-        }
-        
-        // Lưu thông tin user vào SharedPreferences
+        Map<String, dynamic> responseData = {'token': response.body};;
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('user_token', responseData['token'] ?? '');
+        if ((responseData['token'] ?? '').toString().isNotEmpty) {
+          await UserSession.updateFromLoginToken(responseData['token']);
+        }
         await prefs.setString('user_email', _emailCtrl.text.trim());
         
         // Lưu customer ID nếu có trong response
@@ -107,11 +101,18 @@ class _LoginViewState extends State<LoginView> {
           ),
         );
         
-        // Navigate đến màn hình chính sách trước (nếu được bật)
+        // Kiểm tra có cần hiển thị policy screen không
         if (AppConfig.showPolicyScreen) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const PolicyView()),
-          );
+          final shouldShowPolicy = await PolicyService.shouldShowPolicyScreen();
+          if (shouldShowPolicy) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const PolicyView()),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const MainAppView()),
+            );
+          }
         } else {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const MainAppView()),

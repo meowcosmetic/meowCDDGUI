@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'user_session.dart';
 import 'policy_data.dart';
 
 class PolicyService {
@@ -202,10 +203,31 @@ class PolicyService {
   }
 
   // Lấy customer ID từ SharedPreferences
-  static Future<String?> getCustomerId() async {
+    static Future<String?> getCustomerId() async {
     try {
+      print('=== GET CUSTOMER ID ===');
+      // Ưu tiên lấy từ session (đã decode từ JWT)
+      if (UserSession.userId != null && UserSession.userId!.isNotEmpty) {
+        print('Using UserSession.userId: ${UserSession.userId}');
+        return UserSession.userId;
+      }
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('customer_id');
+      final id = prefs.getString('customer_id');
+      print('SharedPreferences customer_id: $id');
+      
+      if ((id == null || id.isEmpty) && UserSession.jwtToken != null) {
+        print('No customer_id in SharedPreferences, trying to decode JWT...');
+        final sub = UserSession.getSubFromJwt(UserSession.jwtToken!);
+        if (sub != null && sub.isNotEmpty) {
+          print('Decoded sub from JWT: $sub');
+          await prefs.setString('customer_id', sub);
+          UserSession.userId = sub;
+          return sub;
+        }
+      }
+      
+      print('Returning customer_id: $id');
+      return id;
     } catch (e) {
       print('Error getting customer ID: $e');
       return null;
@@ -219,6 +241,83 @@ class PolicyService {
       await prefs.setString('customer_id', customerId);
     } catch (e) {
       print('Error saving customer ID: $e');
+    }
+  }
+
+  // Kiểm tra user đã đọc policy chưa
+  static Future<bool> hasUserReadPolicy({
+    required String customerId,
+    String serviceName = 'CDD',
+    String policyType = 'terms',
+  }) async {
+    try {
+      final url = Uri.parse('$_baseUrl/policy/read/hasByType?customerId=$customerId&serviceName=$serviceName&policyType=$policyType&currentVersion=true');
+      
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        try {
+          final responseData = jsonDecode(response.body);
+          // Giả sử API trả về true/false hoặc có trường hasRead
+          if (responseData is bool) {
+            return responseData;
+          } else if (responseData is Map<String, dynamic>) {
+            return responseData['hasRead'] == true || responseData['read'] == true;
+          }
+          return false;
+        } catch (e) {
+          print('Error parsing hasRead response: $e');
+          return false;
+        }
+      } else {
+        print('Failed to check policy read status: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error checking policy read status: $e');
+      return false;
+    }
+  }
+
+  // Kiểm tra xem có cần hiển thị policy screen không
+  static Future<bool> shouldShowPolicyScreen() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Kiểm tra guest mode
+      final isGuest = prefs.getBool('guest_mode') ?? false;
+      if (isGuest) {
+        final guestAccepted = prefs.getBool('guest_policy_accepted') ?? false;
+        return !guestAccepted;
+      }
+
+      // Kiểm tra user đã đăng nhập chưa
+      final userToken = prefs.getString('user_token');
+      if (userToken == null || userToken.isEmpty) {
+        return true; // Chưa đăng nhập thì hiển thị
+      }
+
+      // Khởi tạo UserSession nếu cần và lấy customer ID từ JWT
+      if (UserSession.jwtToken == null || UserSession.userId == null) {
+        await UserSession.initFromPrefs();
+      }
+      final customerId = UserSession.userId ?? prefs.getString('customer_id');
+      if (customerId == null || customerId.isEmpty) {
+        return true; // Chưa có customer ID thì hiển thị
+      }
+
+      // Gọi API kiểm tra đã đọc policy chưa
+      final hasRead = await hasUserReadPolicy(customerId: customerId);
+      return !hasRead; // Chưa đọc thì hiển thị
+      
+    } catch (e) {
+      print('Error checking should show policy screen: $e');
+      return true; // Có lỗi thì hiển thị để đảm bảo an toàn
     }
   }
 }

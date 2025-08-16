@@ -4,6 +4,7 @@ import '../constants/app_colors.dart';
 import '../models/test_models.dart';
 import '../models/api_service.dart';
 import 'test_detail_view.dart';
+import 'create_test_view.dart';
 
 class TestView extends StatefulWidget {
   const TestView({super.key});
@@ -87,6 +88,14 @@ class _TestViewState extends State<TestView> {
         elevation: 0,
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CreateTestView()),
+            ),
+            tooltip: 'Thêm bài test',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadTests,

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../constants/app_config.dart';
 import 'user.dart';
 import 'test_models.dart';
+import 'cdd_test.dart';
 
 class ApiService {
   final String baseUrl;
@@ -44,13 +45,13 @@ class ApiService {
         'Accept': 'application/json',
       },
       body: jsonEncode(payload),
-    );
+    );    
     return resp;
   }
 
   /// Lấy danh sách tất cả bài test
   Future<http.Response> getTests() async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/api/cdd-tests');
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests');
     final resp = await http.get(
       uri,
       headers: const {
@@ -63,13 +64,27 @@ class ApiService {
 
   /// Lấy chi tiết bài test theo ID
   Future<http.Response> getTestById(String testId) async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/api/cdd-tests/$testId');
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/$testId');
     final resp = await http.get(
       uri,
       headers: const {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+    );
+    return resp;
+  }
+
+  /// Tạo bài test mới
+  Future<http.Response> createTest(CDDTest test) async {
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(test.toJson()),
     );
     return resp;
   }

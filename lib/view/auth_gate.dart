@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_config.dart';
 import '../dummy_data/dummy_users.dart';
+import '../models/user_session.dart';
+import '../models/policy_service.dart';
 import 'policy_view.dart';
 import 'register_view.dart';
 
@@ -29,6 +31,8 @@ class _AuthGateState extends State<AuthGate> {
 
   Future<void> _bootstrap() async {
     final prefs = await SharedPreferences.getInstance();
+    // Initialize global session
+    await UserSession.initFromPrefs();
     final isGuest = prefs.getBool(_kGuestMode) ?? false;
     final accepted = prefs.getBool(_kGuestPolicyAccepted) ?? false;
     final userToken = prefs.getString('user_token');
@@ -39,13 +43,22 @@ class _AuthGateState extends State<AuthGate> {
       _isLoading = false;
     });
     
-    // Nếu user đã đăng nhập, navigate đến MainAppView
+    // Nếu user đã đăng nhập, kiểm tra có cần hiển thị policy không
     if (userToken != null && userToken.isNotEmpty) {
       if (!mounted) return;
+      
       if (AppConfig.showPolicyScreen) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const PolicyView()),
-        );
+        // Kiểm tra xem user đã đọc policy chưa
+        final shouldShowPolicy = await PolicyService.shouldShowPolicyScreen();
+        if (shouldShowPolicy) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const PolicyView()),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainAppView()),
+          );
+        }
       } else {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const MainAppView()),
