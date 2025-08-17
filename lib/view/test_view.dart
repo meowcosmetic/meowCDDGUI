@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../constants/app_colors.dart';
-import '../models/test_models.dart';
 import '../models/api_service.dart';
 import 'test_detail_view.dart';
 import '../features/cdd_test_management/views/create_test_view.dart';
+import '../features/cdd_test_management/models/cdd_test.dart';
 
 class TestView extends StatefulWidget {
   const TestView({super.key});
@@ -14,8 +14,8 @@ class TestView extends StatefulWidget {
 }
 
 class _TestViewState extends State<TestView> {
-  List<Test> tests = [];
-  List<Test> filteredTests = [];
+  List<CDDTest> tests = [];
+  List<CDDTest> filteredTests = [];
   String searchQuery = '';
   bool isLoading = true;
   bool hasError = false;
@@ -40,7 +40,7 @@ class _TestViewState extends State<TestView> {
       
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final List<dynamic> data = jsonDecode(response.body);
-        final List<Test> fetchedTests = data.map((json) => Test.fromJson(json)).toList();
+        final List<CDDTest> fetchedTests = data.map((json) => CDDTest.fromJson(json)).toList();
         
         setState(() {
           tests = fetchedTests;
@@ -70,8 +70,8 @@ class _TestViewState extends State<TestView> {
         filteredTests = tests;
       } else {
         filteredTests = tests.where((t) {
-          return t.getName().toLowerCase().contains(q) ||
-              t.getDescription().toLowerCase().contains(q);
+          return t.getName('vi').toLowerCase().contains(q) ||
+              t.getDescription('vi').toLowerCase().contains(q);
         }).toList();
       }
     });
@@ -196,7 +196,7 @@ class _TestViewState extends State<TestView> {
     );
   }
 
-  Widget _buildTestCard(Test test) {
+  Widget _buildTestCard(CDDTest test) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -223,12 +223,12 @@ class _TestViewState extends State<TestView> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: test.getCategoryColor().withValues(alpha: 0.1),
+                      color: _getCategoryColor(test.category).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       _getCategoryIcon(test.category),
-                      color: test.getCategoryColor(),
+                      color: _getCategoryColor(test.category),
                       size: 24,
                     ),
                   ),
@@ -238,7 +238,7 @@ class _TestViewState extends State<TestView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          test.getName(),
+                          test.getName('vi'),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -249,7 +249,7 @@ class _TestViewState extends State<TestView> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          test.getDescription(),
+                          test.getDescription('vi'),
                           style: const TextStyle(
                             fontSize: 14,
                             color: AppColors.textSecondary,
@@ -270,7 +270,7 @@ class _TestViewState extends State<TestView> {
                   const Icon(Icons.access_time, size: 14, color: AppColors.textSecondary),
                   const SizedBox(width: 4),
                   Text(
-                    test.getAgeRangeText(),
+                    '${test.minAgeMonths}-${test.maxAgeMonths} tháng',
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                   const SizedBox(width: 16),
@@ -284,14 +284,14 @@ class _TestViewState extends State<TestView> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: test.getStatusColor().withValues(alpha: 0.1),
+                      color: _getStatusColor(test.status).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      test.getStatusText(),
+                      _getStatusText(test.status),
                       style: TextStyle(
                         fontSize: 10,
-                        color: test.getStatusColor(),
+                        color: _getStatusColor(test.status),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -333,13 +333,13 @@ class _TestViewState extends State<TestView> {
     );
   }
 
-  void _startTest(Test test) {
+  void _startTest(CDDTest test) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => TestDetailView(
-          testId: test.id,
-          testTitle: test.getName(),
+          testId: test.id ?? '',
+          testTitle: test.getName('vi'),
         ),
       ),
     );
@@ -363,6 +363,47 @@ class _TestViewState extends State<TestView> {
         return Icons.more_horiz;
       default:
         return Icons.quiz;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'DRAFT':
+        return 'Bản nháp';
+      case 'ACTIVE':
+        return 'Hoạt động';
+      case 'INACTIVE':
+        return 'Không hoạt động';
+      default:
+        return status;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'DRAFT':
+        return Colors.orange;
+      case 'ACTIVE':
+        return Colors.green;
+      case 'INACTIVE':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'DEVELOPMENTAL_SCREENING':
+        return Colors.blue;
+      case 'COMMUNICATION_ASSESSMENT':
+        return Colors.green;
+      case 'MOTOR_ASSESSMENT':
+        return Colors.orange;
+      case 'SOCIAL_ASSESSMENT':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 }

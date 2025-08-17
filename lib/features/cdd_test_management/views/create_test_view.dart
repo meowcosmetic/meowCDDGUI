@@ -204,7 +204,6 @@ class _CreateTestViewState extends State<CreateTestView> {
       );
 
       final response = await _api.createTest(test);
-      
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

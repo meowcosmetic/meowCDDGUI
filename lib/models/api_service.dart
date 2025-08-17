@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../constants/app_config.dart';
 import 'user.dart';
-import 'test_models.dart';
 import '../features/cdd_test_management/models/cdd_test.dart';
+import 'user_session.dart';
+import 'child.dart';
 
 class ApiService {
   final String baseUrl;
@@ -49,6 +50,31 @@ class ApiService {
     return resp;
   }
 
+  /// Tạo trẻ mới với format JSON mới
+  Future<http.Response> createChild(ChildData childData) async {
+    // Lấy parentId từ user session
+    final parentId = UserSession.userId;
+    if (parentId == null || parentId.isEmpty) {
+      throw Exception('User ID not found. Please login first.');
+    }
+
+    // Tạo payload với format mới và parentId từ user session
+    final payload = childData.copyWith(
+      parentId: int.tryParse(parentId) ?? 1, // Convert string to int, fallback to 1
+    ).toJson();
+
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/children');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+    return resp;
+  }
+
   /// Lấy danh sách tất cả bài test
   Future<http.Response> getTests() async {
     final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests');
@@ -78,13 +104,14 @@ class ApiService {
   /// Tạo bài test mới
   Future<http.Response> createTest(CDDTest test) async {
     final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests');
+    final payload = test.toJson();
     final resp = await http.post(
       uri,
       headers: const {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: jsonEncode(test.toJson()),
+      body: jsonEncode(payload),
     );
     return resp;
   }

@@ -47,9 +47,9 @@ class CDDTest {
     return {
       'id': id,
       'assessmentCode': assessmentCode,
-      'namesJson': jsonEncode(names),
-      'descriptionsJson': jsonEncode(descriptions),
-      'instructionsJson': jsonEncode(instructions),
+      'names': names,
+      'descriptions': descriptions,
+      'instructions': instructions,
       'category': category,
       'minAgeMonths': minAgeMonths,
       'maxAgeMonths': maxAgeMonths,
@@ -58,10 +58,10 @@ class CDDTest {
       'estimatedDuration': estimatedDuration,
       'administrationType': administrationType,
       'requiredQualifications': requiredQualifications,
-      'requiredMaterialsJson': jsonEncode(requiredMaterials),
-      'notesJson': jsonEncode(notes),
-      'questionsJson': jsonEncode(questions.map((q) => q.toJson()).toList()),
-      'scoringCriteriaJson': jsonEncode(scoringCriteria.toJson()),
+      'requiredMaterials': requiredMaterials,
+      'notes': notes,
+      'questions': questions.map((q) => q.toJson()).toList(),
+      'scoringCriteria': scoringCriteria.toJson(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -71,9 +71,9 @@ class CDDTest {
     return CDDTest(
       id: json['id']?.toString(),
       assessmentCode: json['assessmentCode'] ?? '',
-      names: Map<String, String>.from(jsonDecode(json['namesJson'] ?? '{}')),
-      descriptions: Map<String, String>.from(jsonDecode(json['descriptionsJson'] ?? '{}')),
-      instructions: Map<String, String>.from(jsonDecode(json['instructionsJson'] ?? '{}')),
+      names: Map<String, String>.from(json['names'] ?? {}),
+      descriptions: Map<String, String>.from(json['descriptions'] ?? {}),
+      instructions: Map<String, String>.from(json['instructions'] ?? {}),
       category: json['category'] ?? '',
       minAgeMonths: json['minAgeMonths'] ?? 0,
       maxAgeMonths: json['maxAgeMonths'] ?? 0,
@@ -82,12 +82,12 @@ class CDDTest {
       estimatedDuration: json['estimatedDuration'] ?? 15,
       administrationType: json['administrationType'] ?? 'PARENT_REPORT',
       requiredQualifications: json['requiredQualifications'] ?? 'NO_QUALIFICATION_REQUIRED',
-      requiredMaterials: List<String>.from(jsonDecode(json['requiredMaterialsJson'] ?? '[]')),
-      notes: Map<String, String>.from(jsonDecode(json['notesJson'] ?? '{}')),
-      questions: (jsonDecode(json['questionsJson'] ?? '[]') as List)
+      requiredMaterials: List<String>.from(json['requiredMaterials'] ?? []),
+      notes: Map<String, String>.from(json['notes'] ?? {}),
+      questions: (json['questions'] as List? ?? [])
           .map((q) => CDDQuestion.fromJson(q))
           .toList(),
-      scoringCriteria: CDDScoringCriteria.fromJson(jsonDecode(json['scoringCriteriaJson'] ?? '{}')),
+      scoringCriteria: CDDScoringCriteria.fromJson(json['scoringCriteria'] ?? {}),
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );

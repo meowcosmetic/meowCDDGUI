@@ -533,12 +533,12 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       final age = now.year - birthDate.year - (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day) ? 1 : 0);
       
       final newChild = Child(
-        id: formData['externalId'] as String,
-        name: formData['fullName'] as String,
+        id: formData['externalId'] as String? ?? 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        name: formData['fullName'] as String? ?? 'Trẻ mới',
         avatar: '',
         age: age,
-        gender: (formData['gender'] as String) == 'MALE' ? 'Nam' : (formData['gender'] as String) == 'FEMALE' ? 'Nữ' : 'Khác',
-        diagnosis: 'Đã đăng ký qua API - ${formData['developmentalDisorderDiagnosis']}',
+        gender: (formData['gender'] as String?) == 'MALE' ? 'Nam' : (formData['gender'] as String?) == 'FEMALE' ? 'Nữ' : 'Khác',
+        diagnosis: 'Đã đăng ký qua API - ${formData['developmentalDisorderDiagnosis'] ?? 'NOT_EVALUATED'}',
         parentName: 'Chưa cập nhật',
         parentPhone: 'Chưa cập nhật',
         parentEmail: 'Chưa cập nhật',
@@ -552,9 +552,9 @@ class _ChildrenListViewState extends State<ChildrenListView> {
         },
         notes: [
           'Đã đăng ký qua API vào ${now.day}/${now.month}/${now.year}',
-          'Chiều cao: ${formData['height']}cm, Cân nặng: ${formData['weight']}kg',
-          'Nhóm máu: ${formData['bloodType']}',
-          'Dị ứng: ${formData['allergies']}',
+          'Chiều cao: ${formData['height'] ?? 'N/A'}cm, Cân nặng: ${formData['weight'] ?? 'N/A'}kg',
+          'Nhóm máu: ${formData['bloodType'] ?? 'N/A'}',
+          'Dị ứng: ${formData['allergies'] ?? 'Không có'}',
         ],
         address: 'Chưa cập nhật',
         school: 'Chưa cập nhật',

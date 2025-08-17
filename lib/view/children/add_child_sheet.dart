@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../../constants/app_colors.dart';
+import '../../models/api_service.dart';
+import '../../models/child.dart';
 import 'language_dropdown.dart';
 
 class AddChildSheet extends StatefulWidget {
@@ -20,13 +20,16 @@ class _AddChildSheetState extends State<AddChildSheet> {
   final TextEditingController _allergies = TextEditingController();
   final TextEditingController _medicalHistory = TextEditingController();
   final TextEditingController _specialMedicalConditions = TextEditingController();
-  String _primaryLanguage = 'Vietnamese';
+  final TextEditingController _gestationalWeek = TextEditingController();
+  final TextEditingController _birthWeightGrams = TextEditingController();
+  final TextEditingController _earlyInterventionDetails = TextEditingController();
   final TextEditingController _familyDevelopmentalIssues = TextEditingController();
   
+  String _primaryLanguage = 'Vietnamese';
   String _gender = 'MALE';
   String _bloodType = 'A+';
   bool _isPremature = false;
-  String _developmentalDisorderDiagnosis = 'NO';
+  String _developmentalDisorderDiagnosis = 'NOT_EVALUATED';
   bool _hasEarlyIntervention = false;
   bool _isLoading = false;
 
@@ -90,15 +93,25 @@ class _AddChildSheetState extends State<AddChildSheet> {
                         })),
                       ],
                     ),
+
+                    Row(
+                      children: [
+                        Expanded(child: _field('Tuần thai (nếu sinh non)', _gestationalWeek, keyboardType: TextInputType.number)),
+                        const SizedBox(width: 12),
+                        Expanded(child: _field('Cân nặng lúc sinh (gram)', _birthWeightGrams, keyboardType: TextInputType.number)),
+                      ],
+                    ),
                     
                     _field('Dị ứng', _allergies),
                     _field('Tiền sử bệnh lý', _medicalHistory),
-                                         _field('Tình trạng y tế đặc biệt', _specialMedicalConditions),
-                     LanguageDropdown(
-                       value: _primaryLanguage,
-                       onChanged: (value) => setState(() => _primaryLanguage = value ?? 'Vietnamese'),
-                     ),
-                     _field('Vấn đề phát triển gia đình', _familyDevelopmentalIssues),
+                    _field('Tình trạng y tế đặc biệt', _specialMedicalConditions),
+                    _field('Chi tiết can thiệp sớm', _earlyInterventionDetails),
+                    _field('Vấn đề phát triển gia đình', _familyDevelopmentalIssues),
+                    
+                    LanguageDropdown(
+                      value: _primaryLanguage,
+                      onChanged: (value) => setState(() => _primaryLanguage = value ?? 'Vietnamese'),
+                    ),
                     
                     const SizedBox(height: 16),
                     
@@ -108,8 +121,8 @@ class _AddChildSheetState extends State<AddChildSheet> {
                     
                     const SizedBox(height: 16),
                     
-                                         // Developmental Disorder Diagnosis
-                     _buildDiagnosisDropdown(),
+                    // Developmental Disorder Diagnosis
+                    _buildDiagnosisDropdown(),
                     
                     const SizedBox(height: 16),
                   ],
@@ -123,7 +136,13 @@ class _AddChildSheetState extends State<AddChildSheet> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: _isLoading ? null : () => Navigator.pop(context),
+                    onPressed: _isLoading ? null : () {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted && Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        }
+                      });
+                    },
                     child: const Text('Hủy'),
                   ),
                 ),
@@ -219,45 +238,11 @@ class _AddChildSheetState extends State<AddChildSheet> {
     );
   }
 
-  Widget _buildDropdown(String label, String value, List<String> options, Function(String?) onChanged) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.grey50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: DropdownButtonFormField<String>(
-              value: value,
-              decoration: const InputDecoration(border: InputBorder.none),
-              items: options.map((option) => DropdownMenuItem(
-                value: option,
-                child: Text(option),
-              )).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildDiagnosisDropdown() {
     final diagnosisOptions = {
+      'NOT_EVALUATED': 'Chưa đánh giá',
       'NO': 'Không có',
       'YES': 'Có',
       'UNDER_INVESTIGATION': 'Đang tìm hiểu',
@@ -291,7 +276,7 @@ class _AddChildSheetState extends State<AddChildSheet> {
                 value: entry.key,
                 child: Text(entry.value),
               )).toList(),
-              onChanged: (value) => setState(() => _developmentalDisorderDiagnosis = value ?? 'NO'),
+              onChanged: (value) => setState(() => _developmentalDisorderDiagnosis = value ?? 'NOT_EVALUATED'),
             ),
           ),
         ],
@@ -326,45 +311,64 @@ class _AddChildSheetState extends State<AddChildSheet> {
     });
 
     try {
-      final payload = {
-        "externalId": "CHILD_${DateTime.now().millisecondsSinceEpoch}",
-        "fullName": _fullName.text.trim(),
-        "gender": _gender,
-        "dateOfBirth": _dateOfBirth.text.trim(),
-        "height": double.parse(_height.text.trim()),
-        "weight": double.parse(_weight.text.trim()),
-        "bloodType": _bloodType,
-        "allergies": _allergies.text.trim(),
-        "medicalHistory": _medicalHistory.text.trim(),
-        "specialMedicalConditions": _specialMedicalConditions.text.trim(),
-        "isPremature": _isPremature,
-                 "primaryLanguage": _primaryLanguage,
-        "developmentalDisorderDiagnosis": _developmentalDisorderDiagnosis,
-        "hasEarlyIntervention": _hasEarlyIntervention,
-        "familyDevelopmentalIssues": _familyDevelopmentalIssues.text.trim(),
-      };
-
-      final response = await http.post(
-        Uri.parse('http://localhost:8101/api/v1/children'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(payload),
+      final apiService = ApiService();
+      
+      // Chuẩn bị dữ liệu cho API sử dụng model ChildData
+      final childData = ChildData(
+        fullName: _fullName.text.trim(),
+        gender: _gender,
+        dateOfBirth: _dateOfBirth.text.trim(),
+        height: double.tryParse(_height.text.trim()),
+        weight: double.tryParse(_weight.text.trim()),
+        bloodType: _bloodType,
+        allergies: _allergies.text.trim(),
+        medicalHistory: _medicalHistory.text.trim(),
+        specialMedicalConditions: _specialMedicalConditions.text.trim(),
+        isPremature: _isPremature,
+        primaryLanguage: LanguageDropdown.languageOptions[_primaryLanguage] ?? 'Tiếng Việt',
+        developmentalDisorderDiagnosis: _developmentalDisorderDiagnosis,
+        hasEarlyIntervention: _hasEarlyIntervention,
+        familyDevelopmentalIssues: _familyDevelopmentalIssues.text.trim(),
+        gestationalWeek: _gestationalWeek.text.trim().isNotEmpty ? int.tryParse(_gestationalWeek.text.trim()) : null,
+        birthWeightGrams: _birthWeightGrams.text.trim().isNotEmpty ? int.tryParse(_birthWeightGrams.text.trim()) : null,
+        earlyInterventionDetails: _earlyInterventionDetails.text.trim().isNotEmpty ? _earlyInterventionDetails.text.trim() : null,
+        status: 'ACTIVE',
       );
 
+      final response = await apiService.createChild(childData);
+      if (!mounted) return;
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Navigator.pop(context, payload);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đã thêm trẻ thành công: ${_fullName.text.trim()}'),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        // Lưu context và dữ liệu trước khi pop
+        final currentContext = context;
+        final childName = _fullName.text.trim();
+        
+        // Pop với kiểm tra an toàn và try-catch
+        if (mounted && Navigator.canPop(currentContext)) {
+            Navigator.of(currentContext).pop(childData.toJson());
+        }
+        
+        // Hiển thị thông báo thành công
+        Future.delayed(const Duration(milliseconds: 100), () {
+          try {
+            if (currentContext.mounted) {
+              ScaffoldMessenger.of(currentContext).showSnackBar(
+                SnackBar(
+                  content: Text('Đã thêm trẻ thành công: $childName'),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+            }
+          } catch (delayedError) {
+            // Handle delayed error silently
+          }
+        });
       } else {
-        throw Exception('Failed to add child: ${response.statusCode}');
+        throw Exception('Failed to add child: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      if (!mounted) return;
+      
+      // Hiển thị lỗi
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Lỗi khi thêm trẻ: $e'),
@@ -372,9 +376,11 @@ class _AddChildSheetState extends State<AddChildSheet> {
         ),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 }

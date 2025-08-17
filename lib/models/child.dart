@@ -168,6 +168,162 @@ class Child {
   int get hashCode => id.hashCode;
 }
 
+/// Model mới cho child data với format JSON mới
+class ChildData {
+  final int? parentId;
+  final String fullName;
+  final String gender;
+  final String dateOfBirth;
+  final bool isPremature;
+  final int? gestationalWeek;
+  final int? birthWeightGrams;
+  final String specialMedicalConditions;
+  final String developmentalDisorderDiagnosis;
+  final bool hasEarlyIntervention;
+  final String? earlyInterventionDetails;
+  final String primaryLanguage;
+  final String familyDevelopmentalIssues;
+  final double? height;
+  final double? weight;
+  final String bloodType;
+  final String allergies;
+  final String medicalHistory;
+  final String status;
+
+  const ChildData({
+    this.parentId,
+    required this.fullName,
+    required this.gender,
+    required this.dateOfBirth,
+    required this.isPremature,
+    this.gestationalWeek,
+    this.birthWeightGrams,
+    required this.specialMedicalConditions,
+    required this.developmentalDisorderDiagnosis,
+    required this.hasEarlyIntervention,
+    this.earlyInterventionDetails,
+    required this.primaryLanguage,
+    required this.familyDevelopmentalIssues,
+    this.height,
+    this.weight,
+    required this.bloodType,
+    required this.allergies,
+    required this.medicalHistory,
+    required this.status,
+  });
+
+  /// Tạo ChildData từ JSON
+  factory ChildData.fromJson(Map<String, dynamic> json) {
+    return ChildData(
+      parentId: json['parentId'] as int?,
+      fullName: json['fullName'] as String? ?? '',
+      gender: json['gender'] as String? ?? 'MALE',
+      dateOfBirth: json['dateOfBirth'] as String? ?? '',
+      isPremature: json['isPremature'] as bool? ?? false,
+      gestationalWeek: json['gestationalWeek'] as int?,
+      birthWeightGrams: json['birthWeightGrams'] as int?,
+      specialMedicalConditions: json['specialMedicalConditions'] as String? ?? '',
+      developmentalDisorderDiagnosis: json['developmentalDisorderDiagnosis'] as String? ?? 'NOT_EVALUATED',
+      hasEarlyIntervention: json['hasEarlyIntervention'] as bool? ?? false,
+      earlyInterventionDetails: json['earlyInterventionDetails'] as String?,
+      primaryLanguage: json['primaryLanguage'] as String? ?? 'Tiếng Việt',
+      familyDevelopmentalIssues: json['familyDevelopmentalIssues'] as String? ?? 'NO',
+      height: json['height'] as double?,
+      weight: json['weight'] as double?,
+      bloodType: json['bloodType'] as String? ?? 'A+',
+      allergies: json['allergies'] as String? ?? '',
+      medicalHistory: json['medicalHistory'] as String? ?? '',
+      status: json['status'] as String? ?? 'ACTIVE',
+    );
+  }
+
+  /// Chuyển đổi thành JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'parentId': parentId,
+      'fullName': fullName,
+      'gender': gender,
+      'dateOfBirth': dateOfBirth,
+      'isPremature': isPremature,
+      'gestationalWeek': gestationalWeek,
+      'birthWeightGrams': birthWeightGrams,
+      'specialMedicalConditions': specialMedicalConditions,
+      'developmentalDisorderDiagnosis': developmentalDisorderDiagnosis,
+      'hasEarlyIntervention': hasEarlyIntervention,
+      'earlyInterventionDetails': earlyInterventionDetails,
+      'primaryLanguage': primaryLanguage,
+      'familyDevelopmentalIssues': familyDevelopmentalIssues,
+      'height': height,
+      'weight': weight,
+      'bloodType': bloodType,
+      'allergies': allergies,
+      'medicalHistory': medicalHistory,
+      'status': status,
+    };
+  }
+
+  /// Tạo bản sao với thay đổi
+  ChildData copyWith({
+    int? parentId,
+    String? fullName,
+    String? gender,
+    String? dateOfBirth,
+    bool? isPremature,
+    int? gestationalWeek,
+    int? birthWeightGrams,
+    String? specialMedicalConditions,
+    String? developmentalDisorderDiagnosis,
+    bool? hasEarlyIntervention,
+    String? earlyInterventionDetails,
+    String? primaryLanguage,
+    String? familyDevelopmentalIssues,
+    double? height,
+    double? weight,
+    String? bloodType,
+    String? allergies,
+    String? medicalHistory,
+    String? status,
+  }) {
+    return ChildData(
+      parentId: parentId ?? this.parentId,
+      fullName: fullName ?? this.fullName,
+      gender: gender ?? this.gender,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      isPremature: isPremature ?? this.isPremature,
+      gestationalWeek: gestationalWeek ?? this.gestationalWeek,
+      birthWeightGrams: birthWeightGrams ?? this.birthWeightGrams,
+      specialMedicalConditions: specialMedicalConditions ?? this.specialMedicalConditions,
+      developmentalDisorderDiagnosis: developmentalDisorderDiagnosis ?? this.developmentalDisorderDiagnosis,
+      hasEarlyIntervention: hasEarlyIntervention ?? this.hasEarlyIntervention,
+      earlyInterventionDetails: earlyInterventionDetails ?? this.earlyInterventionDetails,
+      primaryLanguage: primaryLanguage ?? this.primaryLanguage,
+      familyDevelopmentalIssues: familyDevelopmentalIssues ?? this.familyDevelopmentalIssues,
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
+      bloodType: bloodType ?? this.bloodType,
+      allergies: allergies ?? this.allergies,
+      medicalHistory: medicalHistory ?? this.medicalHistory,
+      status: status ?? this.status,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'ChildData(fullName: $fullName, gender: $gender, dateOfBirth: $dateOfBirth)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ChildData && 
+           other.fullName == fullName && 
+           other.dateOfBirth == dateOfBirth;
+  }
+
+  @override
+  int get hashCode => fullName.hashCode ^ dateOfBirth.hashCode;
+}
+
 /// Dữ liệu mẫu cho trẻ em
 class SampleChildren {
   static List<Child> getSampleData() {
