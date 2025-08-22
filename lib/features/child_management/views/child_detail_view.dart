@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import '../../../constants/app_colors.dart';
 import '../../../models/child.dart';
 import '../models/child_tracking.dart';
 import 'child_tracking_view.dart';
 import 'child_tracking_history_view.dart';
+import '../../../models/api_service.dart';
+import '../../../features/cdd_test_management/models/cdd_test.dart';
+import 'child_completed_tests_view.dart';
+import '../../../view/test_detail_view.dart';
+import '../../../models/test_models.dart';
+import '../../../uiElement/selectable_text_widget.dart';
 
 class ChildDetailView extends StatefulWidget {
   final Child child;
@@ -15,6 +22,73 @@ class ChildDetailView extends StatefulWidget {
 }
 
 class _ChildDetailViewState extends State<ChildDetailView> {
+  final ApiService _api = const ApiService();
+  List<CDDTest> _tests = [];
+  List<CDDTest> _filteredTests = [];
+  bool _isLoadingTests = true;
+  bool _hasTestsError = false;
+  String _testsErrorMessage = '';
+  int _filterIndex = 0; // 0=Tất cả, 1=Khuyến nghị, 2=Không khuyến nghị
+  bool _infoExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTests();
+  }
+
+  Future<void> _loadTests() async {
+    setState(() {
+      _isLoadingTests = true;
+      _hasTestsError = false;
+      _testsErrorMessage = '';
+    });
+
+    try {
+      final resp = await _api.getTestsPaginated(page: 0, size: 100); // Load more tests for child detail
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        final Map<String, dynamic> responseData = jsonDecode(resp.body);
+        final List<dynamic> data = responseData['content'] ?? responseData['data'] ?? [];
+        final loaded = data.map((e) => CDDTest.fromJson(e)).toList();
+        setState(() {
+          _tests = loaded;
+          _applyTestFilter();
+          _isLoadingTests = false;
+        });
+      } else {
+        setState(() {
+          _hasTestsError = true;
+          _testsErrorMessage = 'Không thể tải danh sách bài test. Mã lỗi: ${resp.statusCode}';
+          _isLoadingTests = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _hasTestsError = true;
+        _testsErrorMessage = 'Lỗi kết nối: $e';
+        _isLoadingTests = false;
+      });
+    }
+  }
+
+  void _applyTestFilter() {
+    final int childAgeMonths = widget.child.age * 12;
+    List<CDDTest> base = _tests;
+    if (_filterIndex == 1) {
+      base = _tests.where((t) => _isRecommended(t, childAgeMonths)).toList();
+    } else if (_filterIndex == 2) {
+      base = _tests.where((t) => !_isRecommended(t, childAgeMonths)).toList();
+    }
+    setState(() {
+      _filteredTests = base;
+    });
+  }
+
+  bool _isRecommended(CDDTest test, int childAgeMonths) {
+    final bool inAgeRange = childAgeMonths >= test.minAgeMonths && childAgeMonths <= test.maxAgeMonths;
+    final bool isActive = test.status == 'ACTIVE';
+    return inAgeRange && isActive;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,45 +130,8 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             _buildHeaderCard(),
             const SizedBox(height: 16),
             
-            // Basic Information
-            _buildInfoCard('Thông Tin Cơ Bản', [
-              _buildInfoRow('Họ và tên', widget.child.name),
-              _buildInfoRow('Tuổi', '${widget.child.age} tuổi'),
-              _buildInfoRow('Giới tính', widget.child.gender),
-              _buildInfoRow('Trạng thái', widget.child.getStatusText()),
-              _buildInfoRow('Ngày tham gia', '${widget.child.joinDate.day}/${widget.child.joinDate.month}/${widget.child.joinDate.year}'),
-            ]),
-            
-            const SizedBox(height: 16),
-            
-            // Diagnosis
-            _buildInfoCard('Chẩn Đoán', [
-              _buildInfoRow('Chẩn đoán', widget.child.diagnosis),
-            ]),
-            
-            const SizedBox(height: 16),
-            
-            // Parent Information
-            _buildInfoCard('Thông Tin Phụ Huynh', [
-              _buildInfoRow('Tên phụ huynh', widget.child.parentName),
-              _buildInfoRow('Số điện thoại', widget.child.parentPhone),
-              _buildInfoRow('Email', widget.child.parentEmail),
-            ]),
-            
-            const SizedBox(height: 16),
-            
-            // Address & School
-            _buildInfoCard('Địa Chỉ & Trường Học', [
-              _buildInfoRow('Địa chỉ', widget.child.address),
-              _buildInfoRow('Trường học', widget.child.school),
-            ]),
-            
-            const SizedBox(height: 16),
-            
-            // Therapist
-            _buildInfoCard('Chuyên Gia Điều Trị', [
-              _buildInfoRow('Chuyên gia', widget.child.therapist.isNotEmpty ? widget.child.therapist : 'Chưa phân công'),
-            ]),
+            // Collapsible Info Section
+            _buildCollapsibleInfoSection(),
             
             const SizedBox(height: 16),
             
@@ -106,6 +143,11 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             // Tracking Button
             _buildTrackingButton(),
             
+            const SizedBox(height: 16),
+
+            // Tests for Child
+            _buildTestsCard(),
+
             const SizedBox(height: 16),
             
             // Activities Section
@@ -127,6 +169,150 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             const SizedBox(height: 32),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCollapsibleInfoSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: _infoExpanded,
+          onExpansionChanged: (expanded) => setState(() => _infoExpanded = expanded),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          leading: const Icon(Icons.info, color: AppColors.primary, size: 22),
+          title: const Text(
+            'Thông Tin Hồ Sơ',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          subtitle: const Text(
+            'Cơ bản, chẩn đoán, phụ huynh, địa chỉ, trường học, chuyên gia',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          children: [
+            const SizedBox(height: 8),
+            _buildTableSection('Thông Tin Cơ Bản', [
+              ['Họ và tên', widget.child.name],
+              ['Tuổi', '${widget.child.age} tuổi'],
+              ['Giới tính', widget.child.gender],
+              ['Trạng thái', widget.child.getStatusText()],
+              ['Ngày tham gia', '${widget.child.joinDate.day}/${widget.child.joinDate.month}/${widget.child.joinDate.year}'],
+            ]),
+            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            _buildTableSection('Chẩn Đoán', [
+              ['Chẩn đoán', widget.child.diagnosis],
+            ]),
+            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            _buildTableSection('Thông Tin Phụ Huynh', [
+              ['Tên phụ huynh', widget.child.parentName],
+              ['Số điện thoại', widget.child.parentPhone],
+              ['Email', widget.child.parentEmail],
+            ]),
+            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            _buildTableSection('Địa Chỉ & Trường Học', [
+              ['Địa chỉ', widget.child.address],
+              ['Trường học', widget.child.school],
+            ]),
+            const SizedBox(height: 12), 
+            const SizedBox(height: 8),
+            _buildTableSection('Chuyên Gia Điều Trị', [
+              ['Chuyên gia', widget.child.therapist.isNotEmpty ? widget.child.therapist : 'Chưa phân công'],
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubsectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
+    );
+  }
+
+  Widget _buildTableSection(String title, List<List<String>> rows) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            color: AppColors.primaryLight,
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          Table(
+            columnWidths: const {
+              0: FixedColumnWidth(140),
+            },
+            border: TableBorder.all(color: AppColors.borderLight, width: 1),
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: rows.map((row) {
+              final label = row.isNotEmpty ? row[0] : '';
+              final value = row.length > 1 ? row[1] : '';
+              return TableRow(
+                children: [
+                  Container(
+                    color: AppColors.grey50,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                                     Container(
+                     color: AppColors.white,
+                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                     child: SelectableTextWidget(
+                       text: value,
+                       style: const TextStyle(
+                         fontSize: 14,
+                         color: AppColors.textPrimary,
+                       ),
+                     ),
+                   ),
+                ],
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
@@ -184,7 +370,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Color(widget.child.getStatusColor()).withOpacity(0.1),
+                    color: Color(widget.child.getStatusColor()).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Color(widget.child.getStatusColor())),
                   ),
@@ -464,9 +650,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
   }
 
   void _navigateToTrackingHistory(BuildContext context) {
-    // TODO: Get tracking history from database/API
-    // For now, using empty list as placeholder
-    final trackingHistory = <ChildTracking>[];
+    final trackingHistory = _generateDummyTrackingHistory();
     
     Navigator.push(
       context,
@@ -477,6 +661,407 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         ),
       ),
     );
+  }
+
+  List<ChildTracking> _generateDummyTrackingHistory() {
+    final now = DateTime.now();
+    final List<ChildTracking> history = [];
+    for (int i = 0; i < 7; i++) {
+      final date = now.subtract(Duration(days: i));
+      history.add(
+        ChildTracking(
+          id: 'track_${widget.child.id}_$i',
+          childId: widget.child.id,
+          date: DateTime(date.year, date.month, date.day, 9, 0),
+          scores: {
+            'Giao tiếp': 1 + (i % 2),
+            'Tương tác xã hội': (i % 3),
+            'Hành vi & cảm xúc': 2 - (i % 2),
+            'Kỹ năng nhận thức': 1 + ((i + 1) % 2),
+            'Tự lập': (i % 3),
+          },
+          notes: i == 0 ? 'Ngày gần nhất: tinh thần tốt, hợp tác.' : '',
+        ),
+      );
+    }
+    return history;
+  }
+
+  Widget _buildTestsCard() {
+    final int childAgeMonths = widget.child.age * 12;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.quiz, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'Danh Sách Bài Test',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () {
+                  final results = _generateDummyTestResults();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChildCompletedTestsView(
+                        child: widget.child,
+                        results: results,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.history),
+                label: const Text('Xem đã làm'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildTestsFilter(),
+          const SizedBox(height: 12),
+          if (_isLoadingTests)
+            const Center(child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(),
+            ))
+          else if (_hasTestsError)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Có lỗi khi tải bài test', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(_testsErrorMessage, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    onPressed: _loadTests,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Thử lại'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else if (_filteredTests.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.grey50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: const Center(
+                child: Text('Không có bài test phù hợp'),
+              ),
+            )
+          else
+            Column(
+              children: _filteredTests.map((test) => _buildTestItem(test, _isRecommended(test, childAgeMonths))).toList(),
+            ),
+        ],
+      ),
+    );
+  }
+
+  List<TestResult> _generateDummyTestResults() {
+    // Prefer using loaded tests for names/ids if available
+    final ids = _tests.take(3).map((t) => t.id ?? 'test_${t.assessmentCode}').toList();
+    while (ids.length < 3) {
+      ids.add('test_${ids.length + 1}');
+    }
+
+    final now = DateTime.now();
+    return [
+      TestResult(
+        id: 'res_${widget.child.id}_1',
+        testId: ids[0],
+        userId: widget.child.id,
+        userName: widget.child.name,
+        score: 2,
+        totalQuestions: 10,
+        answeredQuestions: 10,
+        timeSpent: 420,
+        completedAt: now.subtract(const Duration(days: 1, hours: 2)),
+        questionResults: [
+          QuestionResult(questionId: 'q1', answer: true, timeSpent: 20, answeredAt: now.subtract(const Duration(days: 1, hours: 2))),
+          QuestionResult(questionId: 'q2', answer: false, timeSpent: 30, answeredAt: now.subtract(const Duration(days: 1, hours: 2))),
+        ],
+        notes: 'Kết quả trong ngưỡng an toàn.',
+      ),
+      TestResult(
+        id: 'res_${widget.child.id}_2',
+        testId: ids[1],
+        userId: widget.child.id,
+        userName: widget.child.name,
+        score: 4,
+        totalQuestions: 12,
+        answeredQuestions: 12,
+        timeSpent: 610,
+        completedAt: now.subtract(const Duration(days: 5, hours: 3)),
+        questionResults: [
+          QuestionResult(questionId: 'q1', answer: true, timeSpent: 25, answeredAt: now.subtract(const Duration(days: 5, hours: 3))),
+          QuestionResult(questionId: 'q2', answer: true, timeSpent: 18, answeredAt: now.subtract(const Duration(days: 5, hours: 3))),
+        ],
+        notes: 'Một số dấu hiệu cần theo dõi.',
+      ),
+      TestResult(
+        id: 'res_${widget.child.id}_3',
+        testId: ids[2],
+        userId: widget.child.id,
+        userName: widget.child.name,
+        score: 7,
+        totalQuestions: 15,
+        answeredQuestions: 15,
+        timeSpent: 900,
+        completedAt: now.subtract(const Duration(days: 12, hours: 1)),
+        questionResults: [
+          QuestionResult(questionId: 'q1', answer: false, timeSpent: 40, answeredAt: now.subtract(const Duration(days: 12, hours: 1))),
+          QuestionResult(questionId: 'q2', answer: true, timeSpent: 35, answeredAt: now.subtract(const Duration(days: 12, hours: 1))),
+        ],
+        notes: 'Khuyến nghị trao đổi với chuyên gia.',
+      ),
+    ];
+  }
+
+  Widget _buildTestsFilter() {
+    final List<Map<String, Object>> items = [
+      {'label': 'Tất cả', 'icon': Icons.list_alt},
+      {'label': 'Khuyến nghị', 'icon': Icons.recommend},
+      {'label': 'Không khuyến nghị', 'icon': Icons.block},
+    ];
+    return Wrap(
+      spacing: 8,
+      children: List.generate(items.length, (index) {
+        final String label = items[index]['label'] as String;
+        final IconData icon = items[index]['icon'] as IconData;
+        final selected = _filterIndex == index;
+        return ChoiceChip(
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: selected ? AppColors.white : AppColors.textSecondary),
+              const SizedBox(width: 6),
+              Text(label),
+            ],
+          ),
+          selected: selected,
+          onSelected: (_) {
+            setState(() {
+              _filterIndex = index;
+              _applyTestFilter();
+            });
+          },
+          selectedColor: AppColors.primary,
+          backgroundColor: AppColors.grey50,
+          labelStyle: TextStyle(color: selected ? AppColors.white : AppColors.textPrimary),
+          side: BorderSide(color: selected ? AppColors.primary : AppColors.borderLight),
+        );
+      }),
+    );
+  }
+
+  Widget _buildTestItem(CDDTest test, bool recommended) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.grey50,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _getCategoryColor(test.category).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(_getCategoryIcon(test.category), color: _getCategoryColor(test.category), size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        test.getName('vi'),
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (recommended) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.recommend, size: 14, color: Colors.green),
+                            SizedBox(width: 4),
+                            Text('Khuyến nghị', style: TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.cake, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text('${test.minAgeMonths}-${test.maxAgeMonths} tháng', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    const SizedBox(width: 12),
+                    const Icon(Icons.quiz, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text('${test.questions.length} câu', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(test.status).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _getStatusText(test.status),
+                        style: TextStyle(fontSize: 10, color: _getStatusColor(test.status), fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _startTest(test),
+                    icon: const Icon(Icons.play_arrow, size: 16),
+                    label: const Text('Bắt đầu'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startTest(CDDTest test) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TestDetailView(
+          testId: test.id ?? '',
+          testTitle: test.getName('vi'),
+        ),
+      ),
+    );
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'DRAFT':
+        return 'Bản nháp';
+      case 'ACTIVE':
+        return 'Hoạt động';
+      case 'INACTIVE':
+        return 'Không hoạt động';
+      default:
+        return status;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'DRAFT':
+        return Colors.orange;
+      case 'ACTIVE':
+        return Colors.green;
+      case 'INACTIVE':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'DEVELOPMENTAL_SCREENING':
+        return Icons.psychology;
+      case 'COMMUNICATION_LANGUAGE':
+        return Icons.chat;
+      case 'GROSS_MOTOR':
+        return Icons.accessibility;
+      case 'FINE_MOTOR':
+        return Icons.handyman;
+      case 'IMITATION_LEARNING':
+        return Icons.school;
+      case 'PERSONAL_SOCIAL':
+        return Icons.people;
+      case 'OTHER':
+        return Icons.more_horiz;
+      default:
+        return Icons.quiz;
+    }
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'DEVELOPMENTAL_SCREENING':
+        return Colors.blue;
+      case 'COMMUNICATION_ASSESSMENT':
+        return Colors.green;
+      case 'MOTOR_ASSESSMENT':
+        return Colors.orange;
+      case 'SOCIAL_ASSESSMENT':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
   }
 
   Widget _buildActivitiesCard() {
@@ -691,7 +1276,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+                              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(

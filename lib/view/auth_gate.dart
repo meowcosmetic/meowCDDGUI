@@ -192,7 +192,7 @@ class _AuthGateState extends State<AuthGate> {
                     // Quick action: save dummy dev user for testing in debug/dev mode
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setString(_kCurrentUser, dummyDevUser.toJsonString());
-                    await prefs.setString('customer_id', 'guest_user_${DateTime.now().millisecondsSinceEpoch}');
+                    // Không tạo dummy customer_id - để văng ra lỗi khi không có sub
                     await _setGuestMode(true);
                     if (!mounted) return;
                     Navigator.of(context).pushReplacement(

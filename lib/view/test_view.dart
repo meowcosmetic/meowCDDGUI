@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../constants/app_colors.dart';
 import '../models/api_service.dart';
 import 'test_detail_view.dart';
@@ -21,6 +22,21 @@ class _TestViewState extends State<TestView> {
   bool hasError = false;
   String errorMessage = '';
   final ApiService _api = const ApiService();
+  
+  // Pagination variables
+  int currentPage = 0;
+  int pageSize = 10;
+  bool hasMoreData = true;
+  bool isLoadingMore = false;
+  int totalItems = 0;
+
+  // Filter variables
+  String selectedCategory = 'Tất cả';
+  int? selectedAgeMonths; // null = không filter theo tuổi
+  List<String> availableCategories = [];
+  
+  // Text editing controller for age input
+  final TextEditingController _ageController = TextEditingController();
 
   @override
   void initState() {
@@ -28,30 +44,109 @@ class _TestViewState extends State<TestView> {
     _loadTests();
   }
 
-  Future<void> _loadTests() async {
+  @override
+  void dispose() {
+    _ageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadTests({bool refresh = false}) async {
+    if (refresh) {
+      setState(() {
+        currentPage = 0;
+        tests.clear();
+        filteredTests.clear();
+        hasMoreData = true;
+      });
+    }
+
+    if (!hasMoreData || isLoadingMore) return;
+
     setState(() {
-      isLoading = true;
+      if (refresh) {
+        isLoading = true;
+      } else {
+        isLoadingMore = true;
+      }
       hasError = false;
       errorMessage = '';
     });
 
     try {
-      final response = await _api.getTests();
+      http.Response response;
+      
+      // Determine which API to call based on filters
+      if (selectedCategory != 'Tất cả' && selectedAgeMonths != null) {
+        // Both filters active
+        final category = _getCategoryCode(selectedCategory);
+        response = await _api.getTestsByAgeAndCategoryPaginated(
+          ageMonths: selectedAgeMonths!,
+          category: category,
+          page: currentPage,
+          size: pageSize,
+        );
+      } else if (selectedCategory != 'Tất cả') {
+        // Only category filter active
+        final category = _getCategoryCode(selectedCategory);
+        response = await _api.getTestsByCategoryPaginated(
+          category: category,
+          page: currentPage,
+          size: pageSize,
+        );
+      } else if (selectedAgeMonths != null) {
+        // Only age filter active
+        response = await _api.getTestsByAgePaginated(
+          ageMonths: selectedAgeMonths!,
+          page: currentPage,
+          size: pageSize,
+        );
+      } else {
+        // No filters active
+        response = await _api.getTestsPaginated(page: currentPage, size: pageSize);
+      }
       
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final List<dynamic> data = responseData['content'] ?? responseData['data'] ?? [];
+        final int total = responseData['totalElements'] ?? responseData['total'] ?? 0;
+        
         final List<CDDTest> fetchedTests = data.map((json) => CDDTest.fromJson(json)).toList();
         
         setState(() {
-          tests = fetchedTests;
-          filteredTests = fetchedTests;
+          if (refresh) {
+            tests = fetchedTests;
+            filteredTests = fetchedTests;
+          } else {
+            tests.addAll(fetchedTests);
+            // For filtered results, replace filteredTests instead of adding
+            if (selectedCategory != 'Tất cả' || selectedAgeMonths != null) {
+              // If we have active filters, replace the filtered list
+              filteredTests = fetchedTests;
+            } else {
+              // If no filters, add to existing list
+              filteredTests.addAll(fetchedTests);
+            }
+          }
+          totalItems = total;
+          currentPage++;
+          hasMoreData = tests.length < total;
           isLoading = false;
+          isLoadingMore = false;
         });
+        
+        // Update available filter options
+        _updateFilterOptions();
+        
+        // Apply search filter only if no other filters are active
+        if (selectedCategory == 'Tất cả' && selectedAgeMonths == null) {
+          _applySearchFilter();
+        }
       } else {
         setState(() {
           hasError = true;
           errorMessage = 'Không thể tải danh sách bài test. Mã lỗi: ${response.statusCode}';
           isLoading = false;
+          isLoadingMore = false;
         });
       }
     } catch (e) {
@@ -59,22 +154,102 @@ class _TestViewState extends State<TestView> {
         hasError = true;
         errorMessage = 'Lỗi kết nối: $e';
         isLoading = false;
+        isLoadingMore = false;
       });
     }
   }
 
+  void _updateFilterOptions() {
+    // Update available categories
+    final categories = tests.map((t) => _getCategoryDisplayName(t.category)).toSet().toList();
+    categories.sort();
+    availableCategories = ['Tất cả', ...categories];
+  }
+
+  String _getCategoryCode(String displayName) {
+    switch (displayName) {
+      case 'Sàng lọc phát triển':
+        return 'DEVELOPMENTAL_SCREENING';
+      case 'Giao tiếp & Ngôn ngữ':
+        return 'COMMUNICATION_LANGUAGE';
+      case 'Vận động thô':
+        return 'GROSS_MOTOR';
+      case 'Vận động tinh':
+        return 'FINE_MOTOR';
+      case 'Bắt chước & Học tập':
+        return 'IMITATION_LEARNING';
+      case 'Cá nhân & Xã hội':
+        return 'PERSONAL_SOCIAL';
+      case 'Khác':
+        return 'OTHER';
+      default:
+        return displayName;
+    }
+  }
+
   void _filter() {
+    // Reset pagination and reload data with new filters
+    setState(() {
+      currentPage = 0;
+      tests.clear();
+      filteredTests.clear();
+      hasMoreData = true;
+    });
+    _loadTests();
+  }
+
+  void _applyAgeFilter() {
+    final ageText = _ageController.text.trim();
+    if (ageText.isEmpty) {
+      setState(() {
+        selectedAgeMonths = null;
+      });
+    } else {
+      final age = int.tryParse(ageText);
+      if (age != null && age >= 0) {
+        setState(() {
+          selectedAgeMonths = age;
+        });
+      } else {
+        // Show error for invalid input
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vui lòng nhập số tháng hợp lệ (>= 0)'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+    _filter();
+  }
+
+  void _applySearchFilter() {
     setState(() {
       final q = searchQuery.trim().toLowerCase();
       if (q.isEmpty) {
-        filteredTests = tests;
+        // If no search query, show all tests (respecting other filters)
+        if (selectedCategory == 'Tất cả' && selectedAgeMonths == null) {
+          filteredTests = tests;
+        }
+        // If other filters are active, keep the current filtered results
       } else {
-        filteredTests = tests.where((t) {
+        // Apply search filter on top of existing filters
+        final baseTests = selectedCategory == 'Tất cả' && selectedAgeMonths == null 
+            ? tests 
+            : filteredTests;
+        filteredTests = baseTests.where((t) {
           return t.getName('vi').toLowerCase().contains(q) ||
               t.getDescription('vi').toLowerCase().contains(q);
         }).toList();
       }
     });
+  }
+
+  Future<void> _loadMoreData() async {
+    if (hasMoreData && !isLoadingMore) {
+      await _loadTests();
+    }
   }
 
   @override
@@ -98,14 +273,33 @@ class _TestViewState extends State<TestView> {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadTests,
+            onPressed: () => _loadTests(refresh: true),
             tooltip: 'Làm mới',
           ),
         ],
+        bottom: totalItems > 0 ? PreferredSize(
+          preferredSize: const Size.fromHeight(30),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            color: AppColors.primary.withValues(alpha: 0.1),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                                 Text(
+                   'Hiển thị ${filteredTests.length} / ${tests.length} bài test (tổng: $totalItems)',
+                   style: const TextStyle(
+                     fontSize: 12,
+                     color: AppColors.textSecondary,
+                   ),
+                 ),
+              ],
+            ),
+          ),
+        ) : null,
       ),
       body: Column(
         children: [
-          // Search Bar
+          // Search and Filter Bar
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -118,20 +312,132 @@ class _TestViewState extends State<TestView> {
                 ),
               ],
             ),
-            child: TextField(
-              onChanged: (value) {
-                searchQuery = value;
-                _filter();
-              },
-              decoration: InputDecoration(
-                hintText: 'Tìm kiếm bài test...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: Column(
+              children: [
+                // Search Bar
+                TextField(
+                  onChanged: (value) {
+                    searchQuery = value;
+                    _applySearchFilter();
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Tìm kiếm bài test...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.grey50,
+                  ),
                 ),
-                filled: true,
-                fillColor: AppColors.grey50,
-              ),
+                const SizedBox(height: 12),
+                
+                // Filter Row
+                Row(
+                   children: [
+                     // Category Filter
+                     Expanded(
+                       child: Container(
+                         padding: const EdgeInsets.symmetric(horizontal: 12),
+                         decoration: BoxDecoration(
+                           border: Border.all(color: AppColors.borderLight),
+                           borderRadius: BorderRadius.circular(8),
+                         ),
+                         child: DropdownButtonHideUnderline(
+                           child: DropdownButton<String>(
+                             value: selectedCategory,
+                             isExpanded: true,
+                             hint: const Text('Danh mục'),
+                             items: availableCategories.map((String category) {
+                               return DropdownMenuItem<String>(
+                                 value: category,
+                                 child: Text(
+                                   category,
+                                   style: const TextStyle(fontSize: 14),
+                                   overflow: TextOverflow.ellipsis,
+                                 ),
+                               );
+                             }).toList(),
+                             onChanged: (String? newValue) {
+                               if (newValue != null) {
+                                 setState(() {
+                                   selectedCategory = newValue;
+                                 });
+                                 _filter();
+                               }
+                             },
+                           ),
+                         ),
+                       ),
+                     ),
+                     const SizedBox(width: 12),
+                     
+                     // Age Input Filter
+                     Expanded(
+                       child: Row(
+                         children: [
+                           Expanded(
+                             child: TextField(
+                               controller: _ageController,
+                               keyboardType: TextInputType.number,
+                               decoration: InputDecoration(
+                                 hintText: 'Nhập số tháng (VD: 24)',
+                                 border: OutlineInputBorder(
+                                   borderRadius: BorderRadius.circular(8),
+                                   borderSide: const BorderSide(color: AppColors.borderLight),
+                                 ),
+                                 enabledBorder: OutlineInputBorder(
+                                   borderRadius: BorderRadius.circular(8),
+                                   borderSide: const BorderSide(color: AppColors.borderLight),
+                                 ),
+                                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                 isDense: true,
+                               ),
+                               onSubmitted: (_) => _applyAgeFilter(),
+                             ),
+                           ),
+                           const SizedBox(width: 8),
+                           ElevatedButton(
+                             onPressed: _applyAgeFilter,
+                             style: ElevatedButton.styleFrom(
+                               backgroundColor: AppColors.primary,
+                               foregroundColor: AppColors.white,
+                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                               minimumSize: const Size(0, 36),
+                             ),
+                             child: const Text('Áp dụng'),
+                           ),
+                         ],
+                       ),
+                     ),
+                   ],
+                 ),
+                
+                // Clear Filters Button
+                if (selectedCategory != 'Tất cả' || selectedAgeMonths != null || searchQuery.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            selectedCategory = 'Tất cả';
+                            selectedAgeMonths = null;
+                            searchQuery = '';
+                            _ageController.clear();
+                          });
+                          _filter();
+                        },
+                        icon: const Icon(Icons.clear, size: 16),
+                        label: const Text('Xóa bộ lọc'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
 
@@ -143,13 +449,24 @@ class _TestViewState extends State<TestView> {
                     ? _buildErrorState()
                     : filteredTests.isEmpty
                         ? _buildEmptyState()
-                        : ListView.builder(
-                            padding: const EdgeInsets.all(16),
-                            itemCount: filteredTests.length,
-                            itemBuilder: (context, index) {
-                              final test = filteredTests[index];
-                              return _buildTestCard(test);
+                        : NotificationListener<ScrollNotification>(
+                            onNotification: (ScrollNotification scrollInfo) {
+                              if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                                _loadMoreData();
+                              }
+                              return false;
                             },
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: filteredTests.length + (hasMoreData ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == filteredTests.length) {
+                                  return _buildLoadMoreIndicator();
+                                }
+                                final test = filteredTests[index];
+                                return _buildTestCard(test);
+                              },
+                            ),
                           ),
           ),
         ],
@@ -183,7 +500,7 @@ class _TestViewState extends State<TestView> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: _loadTests,
+            onPressed: () => _loadTests(refresh: true),
             icon: const Icon(Icons.refresh),
             label: const Text('Thử lại'),
             style: ElevatedButton.styleFrom(
@@ -333,6 +650,47 @@ class _TestViewState extends State<TestView> {
     );
   }
 
+  Widget _buildLoadMoreIndicator() {
+    if (!hasMoreData) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        child: const Center(
+          child: Text(
+            'Đã tải hết dữ liệu',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: const Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Đang tải thêm...',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _startTest(CDDTest test) {
     Navigator.push(
       context,
@@ -392,16 +750,43 @@ class _TestViewState extends State<TestView> {
     }
   }
 
+  String _getCategoryDisplayName(String category) {
+    switch (category) {
+      case 'DEVELOPMENTAL_SCREENING':
+        return 'Sàng lọc phát triển';
+      case 'COMMUNICATION_LANGUAGE':
+        return 'Giao tiếp & Ngôn ngữ';
+      case 'GROSS_MOTOR':
+        return 'Vận động thô';
+      case 'FINE_MOTOR':
+        return 'Vận động tinh';
+      case 'IMITATION_LEARNING':
+        return 'Bắt chước & Học tập';
+      case 'PERSONAL_SOCIAL':
+        return 'Cá nhân & Xã hội';
+      case 'OTHER':
+        return 'Khác';
+      default:
+        return category;
+    }
+  }
+
   Color _getCategoryColor(String category) {
     switch (category) {
       case 'DEVELOPMENTAL_SCREENING':
         return Colors.blue;
-      case 'COMMUNICATION_ASSESSMENT':
+      case 'COMMUNICATION_LANGUAGE':
         return Colors.green;
-      case 'MOTOR_ASSESSMENT':
+      case 'GROSS_MOTOR':
         return Colors.orange;
-      case 'SOCIAL_ASSESSMENT':
+      case 'FINE_MOTOR':
         return Colors.purple;
+      case 'IMITATION_LEARNING':
+        return Colors.teal;
+      case 'PERSONAL_SOCIAL':
+        return Colors.indigo;
+      case 'OTHER':
+        return Colors.grey;
       default:
         return Colors.grey;
     }

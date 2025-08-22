@@ -12,14 +12,6 @@ class UserSession {
       jwtToken = prefs.getString('user_token');
       userId = prefs.getString('customer_id');
       isGuest = prefs.getBool('guest_mode') ?? false;
-
-      if ((userId == null || userId!.isEmpty) && jwtToken != null && jwtToken!.isNotEmpty) {
-        final sub = getSubFromJwt(jwtToken!);
-        if (sub != null) {
-          userId = sub;
-          await prefs.setString('customer_id', sub);
-        }
-      }
     } catch (_) {
       // swallow
     }
@@ -75,6 +67,28 @@ class UserSession {
         break;
     }
     return output;
+  }
+
+  static Future<void> clearSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Clear all session-related data
+      await prefs.remove('user_token');
+      await prefs.remove('customer_id');
+      await prefs.remove('guest_mode');
+      await prefs.remove('guest_mode_enabled');
+      await prefs.remove('guest_policy_accepted');
+      await prefs.remove('current_user');
+      
+      // Reset static variables
+      jwtToken = null;
+      userId = null;
+      isGuest = false;
+    } catch (e) {
+      // Log error if needed
+      // print('Error clearing session: $e');
+    }
   }
 }
 

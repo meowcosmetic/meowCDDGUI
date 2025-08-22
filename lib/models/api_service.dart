@@ -52,32 +52,100 @@ class ApiService {
 
   /// Tạo trẻ mới với format JSON mới
   Future<http.Response> createChild(ChildData childData) async {
+    // Đảm bảo UserSession đã được khởi tạo
+    await UserSession.initFromPrefs();
+    
     // Lấy parentId từ user session
     final parentId = UserSession.userId;
+    print('DEBUG: UserSession.userId = $parentId');
+    
     if (parentId == null || parentId.isEmpty) {
       throw Exception('User ID not found. Please login first.');
     }
 
+    // Kiểm tra JWT token
+    print('DEBUG: UserSession.jwtToken = ${UserSession.jwtToken?.substring(0, 20)}...');
+    // if (UserSession.jwtToken == null || UserSession.jwtToken!.isEmpty) {
+    //   throw Exception('JWT token not found. Please login first.');
+    // }
+
     // Tạo payload với format mới và parentId từ user session
+    print('DEBUG: parentId string = $parentId');
+    
     final payload = childData.copyWith(
-      parentId: int.tryParse(parentId) ?? 1, // Convert string to int, fallback to 1
+      parentId: parentId, // Gửi parentId dưới dạng String
     ).toJson();
 
     final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/children');
+    
+    // Debug: In thông tin request
+    print('DEBUG: Creating child with URL: $uri');
+    print('DEBUG: Payload: ${jsonEncode(payload)}');
+    print('DEBUG: Headers: ${{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      // 'Authorization': 'Bearer ${UserSession.jwtToken?.substring(0, 20)}...',
+    }}');
+    
     final resp = await http.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        // 'Authorization': 'Bearer ${UserSession.jwtToken}',
+      },
+      body: jsonEncode(payload),
+    );
+    
+    // Debug: In response
+    print('DEBUG: Response status: ${resp.statusCode}');
+    print('DEBUG: Response body: ${resp.body}');
+    
+    return resp;
+  }
+
+  /// Lấy danh sách bài test có phân trang
+  Future<http.Response> getTestsPaginated({int page = 0, int size = 10}) async {
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/paginated?page=$page&size=$size');
+    final resp = await http.get(
       uri,
       headers: const {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: jsonEncode(payload),
     );
     return resp;
   }
 
-  /// Lấy danh sách tất cả bài test
-  Future<http.Response> getTests() async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests');
+  /// Lấy danh sách bài test theo độ tuổi có phân trang
+  Future<http.Response> getTestsByAgePaginated({int ageMonths = 0, int page = 0, int size = 10}) async {
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/age/$ageMonths/status/ACTIVE/paginated?page=$page&size=$size');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Lấy danh sách bài test theo category có phân trang
+  Future<http.Response> getTestsByCategoryPaginated({String category = '', int page = 0, int size = 10}) async {
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/category/$category/status/ACTIVE/paginated?page=$page&size=$size');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Lấy danh sách bài test theo cả age và category có phân trang
+  Future<http.Response> getTestsByAgeAndCategoryPaginated({int ageMonths = 0, String category = '', int page = 0, int size = 10}) async {
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/age/$ageMonths/category/$category/status/ACTIVE/paginated?page=$page&size=$size');
     final resp = await http.get(
       uri,
       headers: const {
@@ -112,6 +180,19 @@ class ApiService {
         'Accept': 'application/json',
       },
       body: jsonEncode(payload),
+    );
+    return resp;
+  }
+
+  /// Lấy danh sách trẻ theo parentId
+  Future<http.Response> getChildrenByParentId(String parentId) async {
+    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/children/parent/$parentId');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
     );
     return resp;
   }

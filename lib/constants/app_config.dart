@@ -40,6 +40,9 @@ class AppConfig {
   static const bool enableLogging = true;         // Ghi log
   static const bool enableCrashReporting = true;  // Báo cáo lỗi
 
+  // Text Selection Configuration - Cấu hình chọn text
+  static const bool enableTextSelection = true;   // Bật chọn và copy text
+
   // Entry/Gating Screens - Cấu hình màn hình đầu vào
   static const bool showLoginScreen = true;       // Hiển thị màn hình đăng nhập
   static const bool showPolicyScreen = true;      // Hiển thị màn hình chính sách

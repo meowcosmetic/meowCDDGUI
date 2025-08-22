@@ -203,30 +203,10 @@ class PolicyService {
   }
 
   // Lấy customer ID từ SharedPreferences
-    static Future<String?> getCustomerId() async {
+  static Future<String?> getCustomerId() async {
     try {
-      print('=== GET CUSTOMER ID ===');
-      // Ưu tiên lấy từ session (đã decode từ JWT)
-      if (UserSession.userId != null && UserSession.userId!.isNotEmpty) {
-        print('Using UserSession.userId: ${UserSession.userId}');
-        return UserSession.userId;
-      }
       final prefs = await SharedPreferences.getInstance();
       final id = prefs.getString('customer_id');
-      print('SharedPreferences customer_id: $id');
-      
-      if ((id == null || id.isEmpty) && UserSession.jwtToken != null) {
-        print('No customer_id in SharedPreferences, trying to decode JWT...');
-        final sub = UserSession.getSubFromJwt(UserSession.jwtToken!);
-        if (sub != null && sub.isNotEmpty) {
-          print('Decoded sub from JWT: $sub');
-          await prefs.setString('customer_id', sub);
-          UserSession.userId = sub;
-          return sub;
-        }
-      }
-      
-      print('Returning customer_id: $id');
       return id;
     } catch (e) {
       print('Error getting customer ID: $e');
@@ -234,15 +214,6 @@ class PolicyService {
     }
   }
 
-  // Lưu customer ID vào SharedPreferences
-  static Future<void> saveCustomerId(String customerId) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('customer_id', customerId);
-    } catch (e) {
-      print('Error saving customer ID: $e');
-    }
-  }
 
   // Kiểm tra user đã đọc policy chưa
   static Future<bool> hasUserReadPolicy({

@@ -4,6 +4,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_config.dart';
 import '../models/policy_service.dart';
 import '../models/policy_data.dart';
+import '../models/user_session.dart';
 import 'children_list_view.dart';
 import 'library_view.dart';
 import 'test_view.dart';
@@ -594,6 +595,8 @@ class _MainAppViewState extends State<MainAppView> {
       label: 'Hồ Sơ',
     ),
   ];
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -1342,7 +1345,7 @@ class ProfilePage extends StatelessWidget {
                   'Phụ huynh',
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.white.withOpacity(0.9),
+                    color: AppColors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -1408,15 +1411,7 @@ class ProfilePage extends StatelessWidget {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: Implement logout
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Đang đăng xuất...'),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
-              },
+              onPressed: () => _showLogoutDialog(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.error,
                 foregroundColor: AppColors.white,
@@ -1481,5 +1476,86 @@ class ProfilePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.logout, color: AppColors.primary),
+              SizedBox(width: 8),
+              Text('Đăng xuất'),
+            ],
+          ),
+          content: const Text(
+            'Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Hủy',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _performLogout(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+              ),
+              child: const Text('Đăng xuất'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _performLogout(BuildContext context) async {
+    try {
+      // Clear user session
+      await UserSession.clearSession();
+      
+      // Clear SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      
+      // Show success message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã đăng xuất thành công'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      
+      // Navigate back to auth gate
+      if (context.mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/',
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi đăng xuất: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 }

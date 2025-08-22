@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../models/api_service.dart';
 import '../../models/child.dart';
+import '../../models/user_session.dart';
 import 'language_dropdown.dart';
 
 class AddChildSheet extends StatefulWidget {
@@ -311,6 +312,13 @@ class _AddChildSheetState extends State<AddChildSheet> {
     });
 
     try {
+      // Đảm bảo UserSession đã được khởi tạo
+      await UserSession.initFromPrefs();
+      
+      // Debug: Kiểm tra session
+      print('DEBUG: UserSession.userId = ${UserSession.userId}');
+      print('DEBUG: UserSession.jwtToken = ${UserSession.jwtToken?.substring(0, 20)}...');
+      
       final apiService = ApiService();
       
       // Chuẩn bị dữ liệu cho API sử dụng model ChildData
@@ -338,30 +346,22 @@ class _AddChildSheetState extends State<AddChildSheet> {
       final response = await apiService.createChild(childData);
       if (!mounted) return;
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Lưu context và dữ liệu trước khi pop
-        final currentContext = context;
         final childName = _fullName.text.trim();
         
-        // Pop với kiểm tra an toàn và try-catch
-        if (mounted && Navigator.canPop(currentContext)) {
-            Navigator.of(currentContext).pop(childData.toJson());
+        // Pop với kiểm tra an toàn
+        if (mounted && Navigator.canPop(context)) {
+            Navigator.of(context).pop(childData.toJson());
         }
         
         // Hiển thị thông báo thành công
-        Future.delayed(const Duration(milliseconds: 100), () {
-          try {
-            if (currentContext.mounted) {
-              ScaffoldMessenger.of(currentContext).showSnackBar(
-                SnackBar(
-                  content: Text('Đã thêm trẻ thành công: $childName'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            }
-          } catch (delayedError) {
-            // Handle delayed error silently
-          }
-        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Đã thêm trẻ thành công: $childName'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
       } else {
         throw Exception('Failed to add child: ${response.statusCode} - ${response.body}');
       }

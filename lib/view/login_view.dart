@@ -83,15 +83,8 @@ class _LoginViewState extends State<LoginView> {
         }
         await prefs.setString('user_email', _emailCtrl.text.trim());
         
-        // Lưu customer ID nếu có trong response
-        if (responseData['customerId'] != null) {
-          await prefs.setString('customer_id', responseData['customerId']);
-        } else if (responseData['id'] != null) {
-          await prefs.setString('customer_id', responseData['id']);
-        } else {
-          // Fallback: tạo customer ID từ email
-          await prefs.setString('customer_id', 'customer_${_emailCtrl.text.trim().hashCode}');
-        }
+        // Lưu customer ID từ response - bắt buộc phải có
+        await prefs.setString('customer_id', responseData['customerId']);
         
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(

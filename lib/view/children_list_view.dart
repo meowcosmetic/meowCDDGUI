@@ -1,10 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/child.dart';
-import '../models/test_models.dart';
-import 'test_taking_page.dart';
+import '../models/api_service.dart';
+import '../models/user_session.dart';
 import 'children/add_child_sheet.dart';
-import '../features/child_management/views/child_detail_view.dart';
 
 class ChildrenListView extends StatefulWidget {
   const ChildrenListView({super.key});
@@ -14,8 +14,8 @@ class ChildrenListView extends StatefulWidget {
 }
 
 class _ChildrenListViewState extends State<ChildrenListView> {
-  List<Child> children = [];
-  List<Child> filteredChildren = [];
+  List<ChildData> children = [];
+  List<ChildData> filteredChildren = [];
   String searchQuery = '';
   String selectedStatus = 'all';
   bool isLoading = true;
@@ -26,23 +26,65 @@ class _ChildrenListViewState extends State<ChildrenListView> {
     _loadChildren();
   }
 
-  void _loadChildren() {
-    // Simulate loading data
-    Future.delayed(const Duration(milliseconds: 500), () {
+  Future<void> _loadChildren() async {
+    try {
       setState(() {
-        children = SampleChildren.getSampleData();
-        filteredChildren = children;
+        isLoading = true;
+      });
+
+      // Đảm bảo UserSession đã được khởi tạo
+      await UserSession.initFromPrefs();
+      
+      final parentId = UserSession.userId;
+      print('DEBUG: Loading children for parentId = $parentId');
+      
+      if (parentId == null || parentId.isEmpty) {
+        throw Exception('User ID not found. Please login first.');
+      }
+
+      final apiService = ApiService();
+      final response = await apiService.getChildrenByParentId(parentId);
+      
+      print('DEBUG: Response status: ${response.statusCode}');
+      print('DEBUG: Response body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> childrenData = jsonDecode(response.body);
+        final List<ChildData> loadedChildren = childrenData.map((json) => ChildData.fromJson(json)).toList();
+        
+        setState(() {
+          children = loadedChildren;
+          filteredChildren = loadedChildren;
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load children: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Error loading children: $e');
+      setState(() {
+        children = [];
+        filteredChildren = [];
         isLoading = false;
       });
-    });
+      
+      // Hiển thị lỗi cho user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi tải danh sách trẻ: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   void _filterChildren() {
     setState(() {
       filteredChildren = children.where((child) {
-        final matchesSearch = child.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            child.parentName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            child.diagnosis.toLowerCase().contains(searchQuery.toLowerCase());
+        final matchesSearch = child.fullName.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            child.developmentalDisorderDiagnosis.toLowerCase().contains(searchQuery.toLowerCase());
         
         final matchesStatus = selectedStatus == 'all' || child.status == selectedStatus;
         
@@ -266,7 +308,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
     );
   }
 
-  Widget _buildChildCard(Child child) {
+  Widget _buildChildCard(ChildData child) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -295,7 +337,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                     radius: 25,
                     backgroundColor: AppColors.primaryLight,
                     child: Text(
-                      child.name.split(' ').last[0],
+                      child.fullName.split(' ').last[0],
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -311,7 +353,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          child.name,
+                          child.fullName,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -320,7 +362,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${child.age} tuổi - ${child.gender}',
+                          '${_calculateAge(child.dateOfBirth)} tuổi - ${_getGenderText(child.gender)}',
                           style: TextStyle(
                             fontSize: 14,
                             color: AppColors.textSecondary,
@@ -328,7 +370,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Phụ huynh: ${child.parentName}',
+                          'Chẩn đoán: ${_getDiagnosisText(child.developmentalDisorderDiagnosis)}',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -342,16 +384,16 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Color(child.getStatusColor()).withValues(alpha: 0.1),
+                      color: Color(_getStatusColor(child.status)).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Color(child.getStatusColor())),
+                      border: Border.all(color: Color(_getStatusColor(child.status))),
                     ),
                     child: Text(
-                      child.getStatusText(),
+                      _getStatusText(child.status),
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: Color(child.getStatusColor()),
+                        color: Color(_getStatusColor(child.status)),
                       ),
                     ),
                   ),
@@ -377,7 +419,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        child.diagnosis,
+                        _getDiagnosisText(child.developmentalDisorderDiagnosis),
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -394,7 +436,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
               Row(
                 children: [
                   Text(
-                    'Tiến độ: ',
+                    'Trạng thái: ',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -402,19 +444,22 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                     ),
                   ),
                   Expanded(
-                    child: LinearProgressIndicator(
-                      value: child.averageProgress,
-                      backgroundColor: AppColors.grey200,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${(child.averageProgress * 100).toInt()}%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Color(_getStatusColor(child.status)).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Color(_getStatusColor(child.status))),
+                      ),
+                      child: Text(
+                        _getStatusText(child.status),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Color(_getStatusColor(child.status)),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 ],
@@ -509,11 +554,12 @@ class _ChildrenListViewState extends State<ChildrenListView> {
     );
   }
 
-  void _showChildDetails(Child child) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChildDetailView(child: child),
+  void _showChildDetails(ChildData child) {
+    // TODO: Cập nhật ChildDetailView để nhận ChildData
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Chi tiết trẻ: ${child.fullName}'),
+        backgroundColor: AppColors.info,
       ),
     );
   }
@@ -527,52 +573,21 @@ class _ChildrenListViewState extends State<ChildrenListView> {
     ).then((formData) async {
       if (formData == null) return;
       
-      // Tạo đối tượng Child mới từ dữ liệu API
-      final now = DateTime.now();
-      final birthDate = DateTime.tryParse(formData['dateOfBirth'] as String) ?? now;
-      final age = now.year - birthDate.year - (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day) ? 1 : 0);
+      // Reload danh sách trẻ từ API sau khi thêm thành công
+      await _loadChildren();
       
-      final newChild = Child(
-        id: formData['externalId'] as String? ?? 'temp_${DateTime.now().millisecondsSinceEpoch}',
-        name: formData['fullName'] as String? ?? 'Trẻ mới',
-        avatar: '',
-        age: age,
-        gender: (formData['gender'] as String?) == 'MALE' ? 'Nam' : (formData['gender'] as String?) == 'FEMALE' ? 'Nữ' : 'Khác',
-        diagnosis: 'Đã đăng ký qua API - ${formData['developmentalDisorderDiagnosis'] ?? 'NOT_EVALUATED'}',
-        parentName: 'Chưa cập nhật',
-        parentPhone: 'Chưa cập nhật',
-        parentEmail: 'Chưa cập nhật',
-        joinDate: now,
-        status: 'active',
-        progress: {
-          'Giao tiếp': 0.0,
-          'Vận động': 0.0,
-          'Nhận thức': 0.0,
-          'Xã hội': 0.0,
-        },
-        notes: [
-          'Đã đăng ký qua API vào ${now.day}/${now.month}/${now.year}',
-          'Chiều cao: ${formData['height'] ?? 'N/A'}cm, Cân nặng: ${formData['weight'] ?? 'N/A'}kg',
-          'Nhóm máu: ${formData['bloodType'] ?? 'N/A'}',
-          'Dị ứng: ${formData['allergies'] ?? 'Không có'}',
-        ],
-        address: 'Chưa cập nhật',
-        school: 'Chưa cập nhật',
-        therapist: '',
-      );
-
-      setState(() {
-        children.insert(0, newChild);
-        _filterChildren();
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã thêm trẻ thành công: ${newChild.name}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã thêm trẻ thành công: ${formData['fullName'] ?? 'Trẻ mới'}'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
     });
   }
 
-  void _showEditChildDialog(BuildContext context, Child child) {
+  void _showEditChildDialog(BuildContext context, ChildData child) {
     // TODO: Implement edit child dialog
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -580,6 +595,75 @@ class _ChildrenListViewState extends State<ChildrenListView> {
         backgroundColor: AppColors.info,
       ),
     );
+  }
+
+  // Helper methods
+  int _calculateAge(String dateOfBirth) {
+    try {
+      final birthDate = DateTime.parse(dateOfBirth);
+      final now = DateTime.now();
+      int age = now.year - birthDate.year;
+      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+      return age;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  String _getGenderText(String gender) {
+    switch (gender.toUpperCase()) {
+      case 'MALE':
+        return 'Nam';
+      case 'FEMALE':
+        return 'Nữ';
+      default:
+        return 'Khác';
+    }
+  }
+
+  String _getDiagnosisText(String diagnosis) {
+    switch (diagnosis.toUpperCase()) {
+      case 'NOT_EVALUATED':
+        return 'Chưa đánh giá';
+      case 'AUTISM_SPECTRUM_DISORDER':
+        return 'Rối loạn phổ tự kỷ';
+      case 'ATTENTION_DEFICIT_HYPERACTIVITY_DISORDER':
+        return 'Rối loạn tăng động giảm chú ý';
+      case 'INTELLECTUAL_DISABILITY':
+        return 'Khuyết tật trí tuệ';
+      case 'DEVELOPMENTAL_DELAY':
+        return 'Chậm phát triển';
+      default:
+        return diagnosis;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status.toUpperCase()) {
+      case 'ACTIVE':
+        return 'Đang điều trị';
+      case 'INACTIVE':
+        return 'Tạm dừng';
+      case 'COMPLETED':
+        return 'Hoàn thành';
+      default:
+        return 'Không xác định';
+    }
+  }
+
+  int _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'ACTIVE':
+        return 0xFF4CAF50; // Xanh lá
+      case 'INACTIVE':
+        return 0xFFFF9800; // Cam
+      case 'COMPLETED':
+        return 0xFF2196F3; // Xanh dương
+      default:
+        return 0xFF9E9E9E; // Xám
+    }
   }
 }
 

@@ -170,7 +170,7 @@ class Child {
 
 /// Model mới cho child data với format JSON mới
 class ChildData {
-  final int? parentId;
+  final String? parentId;
   final String fullName;
   final String gender;
   final String dateOfBirth;
@@ -215,7 +215,7 @@ class ChildData {
   /// Tạo ChildData từ JSON
   factory ChildData.fromJson(Map<String, dynamic> json) {
     return ChildData(
-      parentId: json['parentId'] as int?,
+      parentId: json['parentId']?.toString(),
       fullName: json['fullName'] as String? ?? '',
       gender: json['gender'] as String? ?? 'MALE',
       dateOfBirth: json['dateOfBirth'] as String? ?? '',
@@ -264,7 +264,7 @@ class ChildData {
 
   /// Tạo bản sao với thay đổi
   ChildData copyWith({
-    int? parentId,
+    String? parentId,
     String? fullName,
     String? gender,
     String? dateOfBirth,
