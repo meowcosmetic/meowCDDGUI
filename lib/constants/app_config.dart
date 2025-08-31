@@ -48,8 +48,8 @@ class AppConfig {
   static const bool showPolicyScreen = true;      // Hiển thị màn hình chính sách
 
   // API Configuration
-  static const String apiBaseUrl = 'http://localhost:8000';
-  static const String testApiBaseUrl = 'http://localhost:8101';
+  static const String apiBaseUrl = 'http://localhost/api';
+  static const String cddAPI = 'http://localhost/api/cdd/api/v1/neon';
   
   /// Lấy danh sách các danh mục được bật
   static List<DashboardCategory> getEnabledCategories() {
