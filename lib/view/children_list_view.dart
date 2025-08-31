@@ -5,6 +5,7 @@ import '../models/child.dart';
 import '../models/api_service.dart';
 import '../models/user_session.dart';
 import 'children/add_child_sheet.dart';
+import '../features/child_management/views/child_detail_view.dart';
 
 class ChildrenListView extends StatefulWidget {
   const ChildrenListView({super.key});
@@ -554,12 +555,41 @@ class _ChildrenListViewState extends State<ChildrenListView> {
     );
   }
 
-  void _showChildDetails(ChildData child) {
-    // TODO: Cập nhật ChildDetailView để nhận ChildData
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Chi tiết trẻ: ${child.fullName}'),
-        backgroundColor: AppColors.info,
+  void _showChildDetails(ChildData childData) {
+    // Convert ChildData to Child for ChildDetailView
+    final child = Child(
+      id: childData.parentId ?? 'unknown',
+      name: childData.fullName,
+      avatar: '',
+      age: _calculateAge(childData.dateOfBirth),
+      gender: _getGenderText(childData.gender),
+      diagnosis: _getDiagnosisText(childData.developmentalDisorderDiagnosis),
+      parentName: 'Chưa cập nhật',
+      parentPhone: 'Chưa cập nhật', 
+      parentEmail: 'Chưa cập nhật',
+      joinDate: DateTime.now(),
+      status: childData.status.toLowerCase(),
+      progress: {
+        'Giao tiếp': 0.0,
+        'Vận động': 0.0,
+        'Nhận thức': 0.0,
+        'Xã hội': 0.0,
+      },
+      notes: [
+        'Chiều cao: ${childData.height ?? 'N/A'}cm',
+        'Cân nặng: ${childData.weight ?? 'N/A'}kg', 
+        'Nhóm máu: ${childData.bloodType}',
+        'Dị ứng: ${childData.allergies.isEmpty ? 'Không có' : childData.allergies}',
+      ],
+      address: 'Chưa cập nhật',
+      school: 'Chưa cập nhật',
+      therapist: 'Chưa cập nhật',
+    );
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChildDetailView(child: child),
       ),
     );
   }

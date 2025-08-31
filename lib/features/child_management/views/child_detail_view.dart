@@ -238,6 +238,11 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             _buildTableSection('Chuyên Gia Điều Trị', [
               ['Chuyên gia', widget.child.therapist.isNotEmpty ? widget.child.therapist : 'Chưa phân công'],
             ]),
+            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            _buildTableSection('Ghi Chú', [
+              ['Ghi chú', widget.child.notes.isNotEmpty ? widget.child.notes.join('\n') : 'Không có ghi chú'],
+            ]),
           ],
         ),
       ),
@@ -666,21 +671,50 @@ class _ChildDetailViewState extends State<ChildDetailView> {
   List<ChildTracking> _generateDummyTrackingHistory() {
     final now = DateTime.now();
     final List<ChildTracking> history = [];
+    
+    // Dummy intervention goals
+    final dummyGoals = [
+      TrackingData.interventionGoals[0], // Giao tiếp bằng lời nói
+      TrackingData.interventionGoals[1], // Tương tác xã hội
+      TrackingData.interventionGoals[2], // Tự lập trong sinh hoạt
+    ];
+    
     for (int i = 0; i < 7; i++) {
       final date = now.subtract(Duration(days: i));
+      
+      // Generate random emotion and participation levels
+      final emotionLevels = EmotionLevel.values;
+      final participationLevels = ParticipationLevel.values;
+      
+      final randomEmotion = emotionLevels[i % emotionLevels.length];
+      final randomParticipation = participationLevels[i % participationLevels.length];
+      
+      // Select 2-3 random goals for each tracking
+      final selectedGoals = dummyGoals.take(2 + (i % 2)).toList();
+      
       history.add(
         ChildTracking(
           id: 'track_${widget.child.id}_$i',
           childId: widget.child.id,
           date: DateTime(date.year, date.month, date.day, 9, 0),
           scores: {
-            'Giao tiếp': 1 + (i % 2),
-            'Tương tác xã hội': (i % 3),
-            'Hành vi & cảm xúc': 2 - (i % 2),
-            'Kỹ năng nhận thức': 1 + ((i + 1) % 2),
-            'Tự lập': (i % 3),
+            'comm_1': 1 + (i % 2),
+            'comm_2': (i % 3),
+            'social_1': 2 - (i % 2),
+            'social_2': 1 + ((i + 1) % 2),
+            'behavior_1': (i % 3),
+            'behavior_2': 1 + (i % 2),
+            'cognitive_1': 2 - (i % 2),
+            'cognitive_2': (i % 3),
+            'independence_1': 1 + ((i + 1) % 2),
+            'independence_2': (i % 3),
           },
-          notes: i == 0 ? 'Ngày gần nhất: tinh thần tốt, hợp tác.' : '',
+          notes: i == 0 ? 'Ngày gần nhất: tinh thần tốt, hợp tác.' : 
+                 i == 1 ? 'Trẻ có tiến bộ trong giao tiếp.' :
+                 i == 2 ? 'Cần hỗ trợ thêm trong kỹ năng tự lập.' : '',
+          emotionLevel: randomEmotion,
+          participationLevel: randomParticipation,
+          selectedGoals: selectedGoals,
         ),
       );
     }
@@ -719,17 +753,115 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               ),
               const Spacer(),
               TextButton.icon(
-                onPressed: () {
-                  final results = _generateDummyTestResults();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChildCompletedTestsView(
-                        child: widget.child,
-                        results: results,
+                onPressed: () async {
+                  try {
+                    // Hiển thị loading
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => const Center(
+                        child: CircularProgressIndicator(),
                       ),
-                    ),
-                  );
+                    );
+
+                    // Gọi API để lấy kết quả bài test đã làm
+                    final response = await _api.getTestResultsByChildId(widget.child.id);
+                    
+                    // Đóng loading dialog
+                    Navigator.pop(context);
+
+                                                             if (response.statusCode >= 200 && response.statusCode < 300) {
+                      final dynamic responseData = jsonDecode(response.body);
+                      
+                      // Debug: In dữ liệu nhận được
+                      print('DEBUG: API Response type: ${responseData.runtimeType}');
+                      print('DEBUG: API Response: $responseData');
+                      
+                      // Xử lý cả trường hợp response là array hoặc object
+                      late List<dynamic> data;
+                      if (responseData is List) {
+                        // Trường hợp response trực tiếp là array
+                        data = responseData;
+                      } else if (responseData is Map<String, dynamic>) {
+                        // Trường hợp response là object có chứa array
+                        data = responseData['content'] ?? responseData['data'] ?? [];
+                      } else {
+                        data = [];
+                      }
+                      
+                      print('DEBUG: Parsed data length: ${data.length}');
+                      if (data.isNotEmpty) {
+                        print('DEBUG: First item: ${data.first}');
+                      }
+                      
+                                             // Chuyển đổi data từ API thành TestResult objects
+                       final List<TestResult> results = data.map((e) {
+                         // Tính thời gian làm bài từ startTime và endTime
+                         int timeSpent = 0;
+                         if (e['startTime'] != null && e['endTime'] != null) {
+                           try {
+                             final startTime = DateTime.parse(e['startTime']);
+                             final endTime = DateTime.parse(e['endTime']);
+                             timeSpent = endTime.difference(startTime).inSeconds;
+                           } catch (e) {
+                             timeSpent = 0;
+                           }
+                         }
+                         
+                         return TestResult(
+                           id: e['id']?.toString() ?? '',
+                           testId: e['testId']?.toString() ?? '',
+                           userId: e['childId']?.toString() ?? '',
+                           userName: widget.child.name,
+                           score: (e['totalScore'] as num?)?.toDouble().toInt() ?? 0,
+                           totalQuestions: (e['totalQuestions'] as num?)?.toInt() ?? 0,
+                           answeredQuestions: (e['correctAnswers'] as num?)?.toInt() ?? 0,
+                           timeSpent: timeSpent,
+                           completedAt: e['testDate'] != null ? DateTime.parse(e['testDate']) : DateTime.now(),
+                           questionResults: [], // API không có field này
+                           notes: e['notes'] ?? '',
+                         );
+                       }).toList();
+
+                      // Navigate to completed tests view
+                      if (mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChildCompletedTestsView(
+                              child: widget.child,
+                              results: results,
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      // Hiển thị lỗi nếu API call thất bại
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Không thể tải kết quả bài test. Mã lỗi: ${response.statusCode}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  } catch (e) {
+                    // Đóng loading dialog nếu có lỗi
+                    if (mounted && Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                    
+                    // Hiển thị lỗi
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Lỗi kết nối: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 },
                 icon: const Icon(Icons.history),
                 label: const Text('Xem đã làm'),
@@ -997,6 +1129,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         builder: (context) => TestDetailView(
           testId: test.id ?? '',
           testTitle: test.getName('vi'),
+          child: widget.child, // Truyền thông tin trẻ
         ),
       ),
     );

@@ -16,14 +16,28 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
   final Map<String, int> _answers = {};
   final TextEditingController _notesController = TextEditingController();
   bool _isSubmitting = false;
+  
+  // New tracking fields
+  EmotionLevel? _selectedEmotion;
+  ParticipationLevel? _selectedParticipation;
+  final List<InterventionGoal> _selectedGoals = [];
+  final Map<String, Map<String, String>> _goalAnswers = {};
 
   @override
   void initState() {
     super.initState();
-    // Initialize answers with default values
+    // Initialize answers with default values for legacy tracking
     for (var category in TrackingData.categories) {
       for (var question in category.questions) {
         _answers[question.id] = 0;
+      }
+    }
+    
+    // Initialize goal answers
+    for (var goal in TrackingData.interventionGoals) {
+      _goalAnswers[goal.id] = {};
+      for (var question in goal.questions) {
+        _goalAnswers[goal.id]![question.id] = '';
       }
     }
   }
@@ -63,7 +77,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
             child: Column(
               children: [
                 Text(
-                  'Bảng câu hỏi chấm điểm hằng ngày',
+                  'Bảng câu hỏi tracking hằng ngày',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -103,7 +117,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Hãy đánh giá tình trạng của trẻ hôm nay theo từng câu hỏi. Chọn mức độ phù hợp nhất.',
+                            'Hãy đánh giá tình trạng của trẻ hôm nay và chọn 3 mục tiêu can thiệp quan trọng nhất.',
                             style: TextStyle(
                               fontSize: 14,
                               color: AppColors.textPrimary,
@@ -116,8 +130,18 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
                   
                   const SizedBox(height: 20),
                   
-                  // Categories
-                  ...TrackingData.categories.map((category) => _buildCategorySection(category)),
+                  // Emotion Section
+                  _buildEmotionSection(),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Participation Section
+                  _buildParticipationSection(),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Intervention Goals Section
+                  _buildInterventionGoalsSection(),
                   
                   const SizedBox(height: 20),
                   
@@ -191,9 +215,9 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
     );
   }
 
-  Widget _buildCategorySection(TrackingCategory category) {
+  Widget _buildEmotionSection() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -208,57 +232,266 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Category header
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+          Row(
+            children: [
+              const Icon(
+                Icons.emoji_emotions,
+                color: AppColors.primary,
+                size: 20,
               ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _getCategoryIcon(category.name),
-                  color: AppColors.primary,
-                  size: 20,
+              const SizedBox(width: 8),
+              const Text(
+                'Cảm xúc của con hôm nay thế nào?',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  category.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  'Tối đa: ${category.maxScore} điểm',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          
-          // Questions
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: category.questions.map((question) => _buildQuestion(question)).toList(),
+          const SizedBox(height: 16),
+          ...EmotionLevel.values.map((emotion) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: RadioListTile<EmotionLevel>(
+              value: emotion,
+              groupValue: _selectedEmotion,
+              onChanged: (value) {
+                setState(() {
+                  _selectedEmotion = value;
+                });
+              },
+              title: Text(
+                emotion.label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              activeColor: AppColors.primary,
+              contentPadding: EdgeInsets.zero,
+              dense: true,
             ),
-          ),
+          )).toList(),
         ],
       ),
     );
   }
 
-  Widget _buildQuestion(TrackingQuestion question) {
+  Widget _buildParticipationSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.star,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Mức độ tham gia của con',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...ParticipationLevel.values.map((participation) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: RadioListTile<ParticipationLevel>(
+              value: participation,
+              groupValue: _selectedParticipation,
+              onChanged: (value) {
+                setState(() {
+                  _selectedParticipation = value;
+                });
+              },
+              title: Text(
+                participation.label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              activeColor: AppColors.primary,
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+            ),
+          )).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInterventionGoalsSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.flag,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Mục tiêu can thiệp (Chọn 3 mục tiêu)',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Đã chọn: ${_selectedGoals.length}/3',
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...TrackingData.interventionGoals.map((goal) => _buildGoalCard(goal)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGoalCard(InterventionGoal goal) {
+    final isSelected = _selectedGoals.contains(goal);
+    final isExpanded = isSelected;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: isSelected ? AppColors.primaryLight.withOpacity(0.1) : AppColors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSelected ? AppColors.primary : AppColors.border,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Goal header
+          InkWell(
+            onTap: () {
+              setState(() {
+                if (isSelected) {
+                  _selectedGoals.remove(goal);
+                } else if (_selectedGoals.length < 3) {
+                  _selectedGoals.add(goal);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Bạn chỉ có thể chọn tối đa 3 mục tiêu'),
+                      backgroundColor: AppColors.warning,
+                    ),
+                  );
+                }
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected ? AppColors.primary : AppColors.border,
+                    ),
+                    child: isSelected
+                        ? const Icon(
+                            Icons.check,
+                            color: AppColors.white,
+                            size: 14,
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          goal.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          goal.description,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Goal questions (only show if selected)
+          if (isExpanded) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: goal.questions.map((question) => _buildGoalQuestion(goal, question)).toList(),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGoalQuestion(InterventionGoal goal, InterventionQuestion question) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -274,32 +507,23 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
           ),
           const SizedBox(height: 8),
           ...question.options.asMap().entries.map((entry) {
-            int index = entry.key;
             String option = entry.value;
-            int score = question.scores[index];
             
             return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: RadioListTile<int>(
-                value: score,
-                groupValue: _answers[question.id],
+              margin: const EdgeInsets.only(bottom: 6),
+              child: RadioListTile<String>(
+                value: option,
+                groupValue: _goalAnswers[goal.id]![question.id],
                 onChanged: (value) {
                   setState(() {
-                    _answers[question.id] = value!;
+                    _goalAnswers[goal.id]![question.id] = value!;
                   });
                 },
                 title: Text(
                   option,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: AppColors.textPrimary,
-                  ),
-                ),
-                subtitle: Text(
-                  '${score} điểm',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
                   ),
                 ),
                 activeColor: AppColors.primary,
@@ -370,20 +594,6 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
   }
 
   Widget _buildSummarySection() {
-    Map<String, double> categoryScores = {};
-    
-    for (var category in TrackingData.categories) {
-      List<int> scores = [];
-      for (var question in category.questions) {
-        scores.add(_answers[question.id] ?? 0);
-      }
-      categoryScores[category.name] = scores.isNotEmpty ? scores.reduce((a, b) => a + b) / scores.length : 0;
-    }
-    
-    double totalScore = categoryScores.values.isNotEmpty 
-        ? categoryScores.values.reduce((a, b) => a + b) / categoryScores.length 
-        : 0;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -409,7 +619,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
               ),
               const SizedBox(width: 8),
               const Text(
-                'Tổng kết điểm số',
+                'Tổng kết tracking',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -420,21 +630,20 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
           ),
           const SizedBox(height: 16),
           
-          // Category scores
-          ...categoryScores.entries.map((entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
+          // Emotion summary
+          if (_selectedEmotion != null) ...[
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  entry.key,
-                  style: const TextStyle(
+                const Text(
+                  'Cảm xúc:',
+                  style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 Text(
-                  '${entry.value.toStringAsFixed(1)}/2.0',
+                  _selectedEmotion!.label,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -443,69 +652,93 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
                 ),
               ],
             ),
-          )).toList(),
+            const SizedBox(height: 8),
+          ],
           
-          const Divider(height: 24),
-          
-          // Total score
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Điểm trung bình tổng',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _getScoreColor(totalScore).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _getScoreColor(totalScore)),
-                ),
-                child: Text(
-                  '${totalScore.toStringAsFixed(1)}/2.0',
+          // Participation summary
+          if (_selectedParticipation != null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Mức độ tham gia:',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: _getScoreColor(totalScore),
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
                   ),
                 ),
+                Text(
+                  _selectedParticipation!.label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+          
+          // Selected goals summary
+          if (_selectedGoals.isNotEmpty) ...[
+            const Text(
+              'Mục tiêu đã chọn:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            ..._selectedGoals.map((goal) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                '• ${goal.title}',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            )).toList(),
+          ],
         ],
       ),
     );
   }
 
-  IconData _getCategoryIcon(String categoryName) {
-    switch (categoryName) {
-      case 'Giao tiếp':
-        return Icons.chat;
-      case 'Tương tác xã hội':
-        return Icons.people;
-      case 'Hành vi & cảm xúc':
-        return Icons.psychology;
-      case 'Kỹ năng nhận thức':
-        return Icons.psychology_outlined;
-      case 'Tự lập':
-        return Icons.person_outline;
-      default:
-        return Icons.assessment;
-    }
-  }
-
-  Color _getScoreColor(double score) {
-    if (score >= 1.5) return AppColors.success;
-    if (score >= 1.0) return AppColors.warning;
-    return AppColors.error;
-  }
-
   void _submitTracking() async {
+    // Validate required fields
+    if (_selectedEmotion == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng chọn cảm xúc của trẻ'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+    
+    if (_selectedParticipation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng chọn mức độ tham gia của trẻ'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+    
+    if (_selectedGoals.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng chọn ít nhất 1 mục tiêu can thiệp'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
     });
@@ -518,6 +751,9 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
         date: DateTime.now(),
         scores: Map<String, int>.from(_answers),
         notes: _notesController.text.trim(),
+        emotionLevel: _selectedEmotion!,
+        participationLevel: _selectedParticipation!,
+        selectedGoals: _selectedGoals,
       );
 
       // TODO: Save to database/API
@@ -553,3 +789,4 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
     }
   }
 }
+

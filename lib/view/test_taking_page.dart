@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/test_models.dart';
+import '../models/child.dart';
 
 class TestTakingPage extends StatefulWidget {
   final Test test;
+  final Child? child; // Thêm thông tin về trẻ
 
-  const TestTakingPage({super.key, required this.test});
+  const TestTakingPage({
+    super.key, 
+    required this.test,
+    this.child, // Optional parameter
+  });
 
   @override
   State<TestTakingPage> createState() => _TestTakingPageState();
@@ -562,7 +568,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
     
     int score = 0;
     int answeredQuestions = 0;
+    int correctAnswers = 0;
     final questionResults = <QuestionResult>[];
+    final questionAnswersMap = <String, Map<String, dynamic>>{};
     
     for (int i = 0; i < widget.test.questions.length; i++) {
       final question = widget.test.questions[i];
@@ -572,6 +580,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
         answeredQuestions++;
         if (answer) { // If answered "Yes"
           score += question.weight;
+          correctAnswers++;
         }
         
         questionResults.add(QuestionResult(
@@ -580,14 +589,25 @@ class _TestTakingPageState extends State<TestTakingPage> {
           timeSpent: 0, // TODO: Track individual question time
           answeredAt: DateTime.now(),
         ));
+
+        // Tạo map cho questionAnswers JSON
+        questionAnswersMap[question.questionId] = {
+          'answer': answer ? 'YES' : 'NO',
+          'score': answer ? question.weight : 0,
+        };
       }
     }
     
+    // Tính percentage score
+    final maxPossibleScore = widget.test.questions.fold<int>(0, (sum, q) => sum + q.weight);
+    final percentageScore = maxPossibleScore > 0 ? (score / maxPossibleScore) * 100 : 0.0;
+    
+    // Tạo TestResult cho hiển thị
     final result = TestResult(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       testId: widget.test.id,
-      userId: 'user123', // TODO: Get from auth
-      userName: 'Người dùng', // TODO: Get from auth
+      userId: widget.child?.id ?? 'user123',
+      userName: widget.child?.name ?? 'Người dùng',
       score: score,
       totalQuestions: widget.test.questions.length,
       answeredQuestions: answeredQuestions,
@@ -596,10 +616,44 @@ class _TestTakingPageState extends State<TestTakingPage> {
       questionResults: questionResults,
     );
     
+    // Tạo kết quả chi tiết để trả về cho TestDetailView
+    final detailedResult = {
+      'startTime': startTime.toIso8601String(),
+      'endTime': endTime.toIso8601String(),
+      'totalScore': score.toDouble(),
+      'maxScore': maxPossibleScore.toDouble(),
+      'percentageScore': percentageScore,
+      'correctAnswers': correctAnswers,
+      'totalQuestions': widget.test.questions.length,
+      'skippedQuestions': widget.test.questions.length - answeredQuestions,
+      'questionAnswers': questionAnswersMap,
+      'interpretation': _getInterpretation(percentageScore),
+      'notes': 'Hoàn thành bài test ${widget.test.getName()}',
+    };
+    
     setState(() {
       this.result = result;
       isCompleted = true;
     });
+    
+    // Trả về kết quả chi tiết cho TestDetailView
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pop(context, detailedResult);
+    });
+  }
+
+  String _getInterpretation(double percentageScore) {
+    if (percentageScore >= 80) {
+      return 'Trẻ có khả năng phát triển xuất sắc trong các lĩnh vực được đánh giá. Kết quả cho thấy trẻ đạt mức độ phát triển vượt trội so với độ tuổi.';
+    } else if (percentageScore >= 70) {
+      return 'Trẻ có khả năng phát triển tốt trong các lĩnh vực được đánh giá. Kết quả cho thấy trẻ đạt mức độ phát triển phù hợp với độ tuổi.';
+    } else if (percentageScore >= 60) {
+      return 'Trẻ có khả năng phát triển ở mức trung bình. Cần theo dõi và hỗ trợ thêm để cải thiện các kỹ năng.';
+    } else if (percentageScore >= 50) {
+      return 'Trẻ có một số khó khăn trong phát triển. Cần can thiệp sớm và hỗ trợ chuyên môn.';
+    } else {
+      return 'Trẻ cần được đánh giá chi tiết hơn và can thiệp chuyên môn ngay lập tức. Kết quả cho thấy có dấu hiệu chậm phát triển.';
+    }
   }
 
   void _retakeTest() {

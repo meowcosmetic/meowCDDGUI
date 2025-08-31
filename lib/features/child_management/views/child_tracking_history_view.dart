@@ -9,8 +9,8 @@ class ChildTrackingHistoryView extends StatelessWidget {
   final List<ChildTracking> trackingHistory;
 
   const ChildTrackingHistoryView({
-    super.key, 
-    required this.child, 
+    super.key,
+    required this.child,
     required this.trackingHistory,
   });
 
@@ -43,9 +43,9 @@ class ChildTrackingHistoryView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.assessment_outlined,
-            size: 80,
-            color: AppColors.grey300,
+            Icons.history,
+            size: 64,
+            color: AppColors.textSecondary.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -76,8 +76,8 @@ class ChildTrackingHistoryView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Summary card
-          _buildSummaryCard(),
+          // Overview section
+          _buildOverviewSection(),
           
           const SizedBox(height: 20),
           
@@ -99,41 +99,30 @@ class ChildTrackingHistoryView extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildOverviewSection() {
     if (trackingHistory.isEmpty) return const SizedBox.shrink();
 
-    // Calculate average scores
-    Map<String, List<double>> categoryAverages = {};
-    
+    // Calculate averages for legacy tracking
+    Map<String, List<int>> categoryScores = {};
     for (var category in tracking_data.TrackingData.categories) {
-      categoryAverages[category.name] = [];
-    }
-
-    for (var tracking in trackingHistory) {
-      for (var category in tracking_data.TrackingData.categories) {
-        List<int> scores = [];
+      categoryScores[category.name] = [];
+      for (var tracking in trackingHistory) {
         for (var question in category.questions) {
-          scores.add(tracking.scores[question.id] ?? 0);
-        }
-        if (scores.isNotEmpty) {
-          double avg = scores.reduce((a, b) => a + b) / scores.length;
-          categoryAverages[category.name]!.add(avg);
+          categoryScores[category.name]!.add(tracking.scores[question.id] ?? 0);
         }
       }
     }
 
-    // Calculate overall trends
     double overallAverage = trackingHistory.map((t) => t.totalScore).reduce((a, b) => a + b) / trackingHistory.length;
     
-    // Get recent vs previous average for trend
     double recentAverage = 0;
     double previousAverage = 0;
     
     if (trackingHistory.length >= 2) {
-      recentAverage = trackingHistory.take(3).map((t) => t.totalScore).reduce((a, b) => a + b) / 
-                     (trackingHistory.length >= 3 ? 3 : trackingHistory.length);
-      previousAverage = trackingHistory.skip(3).map((t) => t.totalScore).reduce((a, b) => a + b) / 
-                       (trackingHistory.length - 3);
+      recentAverage = trackingHistory.take(3).map((t) => t.totalScore).reduce((a, b) => a + b) /
+          (trackingHistory.length >= 3 ? 3 : trackingHistory.length);
+      previousAverage = trackingHistory.skip(3).map((t) => t.totalScore).reduce((a, b) => a + b) /
+          (trackingHistory.length - 3);
     }
 
     return Container(
@@ -173,71 +162,92 @@ class ChildTrackingHistoryView extends StatelessWidget {
           
           const SizedBox(height: 16),
           
-          // Overall score
+          // Stats grid
           Row(
             children: [
               Expanded(
-                child: _buildStatItem(
-                  'Điểm trung bình',
-                  '${overallAverage.toStringAsFixed(1)}/2.0',
-                  _getScoreColor(overallAverage),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatItem(
+                child: _buildStatCard(
                   'Số lần tracking',
                   '${trackingHistory.length}',
-                  AppColors.primary,
+                  Icons.history,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  'Điểm trung bình',
+                  '${overallAverage.toStringAsFixed(1)}',
+                  Icons.trending_up,
                 ),
               ),
             ],
           ),
           
           if (trackingHistory.length >= 2) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: _buildStatItem(
-                    'Xu hướng gần đây',
-                    recentAverage > previousAverage ? 'Tăng' : 'Giảm',
-                    recentAverage > previousAverage ? AppColors.success : AppColors.error,
+                  child: _buildStatCard(
+                    'Gần đây',
+                    '${recentAverage.toStringAsFixed(1)}',
+                    Icons.trending_up,
+                    color: recentAverage > previousAverage ? AppColors.success : AppColors.error,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatItem(
-                    'Tracking gần nhất',
-                    '${trackingHistory.first.date.day}/${trackingHistory.first.date.month}',
-                    AppColors.info,
+                  child: _buildStatCard(
+                    'Trước đó',
+                    '${previousAverage.toStringAsFixed(1)}',
+                    Icons.trending_down,
+                    color: previousAverage > recentAverage ? AppColors.success : AppColors.error,
                   ),
                 ),
               ],
             ),
           ],
+          
+          const SizedBox(height: 12),
+          
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  'Tracking gần nhất',
+                  '${trackingHistory.first.date.day}/${trackingHistory.first.date.month}',
+                  Icons.calendar_today,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  'Tracking đầu tiên',
+                  '${trackingHistory.last.date.day}/${trackingHistory.last.date.month}',
+                  Icons.calendar_today,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color) {
+  Widget _buildStatCard(String title, String value, IconData icon, {Color? color}) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: (color ?? AppColors.primary).withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color ?? AppColors.primary),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
+          Icon(
+            icon,
+            color: color ?? AppColors.primary,
+            size: 20,
           ),
           const SizedBox(height: 4),
           Text(
@@ -245,8 +255,16 @@ class ChildTrackingHistoryView extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: color ?? AppColors.primary,
             ),
+          ),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: color ?? AppColors.primary,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -281,35 +299,28 @@ class ChildTrackingHistoryView extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.calendar_today,
-                  color: AppColors.primary,
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${tracking.date.day}/${tracking.date.month}/${tracking.date.year}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: _getScoreColor(tracking.totalScore).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: _getScoreColor(tracking.totalScore)),
                   ),
                   child: Text(
                     '${tracking.totalScore.toStringAsFixed(1)}/2.0',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: _getScoreColor(tracking.totalScore),
                     ),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${tracking.date.day}/${tracking.date.month}/${tracking.date.year}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -320,67 +331,131 @@ class ChildTrackingHistoryView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Category scores
-                ...tracking_data.TrackingData.categories.map((category) {
-                  List<int> scores = [];
-                  for (var question in category.questions) {
-                    scores.add(tracking.scores[question.id] ?? 0);
-                  }
-                  double avgScore = scores.isNotEmpty ? scores.reduce((a, b) => a + b) / scores.length : 0;
-                  
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                // Emotion and Participation
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoItem(
+                        'Cảm xúc',
+                        tracking.emotionLevel.label,
+                        Icons.emoji_emotions,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildInfoItem(
+                        'Tham gia',
+                        tracking.participationLevel.label,
+                        Icons.star,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Selected Goals
+                if (tracking.selectedGoals.isNotEmpty) ...[
+                  const Text(
+                    'Mục tiêu can thiệp:',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...tracking.selectedGoals.map((goal) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          category.name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textPrimary,
-                          ),
+                        const Icon(
+                          Icons.flag,
+                          size: 16,
+                          color: AppColors.primary,
                         ),
-                        Text(
-                          '${avgScore.toStringAsFixed(1)}/2.0',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: _getScoreColor(avgScore),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            goal.title,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  );
-                }).toList(),
+                  )).toList(),
+                ],
                 
-                // Notes if any
+                // Notes
                 if (tracking.notes.isNotEmpty) ...[
-                  const Divider(height: 16),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.note,
-                        size: 16,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          tracking.notes,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Ghi chú:',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    tracking.notes,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textPrimary,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

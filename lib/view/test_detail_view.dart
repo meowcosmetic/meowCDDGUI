@@ -3,16 +3,21 @@ import 'dart:convert';
 import '../constants/app_colors.dart';
 import '../models/test_models.dart';
 import '../models/api_service.dart';
+import '../models/test_result_model.dart';
+import '../models/child.dart';
 import 'test_taking_page.dart';
+import '../features/cdd_test_management/models/cdd_test.dart';
 
 class TestDetailView extends StatefulWidget {
   final String testId;
   final String testTitle;
+  final Child? child; // Thêm thông tin về trẻ
 
   const TestDetailView({
     super.key,
     required this.testId,
     required this.testTitle,
+    this.child, // Optional parameter
   });
 
   @override
@@ -44,10 +49,12 @@ class _TestDetailViewState extends State<TestDetailView> {
       
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        final Test fetchedTest = Test.fromJson(data);
-        
+        // Parse using new CDD model then convert to legacy Test model for UI reuse
+        final CDDTest cdd = CDDTest.fromJson(data);
+        final Test converted = _convertCDDToLegacyTest(cdd);
+
         setState(() {
-          test = fetchedTest;
+          test = converted;
           isLoading = false;
         });
       } else {
@@ -64,6 +71,56 @@ class _TestDetailViewState extends State<TestDetailView> {
         isLoading = false;
       });
     }
+  }
+
+  // Convert new CDDTest model into existing Test model used by TestTakingPage
+  Test _convertCDDToLegacyTest(CDDTest cdd) {
+    final questions = cdd.questions
+        .map((q) => TestQuestion(
+              questionId: q.questionId,
+              questionNumber: q.questionNumber,
+              questionTexts: q.questionTexts,
+              category: q.category,
+              weight: q.weight,
+              required: q.required,
+              hints: q.hints,
+              explanations: q.explanations,
+            ))
+        .toList();
+
+    final scoring = ScoringCriteria(
+      totalQuestions: cdd.scoringCriteria.totalQuestions,
+      yesScore: cdd.scoringCriteria.yesScore,
+      noScore: cdd.scoringCriteria.noScore,
+      scoreRanges: cdd.scoringCriteria.scoreRanges.map(
+        (k, v) => MapEntry(
+          k,
+          ScoreRange(
+            minScore: v.minScore,
+            maxScore: v.maxScore,
+            level: v.level,
+            descriptions: v.descriptions,
+            recommendation: v.recommendation,
+          ),
+        ),
+      ),
+      interpretation: cdd.scoringCriteria.interpretation,
+    );
+
+    return Test(
+      id: cdd.id ?? '',
+      assessmentCode: cdd.assessmentCode,
+      names: cdd.names,
+      descriptions: cdd.descriptions,
+      instructions: cdd.instructions,
+      category: cdd.category,
+      minAgeMonths: cdd.minAgeMonths,
+      maxAgeMonths: cdd.maxAgeMonths,
+      status: cdd.status,
+      questions: questions,
+      scoringCriteria: scoring,
+      notes: cdd.notes,
+    );
   }
 
   @override
@@ -535,13 +592,93 @@ class _TestDetailViewState extends State<TestDetailView> {
     );
   }
 
-  void _startTest(Test test) {
-    Navigator.push(
+  void _startTest(Test test) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TestTakingPage(test: test),
+        builder: (context) => TestTakingPage(
+          test: test,
+          child: widget.child, // Truyền thông tin trẻ
+        ),
       ),
     );
+    
+    // Xử lý kết quả sau khi hoàn thành test
+    if (result != null && result is Map<String, dynamic> && widget.child != null) {
+      await _submitTestResult(result, test);
+    }
+  }
+
+  Future<void> _submitTestResult(Map<String, dynamic> testResult, Test test) async {
+    try {
+      // Tạo TestResultModel từ kết quả test
+      final now = DateTime.now();
+      final testResultModel = TestResultModel(
+        childId: widget.child!.id,
+        testId: test.id,
+        testType: 'CDD_TEST',
+        testDate: now,
+        startTime: testResult['startTime'] != null ? DateTime.parse(testResult['startTime']) : now,
+        endTime: now,
+        status: 'COMPLETED',
+        totalScore: (testResult['totalScore'] as num?)?.toDouble() ?? 0.0,
+        maxScore: (testResult['maxScore'] as num?)?.toDouble() ?? 100.0,
+        percentageScore: (testResult['percentageScore'] as num?)?.toDouble() ?? 0.0,
+        resultLevel: _getResultLevel((testResult['percentageScore'] as num?)?.toDouble() ?? 0.0),
+        interpretation: testResult['interpretation'] ?? 'Kết quả đánh giá phát triển của trẻ.',
+        questionAnswers: jsonEncode(testResult['questionAnswers'] ?? {}),
+        correctAnswers: testResult['correctAnswers'] ?? 0,
+        totalQuestions: testResult['totalQuestions'] ?? test.questions.length,
+        skippedQuestions: testResult['skippedQuestions'] ?? 0,
+        notes: testResult['notes'] ?? '',
+        environment: 'MOBILE_APP',
+        assessor: '', // Tạm thời để trống như yêu cầu
+        parentPresent: true,
+      );
+
+      // Gửi kết quả lên server
+      final response = await _api.submitTestResult(testResultModel);
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Đã lưu kết quả bài test thành công!'),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi khi lưu kết quả: ${response.statusCode}'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi gửi kết quả: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  String _getResultLevel(double percentageScore) {
+    if (percentageScore >= 80) return 'EXCELLENT';
+    if (percentageScore >= 70) return 'GOOD';
+    if (percentageScore >= 60) return 'AVERAGE';
+    if (percentageScore >= 50) return 'BELOW_AVERAGE';
+    return 'NEEDS_ATTENTION';
   }
 
   IconData _getCategoryIcon(String category) {

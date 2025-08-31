@@ -87,23 +87,36 @@ class ChildCompletedTestsView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Mã bài test: ${result.testId}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
+                                     Text(
+                     'Bài test: ${result.testId}',
+                     style: const TextStyle(
+                       fontSize: 16,
+                       fontWeight: FontWeight.bold,
+                       color: AppColors.textPrimary,
+                     ),
+                   ),
+                   if (result.notes?.isNotEmpty == true) ...[
+                     const SizedBox(height: 4),
+                     Text(
+                       result.notes ?? '',
+                       style: const TextStyle(
+                         fontSize: 12,
+                         color: AppColors.textSecondary,
+                         fontStyle: FontStyle.italic,
+                       ),
+                       maxLines: 2,
+                       overflow: TextOverflow.ellipsis,
+                     ),
+                   ],
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.score, size: 14, color: AppColors.textSecondary),
                       const SizedBox(width: 4),
-                      Text(
-                        'Điểm: ${result.score}/${result.totalQuestions}',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                      ),
+                                             Text(
+                         'Điểm: ${result.score}/${result.totalQuestions} (${result.answeredQuestions}/${result.totalQuestions} câu đúng)',
+                         style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                       ),
                       const SizedBox(width: 16),
                       const Icon(Icons.timer, size: 14, color: AppColors.textSecondary),
                       const SizedBox(width: 4),

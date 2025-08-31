@@ -5,6 +5,9 @@ class ChildTracking {
   final Map<String, int> scores;
   final String notes;
   final double totalScore;
+  final EmotionLevel emotionLevel;
+  final ParticipationLevel participationLevel;
+  final List<InterventionGoal> selectedGoals;
 
   ChildTracking({
     required this.id,
@@ -12,6 +15,9 @@ class ChildTracking {
     required this.date,
     required this.scores,
     this.notes = '',
+    required this.emotionLevel,
+    required this.participationLevel,
+    required this.selectedGoals,
   }) : totalScore = _calculateTotalScore(scores);
 
   static double _calculateTotalScore(Map<String, int> scores) {
@@ -27,6 +33,9 @@ class ChildTracking {
       'date': date.toIso8601String(),
       'scores': scores,
       'notes': notes,
+      'emotionLevel': emotionLevel.index,
+      'participationLevel': participationLevel.index,
+      'selectedGoals': selectedGoals.map((goal) => goal.toJson()).toList(),
     };
   }
 
@@ -37,39 +46,312 @@ class ChildTracking {
       date: DateTime.parse(json['date']),
       scores: Map<String, int>.from(json['scores']),
       notes: json['notes'] ?? '',
+      emotionLevel: EmotionLevel.values[json['emotionLevel'] ?? 0],
+      participationLevel: ParticipationLevel.values[json['participationLevel'] ?? 0],
+      selectedGoals: (json['selectedGoals'] as List?)
+          ?.map((goal) => InterventionGoal.fromJson(goal))
+          .toList() ?? [],
     );
   }
 }
 
-class TrackingQuestion {
-  final String id;
-  final String category;
-  final String question;
-  final List<String> options;
-  final List<int> scores;
+enum EmotionLevel {
+  veryHappy('😀 Rất vui, hợp tác tốt'),
+  happy('😃 Vui, tham gia ổn'),
+  normal('🙂 Bình thường, ít hứng thú'),
+  indifferent('😐 Chưa hợp tác, thờ ơ'),
+  upset('😢 Khó chịu, từ chối');
 
-  const TrackingQuestion({
-    required this.id,
-    required this.category,
-    required this.question,
-    required this.options,
-    required this.scores,
-  });
+  const EmotionLevel(this.label);
+  final String label;
 }
 
-class TrackingCategory {
-  final String name;
-  final List<TrackingQuestion> questions;
-  final int maxScore;
+enum ParticipationLevel {
+  level1('⭐ Thờ ơ, bùng nổ, không tham gia'),
+  level2('⭐⭐ Tham gia ít, không chú ý, hứng thú kém'),
+  level3('⭐⭐⭐ Tham gia vừa, chú ý ngắn, cần nhắc nhở nhiều'),
+  level4('⭐⭐⭐⭐ Tham gia tốt, có chú ý, cần nhắc nhở ít'),
+  level5('⭐⭐⭐⭐⭐ Chủ động, tích cực, chú ý tốt, không nhắc nhở');
 
-  const TrackingCategory({
-    required this.name,
+  const ParticipationLevel(this.label);
+  final String label;
+}
+
+class InterventionGoal {
+  final String id;
+  final String title;
+  final String description;
+  final List<InterventionQuestion> questions;
+  final bool isVisible;
+
+  const InterventionGoal({
+    required this.id,
+    required this.title,
+    required this.description,
     required this.questions,
-    required this.maxScore,
+    this.isVisible = true,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'questions': questions.map((q) => q.toJson()).toList(),
+      'isVisible': isVisible,
+    };
+  }
+
+  factory InterventionGoal.fromJson(Map<String, dynamic> json) {
+    return InterventionGoal(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      questions: (json['questions'] as List)
+          .map((q) => InterventionQuestion.fromJson(q))
+          .toList(),
+      isVisible: json['isVisible'] ?? true,
+    );
+  }
+}
+
+class InterventionQuestion {
+  final String id;
+  final String question;
+  final QuestionType type;
+  final List<String> options;
+  final String? answer;
+  final bool isVisible;
+
+  const InterventionQuestion({
+    required this.id,
+    required this.question,
+    required this.type,
+    required this.options,
+    this.answer,
+    this.isVisible = true,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'question': question,
+      'type': type.index,
+      'options': options,
+      'answer': answer,
+      'isVisible': isVisible,
+    };
+  }
+
+  factory InterventionQuestion.fromJson(Map<String, dynamic> json) {
+    return InterventionQuestion(
+      id: json['id'],
+      question: json['question'],
+      type: QuestionType.values[json['type']],
+      options: List<String>.from(json['options']),
+      answer: json['answer'],
+      isVisible: json['isVisible'] ?? true,
+    );
+  }
+}
+
+enum QuestionType {
+  yesNo,
+  supportLevel,
+  environment,
 }
 
 class TrackingData {
+  static const List<InterventionGoal> interventionGoals = [
+    InterventionGoal(
+      id: 'goal_1',
+      title: 'Giao tiếp bằng lời nói',
+      description: 'Trẻ có thể giao tiếp bằng lời nói với người khác',
+      questions: [
+        InterventionQuestion(
+          id: 'goal_1_lv1',
+          question: 'Con bạn có thực hiện được không?',
+          type: QuestionType.yesNo,
+          options: ['Có', 'Không'],
+        ),
+        InterventionQuestion(
+          id: 'goal_1_lv2',
+          question: 'Con bạn có cần trợ giúp không?',
+          type: QuestionType.supportLevel,
+          options: [
+            'Hỗ trợ toàn phần',
+            'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
+            'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
+            'Hỗ trợ bằng lời',
+            'Không cần hỗ trợ'
+          ],
+        ),
+        InterventionQuestion(
+          id: 'goal_1_lv3',
+          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          type: QuestionType.environment,
+          options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
+        ),
+      ],
+    ),
+    InterventionGoal(
+      id: 'goal_2',
+      title: 'Tương tác xã hội',
+      description: 'Trẻ có thể tương tác với bạn bè và người lớn',
+      questions: [
+        InterventionQuestion(
+          id: 'goal_2_lv1',
+          question: 'Con bạn có thực hiện được không?',
+          type: QuestionType.yesNo,
+          options: ['Có', 'Không'],
+        ),
+        InterventionQuestion(
+          id: 'goal_2_lv2',
+          question: 'Con bạn có cần trợ giúp không?',
+          type: QuestionType.supportLevel,
+          options: [
+            'Hỗ trợ toàn phần',
+            'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
+            'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
+            'Hỗ trợ bằng lời',
+            'Không cần hỗ trợ'
+          ],
+        ),
+        InterventionQuestion(
+          id: 'goal_2_lv3',
+          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          type: QuestionType.environment,
+          options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
+        ),
+      ],
+    ),
+    InterventionGoal(
+      id: 'goal_3',
+      title: 'Tự lập trong sinh hoạt',
+      description: 'Trẻ có thể tự thực hiện các hoạt động sinh hoạt hàng ngày',
+      questions: [
+        InterventionQuestion(
+          id: 'goal_3_lv1',
+          question: 'Con bạn có thực hiện được không?',
+          type: QuestionType.yesNo,
+          options: ['Có', 'Không'],
+        ),
+        InterventionQuestion(
+          id: 'goal_3_lv2',
+          question: 'Con bạn có cần trợ giúp không?',
+          type: QuestionType.supportLevel,
+          options: [
+            'Hỗ trợ toàn phần',
+            'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
+            'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
+            'Hỗ trợ bằng lời',
+            'Không cần hỗ trợ'
+          ],
+        ),
+        InterventionQuestion(
+          id: 'goal_3_lv3',
+          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          type: QuestionType.environment,
+          options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
+        ),
+      ],
+    ),
+    InterventionGoal(
+      id: 'goal_4',
+      title: 'Kỹ năng vận động tinh',
+      description: 'Trẻ có thể thực hiện các hoạt động cần sự khéo léo của bàn tay',
+      questions: [
+        InterventionQuestion(
+          id: 'goal_4_lv1',
+          question: 'Con bạn có thực hiện được không?',
+          type: QuestionType.yesNo,
+          options: ['Có', 'Không'],
+        ),
+        InterventionQuestion(
+          id: 'goal_4_lv2',
+          question: 'Con bạn có cần trợ giúp không?',
+          type: QuestionType.supportLevel,
+          options: [
+            'Hỗ trợ toàn phần',
+            'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
+            'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
+            'Hỗ trợ bằng lời',
+            'Không cần hỗ trợ'
+          ],
+        ),
+        InterventionQuestion(
+          id: 'goal_4_lv3',
+          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          type: QuestionType.environment,
+          options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
+        ),
+      ],
+    ),
+    InterventionGoal(
+      id: 'goal_5',
+      title: 'Kỹ năng nhận thức',
+      description: 'Trẻ có thể hiểu và thực hiện các nhiệm vụ nhận thức đơn giản',
+      questions: [
+        InterventionQuestion(
+          id: 'goal_5_lv1',
+          question: 'Con bạn có thực hiện được không?',
+          type: QuestionType.yesNo,
+          options: ['Có', 'Không'],
+        ),
+        InterventionQuestion(
+          id: 'goal_5_lv2',
+          question: 'Con bạn có cần trợ giúp không?',
+          type: QuestionType.supportLevel,
+          options: [
+            'Hỗ trợ toàn phần',
+            'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
+            'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
+            'Hỗ trợ bằng lời',
+            'Không cần hỗ trợ'
+          ],
+        ),
+        InterventionQuestion(
+          id: 'goal_5_lv3',
+          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          type: QuestionType.environment,
+          options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
+        ),
+      ],
+    ),
+    InterventionGoal(
+      id: 'goal_6',
+      title: 'Kiểm soát cảm xúc',
+      description: 'Trẻ có thể kiểm soát và thể hiện cảm xúc một cách phù hợp',
+      questions: [
+        InterventionQuestion(
+          id: 'goal_6_lv1',
+          question: 'Con bạn có thực hiện được không?',
+          type: QuestionType.yesNo,
+          options: ['Có', 'Không'],
+        ),
+        InterventionQuestion(
+          id: 'goal_6_lv2',
+          question: 'Con bạn có cần trợ giúp không?',
+          type: QuestionType.supportLevel,
+          options: [
+            'Hỗ trợ toàn phần',
+            'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
+            'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
+            'Hỗ trợ bằng lời',
+            'Không cần hỗ trợ'
+          ],
+        ),
+        InterventionQuestion(
+          id: 'goal_6_lv3',
+          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          type: QuestionType.environment,
+          options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
+        ),
+      ],
+    ),
+  ];
+
+  // Legacy tracking data for backward compatibility
   static const List<TrackingCategory> categories = [
     TrackingCategory(
       name: 'Giao tiếp',
@@ -188,4 +470,32 @@ class TrackingData {
       return null;
     }
   }
+}
+
+class TrackingQuestion {
+  final String id;
+  final String category;
+  final String question;
+  final List<String> options;
+  final List<int> scores;
+
+  const TrackingQuestion({
+    required this.id,
+    required this.category,
+    required this.question,
+    required this.options,
+    required this.scores,
+  });
+}
+
+class TrackingCategory {
+  final String name;
+  final List<TrackingQuestion> questions;
+  final int maxScore;
+
+  const TrackingCategory({
+    required this.name,
+    required this.questions,
+    required this.maxScore,
+  });
 }

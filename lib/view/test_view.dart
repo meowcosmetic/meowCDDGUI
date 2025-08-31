@@ -107,29 +107,30 @@ class _TestViewState extends State<TestView> {
       
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final List<dynamic> data = responseData['content'] ?? responseData['data'] ?? [];
-        final int total = responseData['totalElements'] ?? responseData['total'] ?? 0;
-        
+        print('DEBUG: Response data: $responseData');
+        final List<dynamic> data = responseData['content'] ?? [];
+        final int total = responseData['totalElements'] ?? 0;
+        final bool isLastPage = responseData['last'] == true;
+        final int totalPages = responseData['totalPages'] ?? ((total + pageSize - 1) ~/ pageSize);
+
         final List<CDDTest> fetchedTests = data.map((json) => CDDTest.fromJson(json)).toList();
-        
+
         setState(() {
           if (refresh) {
             tests = fetchedTests;
             filteredTests = fetchedTests;
           } else {
             tests.addAll(fetchedTests);
-            // For filtered results, replace filteredTests instead of adding
             if (selectedCategory != 'Tất cả' || selectedAgeMonths != null) {
-              // If we have active filters, replace the filtered list
               filteredTests = fetchedTests;
             } else {
-              // If no filters, add to existing list
               filteredTests.addAll(fetchedTests);
             }
           }
           totalItems = total;
           currentPage++;
-          hasMoreData = tests.length < total;
+          // Prefer explicit flag from API; fallback to length vs total
+          hasMoreData = totalPages > 0 ? !isLastPage : tests.length < total;
           isLoading = false;
           isLoadingMore = false;
         });
@@ -574,6 +575,21 @@ class _TestViewState extends State<TestView> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          children: [
+                            _buildInfoChip(Icons.timer, '${test.estimatedDuration} phút'),
+                            if (test.version.isNotEmpty)
+                              _buildInfoChip(Icons.sell, 'v${test.version}'),
+                            _buildInfoChip(Icons.assignment_ind, _getAdministrationText(test.administrationType)),
+                            if (test.createdAt != null)
+                              _buildInfoChip(Icons.event_note, 'Tạo: ${_formatDate(test.createdAt!)}'),
+                            if (test.updatedAt != null)
+                              _buildInfoChip(Icons.update, 'Cập nhật: ${_formatDate(test.updatedAt!)}'),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -630,6 +646,53 @@ class _TestViewState extends State<TestView> {
         ),
       ),
     );
+  }
+
+  // Small info chip for metadata on test cards
+  Widget _buildInfoChip(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.grey50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: AppColors.textSecondary),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Map administration type to readable text
+  String _getAdministrationText(String type) {
+    switch (type) {
+      case 'PARENT_REPORT':
+        return 'Phụ huynh báo cáo';
+      case 'PROFESSIONAL_OBSERVATION':
+        return 'Chuyên gia quan sát';
+      case 'DIRECT_ASSESSMENT':
+        return 'Đánh giá trực tiếp';
+      case 'SELF_REPORT':
+        return 'Tự báo cáo';
+      default:
+        return type;
+    }
+  }
+
+  String _formatDate(DateTime dt) {
+    final y = dt.year.toString().padLeft(4, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    return '$d/$m/$y';
   }
 
   Widget _buildEmptyState() {

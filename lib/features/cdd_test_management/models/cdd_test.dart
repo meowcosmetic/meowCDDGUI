@@ -68,12 +68,70 @@ class CDDTest {
   }
 
   factory CDDTest.fromJson(Map<String, dynamic> json) {
+    // Helper to parse Map<String, String> from either embedded map or a JSON string field
+    Map<String, String> _parseStringMap(dynamic value) {
+      if (value is Map<String, dynamic>) {
+        return value.map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''));
+      }
+      if (value is String && value.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(value);
+          if (decoded is Map<String, dynamic>) {
+            return decoded.map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''));
+          }
+        } catch (_) {}
+      }
+      return {};
+    }
+
+    // Helper to parse List from either embedded list or a JSON string field
+    List<dynamic> _parseList(dynamic value) {
+      if (value is List) return value;
+      if (value is String && value.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(value);
+          if (decoded is List) return decoded;
+        } catch (_) {}
+      }
+      return [];
+    }
+
+    // Resolve maps possibly provided as *Json string fields
+    final names = _parseStringMap(json['names'] ?? json['namesJson']);
+    final descriptions = _parseStringMap(json['descriptions'] ?? json['descriptionsJson']);
+    final instructions = _parseStringMap(json['instructions'] ?? json['instructionsJson']);
+    final notes = _parseStringMap(json['notes'] ?? json['notesJson']);
+
+    // Questions may come as a JSON string array under questionsJson
+    final questionsSource = _parseList(json['questions'] ?? json['questionsJson']);
+    final parsedQuestions = questionsSource
+        .map((q) => q is Map<String, dynamic> ? q : (q is Map ? Map<String, dynamic>.from(q) : null))
+        .where((q) => q != null)
+        .cast<Map<String, dynamic>>()
+        .map((q) => CDDQuestion.fromJson(q))
+        .toList();
+
+    // scoringCriteria may come as object or JSON string
+    dynamic scoringCriteriaValue = json['scoringCriteria'] ?? json['scoringCriteriaJson'];
+    if (scoringCriteriaValue is String && scoringCriteriaValue.isNotEmpty) {
+      try {
+        scoringCriteriaValue = jsonDecode(scoringCriteriaValue);
+      } catch (_) {
+        scoringCriteriaValue = {};
+      }
+    }
+
+    // requiredMaterials may come as array or JSON string
+    final requiredMaterials = _parseList(json['requiredMaterials'] ?? json['requiredMaterialsJson'])
+        .map((e) => e.toString())
+        .toList();
+
     return CDDTest(
       id: json['id']?.toString(),
       assessmentCode: json['assessmentCode'] ?? '',
-      names: Map<String, String>.from(json['names'] ?? {}),
-      descriptions: Map<String, String>.from(json['descriptions'] ?? {}),
-      instructions: Map<String, String>.from(json['instructions'] ?? {}),
+      names: names,
+      descriptions: descriptions,
+      instructions: instructions,
       category: json['category'] ?? '',
       minAgeMonths: json['minAgeMonths'] ?? 0,
       maxAgeMonths: json['maxAgeMonths'] ?? 0,
@@ -82,14 +140,14 @@ class CDDTest {
       estimatedDuration: json['estimatedDuration'] ?? 15,
       administrationType: json['administrationType'] ?? 'PARENT_REPORT',
       requiredQualifications: json['requiredQualifications'] ?? 'NO_QUALIFICATION_REQUIRED',
-      requiredMaterials: List<String>.from(json['requiredMaterials'] ?? []),
-      notes: Map<String, String>.from(json['notes'] ?? {}),
-      questions: (json['questions'] as List? ?? [])
-          .map((q) => CDDQuestion.fromJson(q))
-          .toList(),
-      scoringCriteria: CDDScoringCriteria.fromJson(json['scoringCriteria'] ?? {}),
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      requiredMaterials: requiredMaterials,
+      notes: notes,
+      questions: parsedQuestions,
+      scoringCriteria: CDDScoringCriteria.fromJson(
+        scoringCriteriaValue is Map<String, dynamic> ? scoringCriteriaValue : {},
+      ),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'].toString()) : null,
     );
   }
 

@@ -255,7 +255,7 @@ class Test {
 
   factory Test.fromJson(Map<String, dynamic> json) {
     return Test(
-      id: json['id'] ?? '',
+      id: json['id']?.toString() ?? '',
       assessmentCode: json['assessmentCode'] ?? '',
       names: Map<String, String>.from(json['names'] ?? {}),
       descriptions: Map<String, String>.from(json['descriptions'] ?? {}),

@@ -5,6 +5,7 @@ import 'user.dart';
 import '../features/cdd_test_management/models/cdd_test.dart';
 import 'user_session.dart';
 import 'child.dart';
+import 'test_result_model.dart';
 
 class ApiService {
   final String baseUrl;
@@ -76,7 +77,7 @@ class ApiService {
       parentId: parentId, // Gửi parentId dưới dạng String
     ).toJson();
 
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/children');
+    final uri = Uri.parse('${AppConfig.cddAPI}/children');
     
     // Debug: In thông tin request
     print('DEBUG: Creating child with URL: $uri');
@@ -106,7 +107,7 @@ class ApiService {
 
   /// Lấy danh sách bài test có phân trang
   Future<http.Response> getTestsPaginated({int page = 0, int size = 10}) async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/paginated?page=$page&size=$size');
+    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/paginated?page=$page&size=$size');
     final resp = await http.get(
       uri,
       headers: const {
@@ -119,7 +120,7 @@ class ApiService {
 
   /// Lấy danh sách bài test theo độ tuổi có phân trang
   Future<http.Response> getTestsByAgePaginated({int ageMonths = 0, int page = 0, int size = 10}) async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/age/$ageMonths/status/ACTIVE/paginated?page=$page&size=$size');
+    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/age/$ageMonths/status/ACTIVE/paginated?page=$page&size=$size');
     final resp = await http.get(
       uri,
       headers: const {
@@ -132,7 +133,7 @@ class ApiService {
 
   /// Lấy danh sách bài test theo category có phân trang
   Future<http.Response> getTestsByCategoryPaginated({String category = '', int page = 0, int size = 10}) async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/category/$category/status/ACTIVE/paginated?page=$page&size=$size');
+    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/category/$category/status/ACTIVE/paginated?page=$page&size=$size');
     final resp = await http.get(
       uri,
       headers: const {
@@ -145,7 +146,7 @@ class ApiService {
 
   /// Lấy danh sách bài test theo cả age và category có phân trang
   Future<http.Response> getTestsByAgeAndCategoryPaginated({int ageMonths = 0, String category = '', int page = 0, int size = 10}) async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/age/$ageMonths/category/$category/status/ACTIVE/paginated?page=$page&size=$size');
+    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/age/$ageMonths/category/$category/status/ACTIVE/paginated?page=$page&size=$size');
     final resp = await http.get(
       uri,
       headers: const {
@@ -158,7 +159,7 @@ class ApiService {
 
   /// Lấy chi tiết bài test theo ID
   Future<http.Response> getTestById(String testId) async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests/$testId');
+    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/$testId');
     final resp = await http.get(
       uri,
       headers: const {
@@ -171,7 +172,7 @@ class ApiService {
 
   /// Tạo bài test mới
   Future<http.Response> createTest(CDDTest test) async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/cdd-tests');
+    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests');
     final payload = test.toJson();
     final resp = await http.post(
       uri,
@@ -186,7 +187,7 @@ class ApiService {
 
   /// Lấy danh sách trẻ theo parentId
   Future<http.Response> getChildrenByParentId(String parentId) async {
-    final uri = Uri.parse('${AppConfig.testApiBaseUrl}/api/v1/supabase/children/parent/$parentId');
+    final uri = Uri.parse('${AppConfig.cddAPI}/children/parent/$parentId');
     final resp = await http.get(
       uri,
       headers: const {
@@ -194,6 +195,45 @@ class ApiService {
         'Accept': 'application/json',
       },
     );
+    return resp;
+  }
+
+  /// Gửi kết quả bài test lên server
+  Future<http.Response> submitTestResult(TestResultModel testResult) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/child-test-records');
+    
+    print('DEBUG: Submitting test result to: $uri');
+    print('DEBUG: Test result payload: ${jsonEncode(testResult.toJson())}');
+    
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(testResult.toJson()),
+    );
+    
+    print('DEBUG: Submit test result response status: ${resp.statusCode}');
+    print('DEBUG: Submit test result response body: ${resp.body}');
+    
+    return resp;
+  }
+
+  /// Lấy danh sách kết quả bài test của một trẻ
+  Future<http.Response> getTestResultsByChildId(String childId) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/child-test-records/child/$childId');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    
+    print('DEBUG: Get test results response status: ${resp.statusCode}');
+    print('DEBUG: Get test results response body: ${resp.body}');
+    
     return resp;
   }
 }
