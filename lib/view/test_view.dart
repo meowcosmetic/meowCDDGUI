@@ -6,6 +6,8 @@ import '../models/api_service.dart';
 import 'test_detail_view.dart';
 import '../features/cdd_test_management/views/create_test_view.dart';
 import '../features/cdd_test_management/models/cdd_test.dart';
+import '../uiElement/chat_dialog.dart';
+import '../uiElement/fab_utility.dart';
 
 class TestView extends StatefulWidget {
   const TestView({super.key});
@@ -257,6 +259,7 @@ class _TestViewState extends State<TestView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: FABUtility.buildSmartFAB(context),
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,

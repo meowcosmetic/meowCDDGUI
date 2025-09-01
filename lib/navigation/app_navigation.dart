@@ -10,6 +10,8 @@ import '../uiElement/heading_demo.dart';
 import '../view/policy_view.dart';
 import '../view/test_view.dart';
 import '../constants/app_colors.dart';
+import '../uiElement/chat_dialog.dart';
+import '../uiElement/fab_utility.dart';
 
 
 class AppNavigation extends StatefulWidget {
@@ -122,6 +124,7 @@ class _AppNavigationState extends State<AppNavigation> {
         },
         children: _navigationItems.map((item) => item.page).toList(),
       ),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
@@ -317,7 +320,10 @@ class ButtonDemoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ButtonDemo(showAppBar: false);
+    return Scaffold(
+      body: const ButtonDemo(showAppBar: false),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
+    );
   }
 }
 
@@ -326,7 +332,10 @@ class CardDemoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CardDemo(showAppBar: false);
+    return Scaffold(
+      body: const CardDemo(showAppBar: false),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
+    );
   }
 }
 
@@ -335,7 +344,10 @@ class FormDemoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const FormDemo(showAppBar: false);
+    return Scaffold(
+      body: const FormDemo(showAppBar: false),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
+    );
   }
 }
 
@@ -344,7 +356,10 @@ class NavigationDemoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const NavigationDemo(showAppBar: false);
+    return Scaffold(
+      body: const NavigationDemo(showAppBar: false),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
+    );
   }
 }
 
@@ -353,7 +368,10 @@ class LoadingDemoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LoadingDemo(showAppBar: false);
+    return Scaffold(
+      body: const LoadingDemo(showAppBar: false),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
+    );
   }
 }
 
@@ -362,7 +380,10 @@ class AlertDemoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AlertDemo(showAppBar: false);
+    return Scaffold(
+      body: const AlertDemo(showAppBar: false),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
+    );
   }
 }
 
@@ -371,7 +392,10 @@ class PaginationDemoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PaginationDemo(showAppBar: false);
+    return Scaffold(
+      body: const PaginationDemo(showAppBar: false),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
+    );
   }
 }
 
@@ -380,6 +404,9 @@ class HeadingDemoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const HeadingDemo(showAppBar: false);
+    return Scaffold(
+      body: const HeadingDemo(showAppBar: false),
+      floatingActionButton: FABUtility.buildSmartFAB(context),
+    );
   }
 } 

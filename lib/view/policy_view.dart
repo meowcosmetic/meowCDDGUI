@@ -12,6 +12,8 @@ import 'collaborator_search_view.dart';
 import 'expert_connect_view.dart';
 import 'store_view.dart';
 import 'donation_view.dart';
+import '../uiElement/chat_dialog.dart';
+import '../uiElement/fab_utility.dart';
 
 class PolicyView extends StatefulWidget {
   const PolicyView({super.key});
@@ -125,6 +127,7 @@ class _PolicyViewState extends State<PolicyView> {
     
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: FABUtility.buildSmartFAB(context),
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
@@ -602,6 +605,7 @@ class _MainAppViewState extends State<MainAppView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: FABUtility.buildSmartFAB(context),
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
