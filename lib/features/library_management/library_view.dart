@@ -839,6 +839,11 @@ class _LibraryViewState extends State<LibraryView> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
+        // Dùng biến tạm cho dialog để hiển thị chọn ngay lập tức
+        String tempTargetAge = selectedTargetAge;
+        String tempDomain = selectedDomain;
+        String tempCategory = selectedCategory;
+
         return DraggableScrollableSheet(
           initialChildSize: 0.9,
           minChildSize: 0.6,
@@ -854,77 +859,88 @@ class _LibraryViewState extends State<LibraryView> {
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
                   ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: AppColors.border)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Text('Bộ lọc', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.close),
+                  child: StatefulBuilder(
+                    builder: (context, setSheetState) {
+                      return Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              border: Border(bottom: BorderSide(color: AppColors.border)),
                             ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: ListView(
-                          controller: controller,
-                          padding: const EdgeInsets.all(16),
-                          children: [
-                            _buildFilterSection('Độ Tuổi', filterTargetAges, selectedTargetAge, (v) => setState(() {
-                              selectedTargetAge = v;
-                            })),
-                            const SizedBox(height: 16),
-                            _buildDomainSidebarSection(),
-                            const SizedBox(height: 16),
-                            _buildFormatSidebarSection(),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    selectedTargetAge = 'Tất cả';
-                                    selectedDomain = 'Tất cả';
-                                    selectedCategory = 'Tất cả';
-                                  });
-                                },
-                                child: const Text('Đặt lại'),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    currentPage = 0;
-                                    hasMoreData = true;
-                                    _filterItems();
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: AppColors.white,
+                            child: Row(
+                              children: [
+                                const Text('Bộ lọc', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                const Spacer(),
+                                IconButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  icon: const Icon(Icons.close),
                                 ),
-                                child: const Text('Áp dụng'),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                          Expanded(
+                            child: ListView(
+                              controller: controller,
+                              padding: const EdgeInsets.all(16),
+                              children: [
+                                _buildFilterSection('Độ Tuổi', filterTargetAges, tempTargetAge, (v) => setSheetState(() {
+                                  tempTargetAge = v;
+                                })),
+                                const SizedBox(height: 16),
+                                _buildDomainSidebarSection(current: tempDomain, onChanged: (v) => setSheetState(() {
+                                  tempDomain = v;
+                                })),
+                                const SizedBox(height: 16),
+                                _buildFormatSidebarSection(current: tempCategory, onChanged: (v) => setSheetState(() {
+                                  tempCategory = v;
+                                })),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      setSheetState(() {
+                                        tempTargetAge = 'Tất cả';
+                                        tempDomain = 'Tất cả';
+                                        tempCategory = 'Tất cả';
+                                      });
+                                    },
+                                    child: const Text('Đặt lại'),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        selectedTargetAge = tempTargetAge;
+                                        selectedDomain = tempDomain;
+                                        selectedCategory = tempCategory;
+                                        currentPage = 0;
+                                        hasMoreData = true;
+                                        _filterItems();
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: AppColors.white,
+                                    ),
+                                    child: const Text('Áp dụng'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -935,7 +951,7 @@ class _LibraryViewState extends State<LibraryView> {
     );
   }
 
-  Widget _buildDomainSidebarSection() {
+  Widget _buildDomainSidebarSection({required String current, required ValueChanged<String> onChanged}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -945,11 +961,11 @@ class _LibraryViewState extends State<LibraryView> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            _domainChoiceChip('Tất cả', 'Tất cả'),
+            _domainChoiceChip('Tất cả', 'Tất cả', current, onChanged),
             ...domains.map((d) {
               final label = (d['displayedName']?[currentLocale] ?? d['name'] ?? '').toString();
               final id = (d['id'] ?? '').toString();
-              return _domainChoiceChip(id, label);
+              return _domainChoiceChip(id, label, current, onChanged);
             }).toList(),
           ],
         ),
@@ -957,8 +973,8 @@ class _LibraryViewState extends State<LibraryView> {
     );
   }
 
-  Widget _domainChoiceChip(String id, String label) {
-    final isSelected = selectedDomain == id;
+  Widget _domainChoiceChip(String id, String label, String current, ValueChanged<String> onChanged) {
+    final isSelected = current == id;
     return Builder(builder: (chipContext) {
       return MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -1015,9 +1031,7 @@ class _LibraryViewState extends State<LibraryView> {
         child: ChoiceChip(
           selected: isSelected,
           label: Text(label),
-          onSelected: (val) => setState(() {
-            selectedDomain = id;
-          }),
+          onSelected: (val) => onChanged(id),
           selectedColor: AppColors.primary,
           labelStyle: TextStyle(color: isSelected ? AppColors.white : AppColors.textSecondary),
           backgroundColor: AppColors.grey100,
@@ -1027,7 +1041,7 @@ class _LibraryViewState extends State<LibraryView> {
     });
   }
 
-  Widget _buildFormatSidebarSection() {
+  Widget _buildFormatSidebarSection({required String current, required ValueChanged<String> onChanged}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1037,12 +1051,12 @@ class _LibraryViewState extends State<LibraryView> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            _formatChoiceChip('Tất cả', 'Tất cả'),
+            _formatChoiceChip('Tất cả', 'Tất cả', current, onChanged),
             ...formats.map((f) {
               final ext = (f['fileExtension'] ?? '').toString();
               final label = (f['formatName'] ?? ext).toString();
               final key = ext.isNotEmpty ? ext : label;
-              return _formatChoiceChip(key, label);
+              return _formatChoiceChip(key, label, current, onChanged);
             }).toList(),
           ],
         ),
@@ -1050,21 +1064,16 @@ class _LibraryViewState extends State<LibraryView> {
     );
   }
 
-  Widget _formatChoiceChip(String key, String label) {
-    final isSelected = selectedCategory == key;
-    return GestureDetector(
-      onTap: () => setState(() => selectedCategory = key),
-      child: ChoiceChip(
-        selected: isSelected,
-        label: Text(label),
-        onSelected: (val) => setState(() {
-          selectedCategory = key;
-        }),
-        selectedColor: AppColors.primary,
-        labelStyle: TextStyle(color: isSelected ? AppColors.white : AppColors.textSecondary),
-        backgroundColor: AppColors.grey100,
-        shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
-      ),
+  Widget _formatChoiceChip(String key, String label, String current, ValueChanged<String> onChanged) {
+    final isSelected = current == key;
+    return ChoiceChip(
+      selected: isSelected,
+      label: Text(label),
+      onSelected: (val) => onChanged(key),
+      selectedColor: AppColors.primary,
+      labelStyle: TextStyle(color: isSelected ? AppColors.white : AppColors.textSecondary),
+      backgroundColor: AppColors.grey100,
+      shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
     );
   }
 
