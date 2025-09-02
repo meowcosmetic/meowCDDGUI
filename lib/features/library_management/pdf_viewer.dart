@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import '../constants/app_colors.dart';
+import '../../constants/app_colors.dart';
 
 class PdfViewerWidget extends StatefulWidget {
   final String base64Data;
@@ -570,45 +570,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             // PDF Viewer - Use Embed Viewer on Web, Syncfusion on Mobile/Desktop
             Expanded(
               child: kIsWeb 
-                ? Column(
-                    children: [
-                      // Web notice
-            Container(
-              width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          border: Border(
-                            bottom: BorderSide(color: Colors.blue.shade200),
-              ),
-                        ),
-                        child: Row(
-                children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 16,
-                              color: Colors.blue.shade700,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'PDF đang được hiển thị trực tiếp trong ứng dụng',
-                    style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.blue.shade700,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // PDF Viewer
-                      Expanded(
-                        child: _buildWebPdfViewer(bytes),
-                      ),
-                    ],
-                  )
+                ? _buildWebPdfViewer(bytes)
                 : _buildMobilePdfViewer(bytes),
             ),
           ],

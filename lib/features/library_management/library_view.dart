@@ -1,9 +1,104 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../models/library_item.dart';
-import '../models/api_service.dart';
+import 'package:http/http.dart' as http;
+import '../../constants/app_colors.dart';
+import '../../models/library_item.dart';
+import '../../models/api_service.dart';
 import 'pdf_viewer.dart';
+
+// Lightweight API response models for books
+class BookApiResponse {
+  final List<ApiBook> content;
+  final bool hasNext;
+
+  BookApiResponse({required this.content, required this.hasNext});
+
+  factory BookApiResponse.fromJson(Map<String, dynamic> json) {
+    final list = (json['content'] as List<dynamic>? ?? [])
+        .map((e) => ApiBook.fromJson(e as Map<String, dynamic>))
+        .toList();
+    final page = json['page'] as Map<String, dynamic>?;
+    final hasNext = (page != null)
+        ? (page['hasNext'] ?? page['hasNextPage'] ?? page['hasNextSlice'] ?? false) == true
+        : (json['hasNext'] ?? json['hasNextPage'] ?? false) == true;
+    return BookApiResponse(content: list, hasNext: hasNext);
+  }
+}
+
+class ApiBook {
+  final String id;
+  final String title;
+  final String description;
+  final String author;
+  final String fileType;
+  final String domain;
+  final String targetAge;
+  final double rating;
+  final int ratingCount;
+  final int viewCount;
+  final String? content;
+
+  ApiBook({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.author,
+    required this.fileType,
+    required this.domain,
+    required this.targetAge,
+    required this.rating,
+    required this.ratingCount,
+    required this.viewCount,
+    this.content,
+  });
+
+  factory ApiBook.fromJson(Map<String, dynamic> json) {
+    String safeString(dynamic v) => v?.toString() ?? '';
+    int safeInt(dynamic v) => v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
+    double safeDouble(dynamic v) => v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0.0;
+
+    return ApiBook(
+      id: safeString(json['id'] ?? json['bookId']),
+      title: safeString(json['title'] ?? json['name']),
+      description: safeString(json['description'] ?? ''),
+      author: safeString(json['author'] ?? ''),
+      fileType: safeString(json['fileType'] ?? json['format'] ?? ''),
+      domain: safeString(json['domain'] ?? json['category'] ?? ''),
+      targetAge: safeString(json['targetAge'] ?? json['ageRange'] ?? ''),
+      rating: safeDouble(json['rating'] ?? json['averageRating']),
+      ratingCount: safeInt(json['ratingCount'] ?? json['reviewsCount']),
+      viewCount: safeInt(json['viewCount'] ?? json['views']),
+      content: json['content']?.toString(),
+    );
+  }
+
+  LibraryItem toLibraryItem() {
+    return LibraryItem(
+      id: id,
+      title: title,
+      description: description,
+      category: fileType.isEmpty ? 'document' : fileType,
+      domain: domain.isEmpty ? 'other' : domain,
+      fileUrl: '',
+      thumbnailUrl: '',
+      author: author.isEmpty ? 'Không rõ' : author,
+      publishDate: DateTime.now(),
+      viewCount: viewCount,
+      rating: rating,
+      ratingCount: ratingCount,
+      fileType: fileType.isEmpty ? 'document' : fileType,
+      fileSize: 0,
+      language: 'vi',
+      tags: const [],
+      isFeatured: false,
+      isFree: true,
+      targetAge: targetAge.isEmpty ? 'Tất cả' : targetAge,
+      difficulty: 'beginner',
+      reviews: const [],
+      content: content ?? '',
+    );
+  }
+}
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key});
@@ -1598,33 +1693,27 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
       // Gọi API để lấy chi tiết sách
       final response = await _apiService.getBookById(int.parse(widget.item.id));
       
-      print('DEBUG: API Response Status: ${response.statusCode}');
-      print('DEBUG: API Response Body: ${response.body}');
-      
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        print('DEBUG: Parsed JSON Data: $jsonData');
         
         // Kiểm tra tất cả các field có thể chứa nội dung
         final contentFile = jsonData['contentFile'] as String?;
         final content = jsonData['content'] as String?;
         final description = jsonData['description'] as String?;
-        
-        print('DEBUG: contentFile: ${contentFile?.substring(0, contentFile.length > 50 ? 50 : contentFile.length)}...');
-        print('DEBUG: content: ${content?.substring(0, (content?.length ?? 0) > 50 ? 50 : (content?.length ?? 0))}...');
-        print('DEBUG: description: ${description?.substring(0, (description?.length ?? 0) > 50 ? 50 : (description?.length ?? 0))}...');
-        
+
         // Ưu tiên contentFile, nếu không có thì dùng content, cuối cùng là description
         String? finalContent;
         if (contentFile != null && contentFile.isNotEmpty) {
-          finalContent = contentFile;
-          print('DEBUG: Using contentFile');
+          finalContent = await _normalizePdfSource(contentFile);
         } else if (content != null && content.isNotEmpty) {
-          finalContent = content;
-          print('DEBUG: Using content');
+          // Nếu đây là PDF được trả về dạng data URI/base64 thì chuẩn hóa
+          if (_looksLikeDataUri(content) || _looksLikeUrl(content)) {
+            finalContent = await _normalizePdfSource(content);
+          } else {
+            finalContent = content;
+          }
         } else if (description != null && description.isNotEmpty) {
           finalContent = description;
-          print('DEBUG: Using description');
         }
         
         if (finalContent != null && finalContent.isNotEmpty) {
@@ -1632,28 +1721,65 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
             bookContent = finalContent;
             isLoading = false;
           });
-          print('DEBUG: Content loaded successfully, length: ${finalContent.length}');
         } else {
           setState(() {
             errorMessage = 'Không có nội dung sách';
             isLoading = false;
           });
-          print('DEBUG: No content found in any field');
         }
       } else {
         setState(() {
           errorMessage = 'Không thể tải nội dung sách (${response.statusCode})';
           isLoading = false;
         });
-        print('DEBUG: API request failed with status: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
         errorMessage = 'Lỗi khi tải nội dung sách: $e';
         isLoading = false;
       });
-      print('DEBUG: Error loading book content: $e');
     }
+  }
+
+  // Chuẩn hóa nguồn PDF về chuỗi Base64 thuần
+  Future<String> _normalizePdfSource(String src) async {
+    final trimmed = src.trim();
+    // Nếu là URL -> tải bytes và encode base64
+    if (_looksLikeUrl(trimmed)) {
+      final uri = Uri.parse(trimmed);
+      final resp = await http.get(uri);
+      if (resp.statusCode == 200) {
+        return base64Encode(resp.bodyBytes);
+      }
+      throw Exception('Không tải được PDF từ URL (${resp.statusCode})');
+    }
+    // Nếu là data URI -> tách lấy phần base64 phía sau dấu phẩy
+    if (_looksLikeDataUri(trimmed)) {
+      final commaIdx = trimmed.indexOf(',');
+      final dataPart = commaIdx >= 0 ? trimmed.substring(commaIdx + 1) : trimmed;
+      return _cleanBase64(dataPart);
+    }
+    // Mặc định coi như base64 -> dọn dẹp whitespace và padding
+    return _cleanBase64(trimmed);
+  }
+
+  bool _looksLikeUrl(String s) {
+    return s.startsWith('http://') || s.startsWith('https://');
+  }
+
+  bool _looksLikeDataUri(String s) {
+    return s.startsWith('data:application/pdf') || s.startsWith('data:;base64,');
+  }
+
+  String _cleanBase64(String b64) {
+    // Loại bỏ mọi khoảng trắng/xuống dòng
+    String cleaned = b64.replaceAll(RegExp(r'\s+'), '');
+    // Bổ sung padding '=' để độ dài chia hết cho 4
+    final mod = cleaned.length % 4;
+    if (mod != 0) {
+      cleaned = cleaned.padRight(cleaned.length + (4 - mod), '=');
+    }
+    return cleaned;
   }
 
   @override
@@ -1747,42 +1873,41 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
       );
     }
 
+    // Nếu nội dung là PDF -> hiển thị viewer ngay
+    if (_isLikelyPdf(bookContent!, widget.item)) {
+      return _buildPdfViewer();
+    }
+
     // Hiển thị nội dung sách
     try {
-      print('DEBUG: Building content with bookContent length: ${bookContent?.length}');
-      
-      // Kiểm tra nếu là file PDF
-      if (widget.item.fileType.toLowerCase() == 'pdf' || 
-          widget.item.title.toLowerCase().contains('.pdf')) {
-        print('DEBUG: Detected PDF file, building PDF viewer');
-        return _buildPdfViewer();
-      }
       
       // Kiểm tra nếu nội dung có vẻ là base64
       if (bookContent != null && bookContent!.isNotEmpty) {
         try {
           // Thử decode base64
           final bytes = base64Decode(bookContent!);
+          // Nếu bytes có chữ ký PDF thì hiển thị PDF
+          if (bytes.length >= 4) {
+            final sig = String.fromCharCodes(bytes.take(4));
+            if (sig.startsWith('%PDF')) {
+              return _buildPdfViewer();
+            }
+          }
           final content = utf8.decode(bytes);
-          print('DEBUG: Successfully decoded base64, content length: ${content.length}');
           
           // Parse content as JSON if possible, otherwise treat as plain text
           try {
             final jsonData = jsonDecode(content);
-            print('DEBUG: Content is valid JSON, building JSON content');
             return _buildJsonContent(jsonData);
           } catch (e) {
             // If not JSON, treat as plain text
-            print('DEBUG: Content is not JSON, treating as plain text');
             return _buildTextContent(content);
           }
         } catch (e) {
           // Nếu không phải base64, hiển thị trực tiếp
-          print('DEBUG: Not base64, treating as plain text directly');
           return _buildTextContent(bookContent!);
         }
       } else {
-        print('DEBUG: No bookContent available');
         return const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1805,7 +1930,6 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         );
       }
     } catch (e) {
-      print('DEBUG: Error building content: $e');
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1828,6 +1952,25 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         ),
       );
     }
+  }
+
+  // Heuristic nhận diện PDF từ nội dung/metadata
+  bool _isLikelyPdf(String content, LibraryItem item) {
+    final ft = item.fileType.toLowerCase();
+    if (ft.contains('pdf')) return true;
+    final title = item.title.toLowerCase();
+    if (title.endsWith('.pdf')) return true;
+    if (content.startsWith('data:application/pdf')) return true;
+    if (_looksLikeUrl(content) && content.toLowerCase().contains('.pdf')) return true;
+    // Try check base64 signature quickly without throwing
+    try {
+      final bytes = base64Decode(content);
+      if (bytes.length >= 4) {
+        final sig = String.fromCharCodes(bytes.take(4));
+        if (sig.startsWith('%PDF')) return true;
+      }
+    } catch (_) {}
+    return false;
   }
 
   Widget _buildJsonContent(Map<String, dynamic> jsonData) {
