@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/library_item.dart';
+import '../models/api_service.dart';
+import 'pdf_viewer.dart';
 
 class LibraryView extends StatefulWidget {
   const LibraryView({super.key});
@@ -16,22 +19,122 @@ class _LibraryViewState extends State<LibraryView> {
   String selectedTargetAge = 'Tất cả';
   String selectedDomain = 'Tất cả';
   String selectedCategory = 'Tất cả';
+  List<Map<String, dynamic>> domains = [];
+  bool isLoadingDomains = false;
+  String currentLocale = 'vi';
+  OverlayEntry? _domainTooltipEntry;
+  List<Map<String, dynamic>> formats = [];
+  bool isLoadingFormats = false;
+  List<String> filterTargetAges = [];
   bool isLoading = true;
+  final ApiService _apiService = const ApiService();
+  int currentPage = 0;
+  bool hasMoreData = true;
 
   @override
   void initState() {
     super.initState();
     _loadLibraryItems();
+    _loadDomains();
+    _loadFormats();
+    // Build target ages list including range 0-2
+    final baseAges = SampleLibraryItems.getTargetAges();
+    filterTargetAges = ['Tất cả', '0-2', ...{
+      ...baseAges.where((e) => e != 'Tất cả' && e != '0' && e != '1' && e != '2')
+    }.toList()];
   }
 
-  void _loadLibraryItems() {
-    Future.delayed(const Duration(milliseconds: 500), () {
+  Future<void> _loadDomains() async {
+    try {
       setState(() {
-        items = SampleLibraryItems.getSampleData();
-        filteredItems = items;
+        isLoadingDomains = true;
+      });
+      final resp = await _apiService.getDevelopmentalDomains();
+      if (resp.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(resp.body);
+        setState(() {
+          domains = data.cast<Map<String, dynamic>>();
+          isLoadingDomains = false;
+        });
+      } else {
+        setState(() {
+          isLoadingDomains = false;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        isLoadingDomains = false;
+      });
+    }
+  }
+
+  Future<void> _loadFormats() async {
+    try {
+      setState(() {
+        isLoadingFormats = true;
+      });
+      final resp = await _apiService.getSupportedFormats();
+      if (resp.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(resp.body);
+        setState(() {
+          formats = data.cast<Map<String, dynamic>>();
+          isLoadingFormats = false;
+        });
+      } else {
+        setState(() {
+          isLoadingFormats = false;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        isLoadingFormats = false;
+      });
+    }
+  }
+
+  Future<void> _loadLibraryItems() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final response = await _apiService.getBooksPaginated(
+        page: currentPage,
+        size: 10,
+        sortBy: 'title',
+        sortDir: 'desc',
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        final apiResponse = BookApiResponse.fromJson(jsonData);
+        
+        final newItems = apiResponse.content.map((book) => book.toLibraryItem()).toList();
+        
+        setState(() {
+          if (currentPage == 0) {
+            items = newItems;
+          } else {
+            items.addAll(newItems);
+          }
+          filteredItems = items;
+          hasMoreData = apiResponse.hasNext;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          items = [];
+          filteredItems = [];
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        items = [];
+        filteredItems = [];
         isLoading = false;
       });
-    });
+    }
   }
 
   void _filterItems() {
@@ -43,12 +146,234 @@ class _LibraryViewState extends State<LibraryView> {
             item.author.toLowerCase().contains(searchQuery.toLowerCase());
         
         final matchesTargetAge = selectedTargetAge == 'Tất cả' || item.targetAge == selectedTargetAge;
-        final matchesDomain = selectedDomain == 'Tất cả' || item.domain == selectedDomain;
-        final matchesCategory = selectedCategory == 'Tất cả' || item.category == selectedCategory;
+        final matchesDomain = selectedDomain == 'Tất cả' || item.domain == selectedDomain || item.domain == _mapDomainIdToName(selectedDomain);
+        final matchesCategory = selectedCategory == 'Tất cả' ||
+            item.title.toLowerCase().endsWith(selectedCategory.toLowerCase()) ||
+            item.getFileTypeText().toLowerCase().contains(selectedCategory.toLowerCase());
         
         return matchesSearch && matchesTargetAge && matchesDomain && matchesCategory;
       }).toList();
     });
+  }
+
+  String _mapDomainIdToName(String domainId) {
+    final found = domains.firstWhere(
+      (d) => (d['id'] ?? '') == domainId,
+      orElse: () => const {},
+    );
+    if (found.isEmpty) return domainId;
+    return (found['name'] ?? domainId).toString();
+  }
+
+  void _loadMoreData() async {
+    if (!hasMoreData || isLoading) return;
+
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final nextPage = currentPage + 1;
+      final response = await _apiService.getBooksPaginated(
+        page: nextPage,
+        size: 10,
+        sortBy: 'title',
+        sortDir: 'desc',
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        final apiResponse = BookApiResponse.fromJson(jsonData);
+        
+        final newItems = apiResponse.content.map((book) => book.toLibraryItem()).toList();
+        
+        setState(() {
+          items.addAll(newItems);
+          filteredItems = items;
+          currentPage = nextPage;
+          hasMoreData = apiResponse.hasNext;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        print('DEBUG: Load more API request failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('DEBUG: Error loading more data: $e');
+    }
+  }
+
+  void _searchBooks() async {
+    if (searchQuery.isEmpty) {
+      _loadLibraryItems();
+      return;
+    }
+
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final response = await _apiService.getBooksWithFilter(
+        page: 0,
+        size: 10,
+        sortBy: 'title',
+        sortDir: 'desc',
+        filter: searchQuery,
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        final apiResponse = BookApiResponse.fromJson(jsonData);
+        
+        final newItems = apiResponse.content.map((book) => book.toLibraryItem()).toList();
+        
+        setState(() {
+          items = newItems;
+          filteredItems = newItems;
+          currentPage = 0;
+          hasMoreData = apiResponse.hasNext;
+          isLoading = false;
+        });
+      } else {
+        // Fallback to local filtering
+        _filterItems();
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Fallback to local filtering
+      _filterItems();
+      setState(() {
+        isLoading = false;
+      });
+      print('DEBUG: Error searching books: $e');
+    }
+  }
+
+  Widget _buildDomainChip(String id, String label) {
+    final isSelected = selectedDomain == id;
+    return Builder(builder: (chipContext) {
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) {
+          final domain = domains.firstWhere(
+            (d) => (d['id'] ?? '') == id,
+            orElse: () => const {},
+          );
+          final desc = (domain['description']?[currentLocale] ?? '').toString();
+          if (desc.isEmpty) return;
+
+          // Remove existing tooltip if any
+          _domainTooltipEntry?.remove();
+          _domainTooltipEntry = null;
+
+          // Calculate position right under the chip
+          final box = chipContext.findRenderObject() as RenderBox?;
+          if (box == null) return;
+          final offset = box.localToGlobal(Offset.zero);
+          final size = box.size;
+
+          final entry = OverlayEntry(
+            builder: (_) => Positioned(
+              left: offset.dx,
+              top: offset.dy + size.height + 6,
+              child: IgnorePointer(
+                ignoring: true,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.grey900.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(color: AppColors.shadowLight, blurRadius: 8, offset: Offset(0, 4)),
+                      ],
+                    ),
+                    child: Text(
+                      desc,
+                      style: const TextStyle(color: AppColors.white, fontSize: 12, height: 1.4),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          Overlay.of(chipContext).insert(entry);
+          _domainTooltipEntry = entry;
+        },
+        onExit: (_) {
+          _domainTooltipEntry?.remove();
+          _domainTooltipEntry = null;
+        },
+        child: GestureDetector(
+        onTap: () {
+          setState(() {
+            selectedDomain = id;
+            currentPage = 0;
+            hasMoreData = true;
+            _filterItems();
+          });
+        },
+        child: Container(
+          margin: const EdgeInsets.only(right: 0),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: isSelected ? AppColors.white : AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
+    });
+  }
+
+  Widget _buildFormatChip(String idOrExt, String label) {
+    final isSelected = selectedCategory == idOrExt;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedCategory = idOrExt;
+          currentPage = 0;
+          hasMoreData = true;
+          _filterItems();
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isSelected ? AppColors.white : AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -61,16 +386,11 @@ class _LibraryViewState extends State<LibraryView> {
         title: const Text('Thư Viện'),
         elevation: 0,
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () => _showFilterDialog(context),
-          ),
-        ],
+        actions: const [],
       ),
       body: Column(
         children: [
-          // Search Bar
+          // Search Bar + Filter Button
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -83,202 +403,79 @@ class _LibraryViewState extends State<LibraryView> {
                 ),
               ],
             ),
-            child: TextField(
-              onChanged: (value) {
-                searchQuery = value;
-                _filterItems();
-              },
-              decoration: InputDecoration(
-                hintText: 'Tìm kiếm tài liệu...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: AppColors.grey50,
-              ),
-            ),
-          ),
-          
-          // Filter Chips
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+            child: Row(
               children: [
-                // Target Age Filter
-                Row(
-                  children: [
-                    Text(
-                      'Độ tuổi: ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+                Expanded(
+                  child: TextField(
+                    onChanged: (value) {
+                      searchQuery = value;
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        if (searchQuery == value) {
+                          _searchBooks();
+                        }
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Tìm kiếm tài liệu...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      filled: true,
+                      fillColor: AppColors.grey50,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: SampleLibraryItems.getTargetAges().map((age) {
-                            final isSelected = selectedTargetAge == age;
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedTargetAge = age;
-                                  _filterItems();
-                                });
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primary : AppColors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppColors.border),
-                                ),
-                                child: Text(
-                                  age,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isSelected ? AppColors.white : AppColors.textSecondary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                
-                const SizedBox(height: 12),
-                
-                // Domain Filter
-                Row(
-                  children: [
-                    Text(
-                      'Lĩnh vực: ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: SampleLibraryItems.getDomains().map((domain) {
-                            final isSelected = selectedDomain == domain;
-                            final domainText = domain == 'Tất cả' ? 'Tất cả' : 
-                                (items.where((item) => item.domain == domain).isNotEmpty 
-                                    ? items.firstWhere((item) => item.domain == domain).getDomainText()
-                                    : domain);
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedDomain = domain;
-                                  _filterItems();
-                                });
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primary : AppColors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppColors.border),
-                                ),
-                                child: Text(
-                                  domainText,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isSelected ? AppColors.white : AppColors.textSecondary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // Category Filter
-                Row(
-                  children: [
-                    Text(
-                      'Định dạng: ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: SampleLibraryItems.getCategories().map((category) {
-                            final isSelected = selectedCategory == category;
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedCategory = category;
-                                  _filterItems();
-                                });
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primary : AppColors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppColors.border),
-                                ),
-                                child: Text(
-                                  category,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isSelected ? AppColors.white : AppColors.textSecondary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: _openFilterSidebar,
+                  icon: const Icon(Icons.tune),
+                  label: const Text('Bộ lọc'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                  ),
                 ),
               ],
             ),
           ),
           
+          // Inline filters removed; use sidebar button instead
+          
           // Library Items
           Expanded(
-            child: isLoading
+            child: RefreshIndicator(
+              onRefresh: () async {
+                currentPage = 0;
+                hasMoreData = true;
+                await _loadLibraryItems();
+              },
+              child: isLoading && currentPage == 0
                 ? const Center(child: CircularProgressIndicator())
                 : filteredItems.isEmpty
                     ? _buildEmptyState()
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: filteredItems.length,
+                          itemCount: filteredItems.length + (hasMoreData ? 1 : 0),
                         itemBuilder: (context, index) {
+                            if (index == filteredItems.length) {
+                              // Show loading indicator for next page
+                              if (hasMoreData) {
+                                _loadMoreData();
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            }
+                            
                           final item = filteredItems[index];
                           return _buildLibraryItemCard(item);
                         },
+                        ),
                       ),
           ),
         ],
@@ -313,7 +510,7 @@ class _LibraryViewState extends State<LibraryView> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Color(item.getFileTypeColor()).withOpacity(0.1),
+                      color: Color(item.getFileTypeColor()).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -369,7 +566,7 @@ class _LibraryViewState extends State<LibraryView> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Color(item.getFileTypeColor()).withOpacity(0.1),
+                      color: Color(item.getFileTypeColor()).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Color(item.getFileTypeColor())),
                     ),
@@ -386,7 +583,7 @@ class _LibraryViewState extends State<LibraryView> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Color(item.getDomainColor()).withOpacity(0.1),
+                      color: Color(item.getDomainColor()).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Color(item.getDomainColor())),
                     ),
@@ -403,7 +600,7 @@ class _LibraryViewState extends State<LibraryView> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Color(item.getDifficultyColor()).withOpacity(0.1),
+                      color: Color(item.getDifficultyColor()).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Color(item.getDifficultyColor())),
                     ),
@@ -532,10 +729,287 @@ class _LibraryViewState extends State<LibraryView> {
             selectedTargetAge = targetAge;
             selectedDomain = domain;
             selectedCategory = category;
+            currentPage = 0;
+            hasMoreData = true;
             _filterItems();
           });
         },
       ),
+    );
+  }
+
+  void _openFilterSidebar() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.9,
+          minChildSize: 0.6,
+          maxChildSize: 0.95,
+          builder: (context, controller) {
+            return Align(
+              alignment: Alignment.centerRight,
+              child: FractionallySizedBox(
+                widthFactor: 0.85,
+                child: Material(
+                  color: AppColors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(color: AppColors.border)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Text('Bộ lọc', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                            const Spacer(),
+                            IconButton(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          controller: controller,
+                          padding: const EdgeInsets.all(16),
+                          children: [
+                            _buildFilterSection('Độ Tuổi', filterTargetAges, selectedTargetAge, (v) => setState(() {
+                              selectedTargetAge = v;
+                            })),
+                            const SizedBox(height: 16),
+                            _buildDomainSidebarSection(),
+                            const SizedBox(height: 16),
+                            _buildFormatSidebarSection(),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    selectedTargetAge = 'Tất cả';
+                                    selectedDomain = 'Tất cả';
+                                    selectedCategory = 'Tất cả';
+                                  });
+                                },
+                                child: const Text('Đặt lại'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    currentPage = 0;
+                                    hasMoreData = true;
+                                    _filterItems();
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: AppColors.white,
+                                ),
+                                child: const Text('Áp dụng'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDomainSidebarSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Lĩnh Vực', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _domainChoiceChip('Tất cả', 'Tất cả'),
+            ...domains.map((d) {
+              final label = (d['displayedName']?[currentLocale] ?? d['name'] ?? '').toString();
+              final id = (d['id'] ?? '').toString();
+              return _domainChoiceChip(id, label);
+            }).toList(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _domainChoiceChip(String id, String label) {
+    final isSelected = selectedDomain == id;
+    return Builder(builder: (chipContext) {
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) {
+          // Find domain description for tooltip
+          final domain = domains.firstWhere(
+            (d) => (d['id'] ?? '') == id,
+            orElse: () => const {},
+          );
+          final desc = (domain['description']?[currentLocale] ?? '').toString();
+          if (desc.isEmpty) return;
+
+          // Remove existing tooltip
+          _domainTooltipEntry?.remove();
+          _domainTooltipEntry = null;
+
+          // Position below chip
+          final box = chipContext.findRenderObject() as RenderBox?;
+          if (box == null) return;
+          final offset = box.localToGlobal(Offset.zero);
+          final size = box.size;
+
+          final entry = OverlayEntry(
+            builder: (_) => Positioned(
+              left: offset.dx,
+              top: offset.dy + size.height + 6,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 320),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.grey900.withValues(alpha: 0.95),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(color: AppColors.shadowLight, blurRadius: 8, offset: Offset(0, 4)),
+                    ],
+                  ),
+                  child: Text(
+                    desc,
+                    style: const TextStyle(color: AppColors.white, fontSize: 12, height: 1.4),
+                  ),
+                ),
+              ),
+            ),
+          );
+          Overlay.of(chipContext).insert(entry);
+          _domainTooltipEntry = entry;
+        },
+        onExit: (_) {
+          _domainTooltipEntry?.remove();
+          _domainTooltipEntry = null;
+        },
+        child: ChoiceChip(
+          selected: isSelected,
+          label: Text(label),
+          onSelected: (val) => setState(() {
+            selectedDomain = id;
+          }),
+          selectedColor: AppColors.primary,
+          labelStyle: TextStyle(color: isSelected ? AppColors.white : AppColors.textSecondary),
+          backgroundColor: AppColors.grey100,
+          shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
+        ),
+      );
+    });
+  }
+
+  Widget _buildFormatSidebarSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Định Dạng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _formatChoiceChip('Tất cả', 'Tất cả'),
+            ...formats.map((f) {
+              final ext = (f['fileExtension'] ?? '').toString();
+              final label = (f['formatName'] ?? ext).toString();
+              final key = ext.isNotEmpty ? ext : label;
+              return _formatChoiceChip(key, label);
+            }).toList(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _formatChoiceChip(String key, String label) {
+    final isSelected = selectedCategory == key;
+    return GestureDetector(
+      onTap: () => setState(() => selectedCategory = key),
+      child: ChoiceChip(
+        selected: isSelected,
+        label: Text(label),
+        onSelected: (val) => setState(() {
+          selectedCategory = key;
+        }),
+        selectedColor: AppColors.primary,
+        labelStyle: TextStyle(color: isSelected ? AppColors.white : AppColors.textSecondary),
+        backgroundColor: AppColors.grey100,
+        shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
+      ),
+    );
+  }
+
+  Widget _buildFilterSection(
+    String title,
+    List<String> options,
+    String selected,
+    Function(String) onChanged,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: options.map((option) {
+            final isSelected = selected == option;
+            return ChoiceChip(
+              selected: isSelected,
+              label: Text(option),
+              onSelected: (_) => onChanged(option),
+              selectedColor: AppColors.primary,
+              labelStyle: TextStyle(
+                color: isSelected ? AppColors.white : AppColors.textSecondary,
+              ),
+              backgroundColor: AppColors.grey100,
+              shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -783,7 +1257,7 @@ class _ItemDetailsSheet extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Color(item.getFileTypeColor()).withOpacity(0.1),
+                          color: Color(item.getFileTypeColor()).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -990,7 +1464,7 @@ class _ItemDetailsSheet extends StatelessWidget {
                 ),
               ],
             ),
-          )).toList(),
+           )),
         ],
       ),
     );
@@ -1093,10 +1567,94 @@ class _ItemDetailsSheet extends StatelessWidget {
   }
 }
 
-class _ItemReaderPage extends StatelessWidget {
+class _ItemReaderPage extends StatefulWidget {
   final LibraryItem item;
 
   const _ItemReaderPage({required this.item});
+
+  @override
+  State<_ItemReaderPage> createState() => _ItemReaderPageState();
+}
+
+class _ItemReaderPageState extends State<_ItemReaderPage> {
+  String? bookContent;
+  bool isLoading = true;
+  String? errorMessage;
+  final ApiService _apiService = const ApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBookContent();
+  }
+
+  Future<void> _loadBookContent() async {
+    try {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+
+      // Gọi API để lấy chi tiết sách
+      final response = await _apiService.getBookById(int.parse(widget.item.id));
+      
+      print('DEBUG: API Response Status: ${response.statusCode}');
+      print('DEBUG: API Response Body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        print('DEBUG: Parsed JSON Data: $jsonData');
+        
+        // Kiểm tra tất cả các field có thể chứa nội dung
+        final contentFile = jsonData['contentFile'] as String?;
+        final content = jsonData['content'] as String?;
+        final description = jsonData['description'] as String?;
+        
+        print('DEBUG: contentFile: ${contentFile?.substring(0, contentFile.length > 50 ? 50 : contentFile.length)}...');
+        print('DEBUG: content: ${content?.substring(0, (content?.length ?? 0) > 50 ? 50 : (content?.length ?? 0))}...');
+        print('DEBUG: description: ${description?.substring(0, (description?.length ?? 0) > 50 ? 50 : (description?.length ?? 0))}...');
+        
+        // Ưu tiên contentFile, nếu không có thì dùng content, cuối cùng là description
+        String? finalContent;
+        if (contentFile != null && contentFile.isNotEmpty) {
+          finalContent = contentFile;
+          print('DEBUG: Using contentFile');
+        } else if (content != null && content.isNotEmpty) {
+          finalContent = content;
+          print('DEBUG: Using content');
+        } else if (description != null && description.isNotEmpty) {
+          finalContent = description;
+          print('DEBUG: Using description');
+        }
+        
+        if (finalContent != null && finalContent.isNotEmpty) {
+          setState(() {
+            bookContent = finalContent;
+            isLoading = false;
+          });
+          print('DEBUG: Content loaded successfully, length: ${finalContent.length}');
+        } else {
+          setState(() {
+            errorMessage = 'Không có nội dung sách';
+            isLoading = false;
+          });
+          print('DEBUG: No content found in any field');
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Không thể tải nội dung sách (${response.statusCode})';
+          isLoading = false;
+        });
+        print('DEBUG: API request failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Lỗi khi tải nội dung sách: $e';
+        isLoading = false;
+      });
+      print('DEBUG: Error loading book content: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1106,7 +1664,7 @@ class _ItemReaderPage extends StatelessWidget {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         title: Text(
-          item.title,
+          widget.item.title,
           style: const TextStyle(fontSize: 16),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -1119,68 +1677,255 @@ class _ItemReaderPage extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Color(item.getFileTypeColor()).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    _getIconData(item.getFileTypeIcon()),
-                    color: Color(item.getFileTypeColor()),
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Bởi ${item.author}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // Content
-            _buildContent(),
-            
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
+      body: _buildContent(),
     );
   }
 
   Widget _buildContent() {
-    // Simple markdown-like rendering
-    final lines = item.content.split('\n');
+    if (isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Đang tải nội dung sách...'),
+          ],
+        ),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              errorMessage!,
+              style: const TextStyle(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadBookContent,
+              child: const Text('Thử lại'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (bookContent == null || bookContent!.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.book_outlined,
+              size: 64,
+              color: AppColors.grey400,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Không có nội dung sách',
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Hiển thị nội dung sách
+    try {
+      print('DEBUG: Building content with bookContent length: ${bookContent?.length}');
+      
+      // Kiểm tra nếu là file PDF
+      if (widget.item.fileType.toLowerCase() == 'pdf' || 
+          widget.item.title.toLowerCase().contains('.pdf')) {
+        print('DEBUG: Detected PDF file, building PDF viewer');
+        return _buildPdfViewer();
+      }
+      
+      // Kiểm tra nếu nội dung có vẻ là base64
+      if (bookContent != null && bookContent!.isNotEmpty) {
+        try {
+          // Thử decode base64
+          final bytes = base64Decode(bookContent!);
+          final content = utf8.decode(bytes);
+          print('DEBUG: Successfully decoded base64, content length: ${content.length}');
+          
+          // Parse content as JSON if possible, otherwise treat as plain text
+          try {
+            final jsonData = jsonDecode(content);
+            print('DEBUG: Content is valid JSON, building JSON content');
+            return _buildJsonContent(jsonData);
+          } catch (e) {
+            // If not JSON, treat as plain text
+            print('DEBUG: Content is not JSON, treating as plain text');
+            return _buildTextContent(content);
+          }
+        } catch (e) {
+          // Nếu không phải base64, hiển thị trực tiếp
+          print('DEBUG: Not base64, treating as plain text directly');
+          return _buildTextContent(bookContent!);
+        }
+      } else {
+        print('DEBUG: No bookContent available');
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.book_outlined,
+                size: 64,
+                color: AppColors.grey400,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Không có nội dung sách',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      print('DEBUG: Error building content: $e');
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Không thể đọc nội dung sách: $e',
+              style: const TextStyle(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _buildJsonContent(Map<String, dynamic> jsonData) {
+    // Hiển thị nội dung JSON
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (jsonData['title'] != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                jsonData['title'].toString(),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          
+          if (jsonData['content'] != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                jsonData['content'].toString(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textSecondary,
+                  height: 1.6,
+                ),
+              ),
+            ),
+          
+          if (jsonData['chapters'] != null)
+            ...(jsonData['chapters'] as List).map((chapter) => 
+              _buildChapterWidget(chapter)
+            ).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPdfViewer() {
+    // Hiển thị PDF viewer trực tiếp
+    return SizedBox.expand(
+      child: PdfViewerWidget(
+        base64Data: bookContent!,
+        title: widget.item.title,
+        showAppBar: false, // Không hiển thị AppBar khi nhúng trong trang
+      ),
+    );
+  }
+
+  Widget _buildChapterWidget(dynamic chapter) {
+    if (chapter is Map<String, dynamic>) {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.grey50,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (chapter['title'] != null)
+              Text(
+                chapter['title'].toString(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            
+            if (chapter['content'] != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  chapter['content'].toString(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildTextContent(String content) {
+    // Hiển thị nội dung text thông thường
+    final lines = content.split('\n');
     final widgets = <Widget>[];
     
     for (final line in lines) {
@@ -1238,6 +1983,7 @@ class _ItemReaderPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('• ', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     line.substring(2),

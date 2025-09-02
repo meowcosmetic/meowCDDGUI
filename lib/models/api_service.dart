@@ -6,6 +6,7 @@ import '../features/cdd_test_management/models/cdd_test.dart';
 import 'user_session.dart';
 import 'child.dart';
 import 'test_result_model.dart';
+import 'library_item.dart';
 
 class ApiService {
   final String baseUrl;
@@ -234,6 +235,114 @@ class ApiService {
     print('DEBUG: Get test results response status: ${resp.statusCode}');
     print('DEBUG: Get test results response body: ${resp.body}');
     
+    return resp;
+  }
+
+  /// Lấy danh sách sách từ API với phân trang và sắp xếp
+  Future<http.Response> getBooksPaginated({
+    int page = 0,
+    int size = 10,
+    String sortBy = 'title',
+    String sortDir = 'desc',
+  }) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/books?page=$page&size=$size&sortBy=$sortBy&sortDir=$sortDir');
+    
+    print('DEBUG: Getting books from: $uri');
+    
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    
+    print('DEBUG: Get books response status: ${resp.statusCode}');
+    print('DEBUG: Get books response body: ${resp.body}');
+    
+    return resp;
+  }
+
+  /// Lấy danh sách sách với filter
+  Future<http.Response> getBooksWithFilter({
+    int page = 0,
+    int size = 10,
+    String sortBy = 'title',
+    String sortDir = 'desc',
+    String? filter,
+  }) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'size': size.toString(),
+      'sortBy': sortBy,
+      'sortDir': sortDir,
+    };
+    
+    if (filter != null && filter.isNotEmpty) {
+      queryParams['filter'] = filter;
+    }
+    
+    final uri = Uri.parse('${AppConfig.cddAPI}/books').replace(queryParameters: queryParams);
+    
+    print('DEBUG: Getting books with filter from: $uri');
+    
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    
+    print('DEBUG: Get books with filter response status: ${resp.statusCode}');
+    print('DEBUG: Get books with filter response body: ${resp.body}');
+    
+    return resp;
+  }
+
+  /// Lấy danh sách lĩnh vực phát triển (developmental domains)
+  Future<http.Response> getDevelopmentalDomains() async {
+    final uri = Uri.parse('http://localhost/api/cdd/api/v1/neon/developmental-domains');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Lấy chi tiết sách theo ID
+  Future<http.Response> getBookById(int bookId) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/books/$bookId');
+    
+    print('DEBUG: Getting book by ID from: $uri');
+    
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    
+    print('DEBUG: Get book by ID response status: ${resp.statusCode}');
+    print('DEBUG: Get book by ID response body: ${resp.body}');
+    
+    return resp;
+  }
+
+  /// Lấy danh sách định dạng được hỗ trợ (supported formats)
+  Future<http.Response> getSupportedFormats() async {
+    final uri = Uri.parse('http://localhost/api/cdd/api/v1/neon/supported-formats');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
     return resp;
   }
 }
