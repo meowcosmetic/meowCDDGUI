@@ -6,7 +6,7 @@ import '../models/policy_service.dart';
 import '../models/policy_data.dart';
 import '../models/user_session.dart';
 import 'children_list_view.dart';
-import 'library_view.dart';
+import '../features/library_management/library_view.dart';
 import 'test_view.dart';
 import 'collaborator_search_view.dart';
 import 'expert_connect_view.dart';
