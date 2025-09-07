@@ -1,3 +1,5 @@
+import '../services/host_service.dart';
+
 /// App Configuration - Cấu hình hiển thị các tính năng trong ứng dụng
 class AppConfig {
   // Dashboard Categories - Các danh mục trong trang chủ
@@ -14,6 +16,7 @@ class AppConfig {
   static const bool enableOfflineMode = true;     // Chế độ offline
   static const bool enableDataSync = true;        // Đồng bộ dữ liệu
   static const bool enableAnalytics = true;       // Phân tích dữ liệu
+  static const bool enableAddTestCategory = true; // Bật nút thêm category bài test
   
   // UI Configuration - Cấu hình giao diện
   static const bool showWelcomeMessage = true;    // Hiển thị tin nhắn chào mừng
@@ -47,9 +50,9 @@ class AppConfig {
   static const bool showLoginScreen = true;       // Hiển thị màn hình đăng nhập
   static const bool showPolicyScreen = true;      // Hiển thị màn hình chính sách
 
-  // API Configuration
-  static const String apiBaseUrl = 'http://localhost/api';
-  static const String cddAPI = 'http://localhost/api/cdd/api/v1/neon';
+  // API Configuration - Sử dụng hostname động
+  static String get apiBaseUrl => HostService.getApiBaseUrl();
+  static String get cddAPI => HostService.getCddApiUrl();
   
   /// Lấy danh sách các danh mục được bật
   static List<DashboardCategory> getEnabledCategories() {

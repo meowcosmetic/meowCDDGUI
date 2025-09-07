@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../constants/app_colors.dart';
 import '../models/cdd_test.dart';
 import '../../../models/api_service.dart';
+import '../../../models/test_category.dart';
 
 class CreateTestView extends StatefulWidget {
   const CreateTestView({super.key});
@@ -12,7 +13,7 @@ class CreateTestView extends StatefulWidget {
 
 class _CreateTestViewState extends State<CreateTestView> {
   final _formKey = GlobalKey<FormState>();
-  final _api = const ApiService();
+  final _api = ApiService();
   
   // Basic Information
   final _assessmentCodeCtrl = TextEditingController();
@@ -25,6 +26,8 @@ class _CreateTestViewState extends State<CreateTestView> {
   
   // Test Configuration
   String _selectedCategory = 'DEVELOPMENTAL_SCREENING';
+  List<TestCategory> _categories = [];
+  bool _isLoadingCategories = false;
   final _minAgeCtrl = TextEditingController(text: '0');
   final _maxAgeCtrl = TextEditingController(text: '6');
   String _selectedStatus = CDDTestStatus.DRAFT;
@@ -51,10 +54,43 @@ class _CreateTestViewState extends State<CreateTestView> {
   void initState() {
     super.initState();
     _addDefaultQuestions();
+    _loadCategories();
   }
 
   void _addDefaultQuestions() {
     _questions = [];
+  }
+
+  Future<void> _loadCategories() async {
+    setState(() {
+      _isLoadingCategories = true;
+    });
+    try {
+      final categories = await _api.getAllTestCategories();
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          if (_categories.isNotEmpty) {
+            _selectedCategory = _categories.first.code;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không tải được danh mục: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingCategories = false;
+        });
+      }
+    }
   }
 
   @override
@@ -374,19 +410,24 @@ class _CreateTestViewState extends State<CreateTestView> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              decoration: const InputDecoration(
-                labelText: 'Danh mục *',
-              ),
-              items: const [
-                DropdownMenuItem(value: 'DEVELOPMENTAL_SCREENING', child: Text('Sàng lọc phát triển')),
-                DropdownMenuItem(value: 'COMMUNICATION_ASSESSMENT', child: Text('Đánh giá giao tiếp')),
-                DropdownMenuItem(value: 'MOTOR_ASSESSMENT', child: Text('Đánh giá vận động')),
-                DropdownMenuItem(value: 'SOCIAL_ASSESSMENT', child: Text('Đánh giá xã hội')),
-              ],
-              onChanged: (value) => setState(() => _selectedCategory = value!),
-            ),
+            _isLoadingCategories
+                ? const Center(child: CircularProgressIndicator())
+                : DropdownButtonFormField<String>(
+                    value: _categories.isEmpty ? null : _selectedCategory,
+                    decoration: const InputDecoration(
+                      labelText: 'Danh mục *',
+                    ),
+                    items: _categories
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.code,
+                            child: Text(c.getDisplayName('vi')),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() => _selectedCategory = value ?? _selectedCategory),
+                    validator: (value) => (value == null || value.isEmpty) ? 'Vui lòng chọn danh mục' : null,
+                  ),
             const SizedBox(height: 16),
             Row(
               children: [

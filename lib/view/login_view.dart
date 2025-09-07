@@ -24,7 +24,7 @@ class _LoginViewState extends State<LoginView> {
   
   bool _isSubmitting = false;
   bool _isFormValid = false;
-  final ApiService _api = const ApiService();
+  final ApiService _api = ApiService();
 
   @override
   void initState() {

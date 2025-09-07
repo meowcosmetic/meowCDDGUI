@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../constants/app_colors.dart';
+import '../constants/app_config.dart';
 import '../models/api_service.dart';
 import 'test_detail_view.dart';
 import '../features/cdd_test_management/views/create_test_view.dart';
+import '../features/cdd_test_management/views/create_category_view.dart';
 import '../features/cdd_test_management/models/cdd_test.dart';
 import '../uiElement/chat_dialog.dart';
 import '../uiElement/fab_utility.dart';
@@ -23,7 +25,7 @@ class _TestViewState extends State<TestView> {
   bool isLoading = true;
   bool hasError = false;
   String errorMessage = '';
-  final ApiService _api = const ApiService();
+  final ApiService _api = ApiService();
   
   // Pagination variables
   int currentPage = 0;
@@ -109,7 +111,6 @@ class _TestViewState extends State<TestView> {
       
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        print('DEBUG: Response data: $responseData');
         final List<dynamic> data = responseData['content'] ?? [];
         final int total = responseData['totalElements'] ?? 0;
         final bool isLastPage = responseData['last'] == true;
@@ -275,6 +276,15 @@ class _TestViewState extends State<TestView> {
             ),
             tooltip: 'Thêm bài test',
           ),
+          if (AppConfig.enableAddTestCategory)
+            IconButton(
+              icon: const Icon(Icons.category),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CreateCategoryView()),
+              ),
+              tooltip: 'Thêm category',
+            ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => _loadTests(refresh: true),

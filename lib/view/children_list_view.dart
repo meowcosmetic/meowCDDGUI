@@ -37,7 +37,6 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       await UserSession.initFromPrefs();
       
       final parentId = UserSession.userId;
-      print('DEBUG: Loading children for parentId = $parentId');
       
       if (parentId == null || parentId.isEmpty) {
         throw Exception('User ID not found. Please login first.');
@@ -46,8 +45,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       final apiService = ApiService();
       final response = await apiService.getChildrenByParentId(parentId);
       
-      print('DEBUG: Response status: ${response.statusCode}');
-      print('DEBUG: Response body: ${response.body}');
+      
       
       if (response.statusCode == 200) {
         final List<dynamic> childrenData = jsonDecode(response.body);
@@ -62,7 +60,6 @@ class _ChildrenListViewState extends State<ChildrenListView> {
         throw Exception('Failed to load children: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('Error loading children: $e');
       setState(() {
         children = [];
         filteredChildren = [];

@@ -22,7 +22,7 @@ class ChildDetailView extends StatefulWidget {
 }
 
 class _ChildDetailViewState extends State<ChildDetailView> {
-  final ApiService _api = const ApiService();
+  final ApiService _api = ApiService();
   List<CDDTest> _tests = [];
   List<CDDTest> _filteredTests = [];
   bool _isLoadingTests = true;
@@ -773,9 +773,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                                                              if (response.statusCode >= 200 && response.statusCode < 300) {
                       final dynamic responseData = jsonDecode(response.body);
                       
-                      // Debug: In dữ liệu nhận được
-                      print('DEBUG: API Response type: ${responseData.runtimeType}');
-                      print('DEBUG: API Response: $responseData');
+                      // Parse dữ liệu nhận được
                       
                       // Xử lý cả trường hợp response là array hoặc object
                       late List<dynamic> data;
@@ -789,10 +787,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                         data = [];
                       }
                       
-                      print('DEBUG: Parsed data length: ${data.length}');
-                      if (data.isNotEmpty) {
-                        print('DEBUG: First item: ${data.first}');
-                      }
+                      
                       
                                              // Chuyển đổi data từ API thành TestResult objects
                        final List<TestResult> results = data.map((e) {

@@ -3,9 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_session.dart';
 import 'policy_data.dart';
+import '../services/host_service.dart';
 
 class PolicyService {
-  static const String _baseUrl = 'http://localhost/api';
+  static String get _baseUrl => HostService.getApiBaseUrl();
   static const String _policyCacheKey = 'policy_cache_cdd_terms';
   static const String _policyCacheTimeKey = 'policy_cache_time_cdd_terms';
   static const Duration _cacheExpiry = Duration(hours: 24);

@@ -316,8 +316,6 @@ class _AddChildSheetState extends State<AddChildSheet> {
       await UserSession.initFromPrefs();
       
       // Debug: Kiểm tra session
-      print('DEBUG: UserSession.userId = ${UserSession.userId}');
-      print('DEBUG: UserSession.jwtToken = ${UserSession.jwtToken?.substring(0, 20)}...');
       
       final apiService = ApiService();
       

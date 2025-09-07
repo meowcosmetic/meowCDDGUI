@@ -95,13 +95,13 @@ class _PolicyViewState extends State<PolicyView> {
         );
         
         if (success) {
-          print('Policy marked as read successfully');
+          // Marked as read
         } else {
-          print('Failed to mark policy as read');
+          // Failed to mark as read
         }
       }
     } catch (e) {
-      print('Error marking policy as read: $e');
+      // ignore
     }
   }
 

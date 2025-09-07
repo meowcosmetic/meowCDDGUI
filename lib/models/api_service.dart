@@ -7,10 +7,16 @@ import 'user_session.dart';
 import 'child.dart';
 import 'test_result_model.dart';
 import 'library_item.dart';
+import 'test_category.dart';
 
 class ApiService {
   final String baseUrl;
-  const ApiService({this.baseUrl = AppConfig.apiBaseUrl});
+  
+  const ApiService._(this.baseUrl);
+  
+  factory ApiService({String? baseUrl}) {
+    return ApiService._(baseUrl ?? AppConfig.apiBaseUrl);
+  }
 
   Future<http.Response> createUser(User user) async {
     final uri = Uri.parse('$baseUrl/auth/register');
@@ -59,20 +65,17 @@ class ApiService {
     
     // Lấy parentId từ user session
     final parentId = UserSession.userId;
-    print('DEBUG: UserSession.userId = $parentId');
     
     if (parentId == null || parentId.isEmpty) {
       throw Exception('User ID not found. Please login first.');
     }
 
     // Kiểm tra JWT token
-    print('DEBUG: UserSession.jwtToken = ${UserSession.jwtToken?.substring(0, 20)}...');
     // if (UserSession.jwtToken == null || UserSession.jwtToken!.isEmpty) {
     //   throw Exception('JWT token not found. Please login first.');
     // }
 
     // Tạo payload với format mới và parentId từ user session
-    print('DEBUG: parentId string = $parentId');
     
     final payload = childData.copyWith(
       parentId: parentId, // Gửi parentId dưới dạng String
@@ -81,13 +84,6 @@ class ApiService {
     final uri = Uri.parse('${AppConfig.cddAPI}/children');
     
     // Debug: In thông tin request
-    print('DEBUG: Creating child with URL: $uri');
-    print('DEBUG: Payload: ${jsonEncode(payload)}');
-    print('DEBUG: Headers: ${{
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      // 'Authorization': 'Bearer ${UserSession.jwtToken?.substring(0, 20)}...',
-    }}');
     
     final resp = await http.post(
       uri,
@@ -100,8 +96,6 @@ class ApiService {
     );
     
     // Debug: In response
-    print('DEBUG: Response status: ${resp.statusCode}');
-    print('DEBUG: Response body: ${resp.body}');
     
     return resp;
   }
@@ -171,6 +165,48 @@ class ApiService {
     return resp;
   }
 
+  /// Lấy danh sách tất cả test categories
+  Future<List<TestCategory>> getAllTestCategories() async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-test-categories/all');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    
+    if (resp.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(resp.body);
+      return jsonList.map((json) => TestCategory.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load test categories: ${resp.statusCode}');
+    }
+  }
+
+  /// Tạo category bài test mới
+  Future<http.Response> createTestCategory({
+    required String code,
+    required Map<String, Object> displayedName,
+    Map<String, Object>? description,
+  }) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-test-categories');
+    final payload = <String, dynamic>{
+      'code': code,
+      'displayedName': displayedName,
+      if (description != null) 'description': description,
+    };
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+    return resp;
+  }
+
   /// Tạo bài test mới
   Future<http.Response> createTest(CDDTest test) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests');
@@ -203,8 +239,7 @@ class ApiService {
   Future<http.Response> submitTestResult(TestResultModel testResult) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/child-test-records');
     
-    print('DEBUG: Submitting test result to: $uri');
-    print('DEBUG: Test result payload: ${jsonEncode(testResult.toJson())}');
+    
     
     final resp = await http.post(
       uri,
@@ -215,8 +250,7 @@ class ApiService {
       body: jsonEncode(testResult.toJson()),
     );
     
-    print('DEBUG: Submit test result response status: ${resp.statusCode}');
-    print('DEBUG: Submit test result response body: ${resp.body}');
+    
     
     return resp;
   }
@@ -232,8 +266,7 @@ class ApiService {
       },
     );
     
-    print('DEBUG: Get test results response status: ${resp.statusCode}');
-    print('DEBUG: Get test results response body: ${resp.body}');
+    
     
     return resp;
   }
@@ -247,7 +280,7 @@ class ApiService {
   }) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/books?page=$page&size=$size&sortBy=$sortBy&sortDir=$sortDir');
     
-    print('DEBUG: Getting books from: $uri');
+    
     
     final resp = await http.get(
       uri,
@@ -257,8 +290,7 @@ class ApiService {
       },
     );
     
-    print('DEBUG: Get books response status: ${resp.statusCode}');
-    print('DEBUG: Get books response body: ${resp.body}');
+    
     
     return resp;
   }
@@ -284,7 +316,7 @@ class ApiService {
     
     final uri = Uri.parse('${AppConfig.cddAPI}/books').replace(queryParameters: queryParams);
     
-    print('DEBUG: Getting books with filter from: $uri');
+    
     
     final resp = await http.get(
       uri,
@@ -294,15 +326,14 @@ class ApiService {
       },
     );
     
-    print('DEBUG: Get books with filter response status: ${resp.statusCode}');
-    print('DEBUG: Get books with filter response body: ${resp.body}');
+    
     
     return resp;
   }
 
   /// Lấy danh sách lĩnh vực phát triển (developmental domains)
   Future<http.Response> getDevelopmentalDomains() async {
-    final uri = Uri.parse('http://localhost/api/cdd/api/v1/neon/developmental-domains');
+    final uri = Uri.parse('${AppConfig.cddAPI}/developmental-domains');
     final resp = await http.get(
       uri,
       headers: const {
@@ -317,7 +348,7 @@ class ApiService {
   Future<http.Response> getBookById(int bookId) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/books/$bookId');
     
-    print('DEBUG: Getting book by ID from: $uri');
+    
     
     final resp = await http.get(
       uri,
@@ -327,15 +358,14 @@ class ApiService {
       },
     );
     
-    print('DEBUG: Get book by ID response status: ${resp.statusCode}');
-    print('DEBUG: Get book by ID response body: ${resp.body}');
+    
     
     return resp;
   }
 
   /// Lấy danh sách định dạng được hỗ trợ (supported formats)
   Future<http.Response> getSupportedFormats() async {
-    final uri = Uri.parse('http://localhost/api/cdd/api/v1/neon/supported-formats');
+    final uri = Uri.parse('${AppConfig.cddAPI}/supported-formats');
     final resp = await http.get(
       uri,
       headers: const {

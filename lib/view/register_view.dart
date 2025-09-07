@@ -26,7 +26,7 @@ class _RegisterViewState extends State<RegisterView> {
   String _secondaryRole = 'PARENT'; // 'PARENT' or 'TEACHER'
 
   bool _isSubmitting = false;
-  final ApiService _api = const ApiService();
+  final ApiService _api = ApiService();
   bool _isFormValid = false;
 
   @override

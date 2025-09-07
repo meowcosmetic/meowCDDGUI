@@ -29,7 +29,7 @@ class _TestDetailViewState extends State<TestDetailView> {
   bool isLoading = true;
   bool hasError = false;
   String errorMessage = '';
-  final ApiService _api = const ApiService();
+  final ApiService _api = ApiService();
 
   @override
   void initState() {

@@ -122,7 +122,7 @@ class _LibraryViewState extends State<LibraryView> {
   bool isLoadingFormats = false;
   List<String> filterTargetAges = [];
   bool isLoading = true;
-  final ApiService _apiService = const ApiService();
+  final ApiService _apiService = ApiService();
   int currentPage = 0;
   bool hasMoreData = true;
 
@@ -293,13 +293,11 @@ class _LibraryViewState extends State<LibraryView> {
         setState(() {
           isLoading = false;
         });
-        print('DEBUG: Load more API request failed with status: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      print('DEBUG: Error loading more data: $e');
     }
   }
 
@@ -348,7 +346,6 @@ class _LibraryViewState extends State<LibraryView> {
       setState(() {
         isLoading = false;
       });
-      print('DEBUG: Error searching books: $e');
     }
   }
 
@@ -1684,7 +1681,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
   String? bookContent;
   bool isLoading = true;
   String? errorMessage;
-  final ApiService _apiService = const ApiService();
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
