@@ -10,6 +10,8 @@ class AppConfig {
   static const bool showExpertConnection = true;  // Liên kết với chuyên gia
   static const bool showStore = true;             // Cửa hàng
   static const bool showDonation = true;          // Đóng góp
+  static const bool showInterventions = true;     // Mục tiêu can thiệp
+  static const bool showInterventionDomains = true; // Lĩnh vực can thiệp
   
   // Feature Flags - Cờ bật/tắt tính năng
   static const bool enableNotifications = true;   // Thông báo
@@ -17,6 +19,8 @@ class AppConfig {
   static const bool enableDataSync = true;        // Đồng bộ dữ liệu
   static const bool enableAnalytics = true;       // Phân tích dữ liệu
   static const bool enableAddTestCategory = true; // Bật nút thêm category bài test
+  static const bool enableInterventions = true;   // Bật tính năng mục tiêu can thiệp
+  static const bool enableInterventionDomains = true; // Bật tính năng lĩnh vực can thiệp
   
   // UI Configuration - Cấu hình giao diện
   static const bool showWelcomeMessage = true;    // Hiển thị tin nhắn chào mừng
@@ -135,6 +139,28 @@ class AppConfig {
       ));
     }
     
+    if (showInterventions && enableInterventions) {
+      categories.add(DashboardCategory(
+        id: 'interventions',
+        title: 'Mục Tiêu Can Thiệp',
+        subtitle: 'Quản lý lĩnh vực và mục tiêu',
+        icon: 'flag',
+        color: 0xFF3F51B5,
+        route: '/interventions',
+      ));
+    }
+    
+    if (showInterventionDomains && enableInterventionDomains) {
+      categories.add(DashboardCategory(
+        id: 'intervention-domains',
+        title: 'Lĩnh Vực Can Thiệp',
+        subtitle: 'Quản lý các lĩnh vực can thiệp',
+        icon: 'category',
+        color: 0xFF9C27B0,
+        route: '/intervention-domains',
+      ));
+    }
+    
     return categories;
   }
   
@@ -155,6 +181,10 @@ class AppConfig {
         return showStore;
       case 'donation':
         return showDonation;
+      case 'interventions':
+        return showInterventions && enableInterventions;
+      case 'intervention-domains':
+        return showInterventionDomains && enableInterventionDomains;
       default:
         return false;
     }

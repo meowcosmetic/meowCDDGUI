@@ -134,8 +134,7 @@ class _RegisterViewState extends State<RegisterView> {
     try {
       final resp = await _api.createUser(user);
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('current_user', user.toJsonString());
+        // Không lưu current_user sau khi đăng ký, chỉ lưu sau khi đăng nhập
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -191,32 +190,51 @@ class _RegisterViewState extends State<RegisterView> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          autovalidateMode: AutovalidateMode.disabled,
-          key: _formKey,
-          child: Column(
+        child: AutofillGroup(
+            child: Form(
+              autovalidateMode: AutovalidateMode.disabled,
+              key: _formKey,
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Họ và tên'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ tên' : null,
+              Semantics(
+                label: 'Name input field',
+                textField: true,
+                child: TextFormField(
+                  controller: _nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Họ và tên'),
+                  autofillHints: const [AutofillHints.name],
+                  textInputAction: TextInputAction.next,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ tên' : null,
+                ),
               ),
-              TextFormField(
-                controller: _emailCtrl,
-                decoration: const InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Vui lòng nhập email';
-                  if (!v.contains('@')) return 'Email không hợp lệ';
-                  return null;
-                },
+              Semantics(
+                label: 'Email input field',
+                textField: true,
+                child: TextFormField(
+                  controller: _emailCtrl,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  textInputAction: TextInputAction.next,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Vui lòng nhập email';
+                    if (!v.contains('@')) return 'Email không hợp lệ';
+                    return null;
+                  },
+                ),
               ),
-              TextFormField(
-                controller: _phoneCtrl,
-                decoration: const InputDecoration(labelText: 'Số điện thoại'),
-                keyboardType: TextInputType.phone,
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập số điện thoại' : null,
+              Semantics(
+                label: 'Phone input field',
+                textField: true,
+                child: TextFormField(
+                  controller: _phoneCtrl,
+                  decoration: const InputDecoration(labelText: 'Số điện thoại'),
+                  keyboardType: TextInputType.phone,
+                  autofillHints: const [AutofillHints.telephoneNumber],
+                  textInputAction: TextInputAction.next,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập số điện thoại' : null,
+                ),
               ),
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Giới tính'),
@@ -261,11 +279,17 @@ class _RegisterViewState extends State<RegisterView> {
                 },
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _passwordCtrl,
-                decoration: const InputDecoration(labelText: 'Mật khẩu'),
-                obscureText: true,
-                validator: (v) => (v == null || v.length < 6) ? 'Mật khẩu tối thiểu 6 ký tự' : null,
+              Semantics(
+                label: 'Password input field',
+                textField: true,
+                child: TextFormField(
+                  controller: _passwordCtrl,
+                  decoration: const InputDecoration(labelText: 'Mật khẩu'),
+                  obscureText: true,
+                  autofillHints: const [AutofillHints.newPassword],
+                  textInputAction: TextInputAction.done,
+                  validator: (v) => (v == null || v.length < 6) ? 'Mật khẩu tối thiểu 6 ký tự' : null,
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -309,6 +333,7 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

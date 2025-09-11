@@ -109,7 +109,7 @@ class _NavigationDemoState extends State<NavigationDemo> {
 
   Widget _buildFilledMenu() {
     final items = [
-      MenuItem(label: 'Products', icon: Icons.inventory),
+      MenuItem(label: 'Products', icon: Icons.shopping_bag),
       MenuItem(label: 'Orders', icon: Icons.shopping_cart),
       MenuItem(label: 'Customers', icon: Icons.people),
     ];
@@ -152,11 +152,11 @@ class _NavigationDemoState extends State<NavigationDemo> {
     final items = [
       MenuItem(
         label: 'Products',
-        icon: Icons.inventory,
+        icon: Icons.shopping_bag,
         children: [
           MenuItem(label: 'All Products'),
           MenuItem(label: 'Categories'),
-          MenuItem(label: 'Inventory'),
+          MenuItem(label: 'Stock'),
         ],
       ),
       MenuItem(

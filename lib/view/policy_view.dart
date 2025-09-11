@@ -14,6 +14,9 @@ import 'store_view.dart';
 import 'donation_view.dart';
 import '../uiElement/chat_dialog.dart';
 import '../uiElement/fab_utility.dart';
+import '../features/intervention_domains/views/domains_view.dart';
+import '../features/intervention_goals/views/goals_view.dart';
+import 'login_view_html.dart';
 
 class PolicyView extends StatefulWidget {
   const PolicyView({super.key});
@@ -147,6 +150,18 @@ class _PolicyViewState extends State<PolicyView> {
               onPressed: _refreshPolicy,
               tooltip: 'Làm mới',
             ),
+          IconButton(
+            icon: const Icon(Icons.web),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LoginViewHtml(),
+                ),
+              );
+            },
+            tooltip: 'Test HTML Form',
+          ),
         ],
       ),
       body: _isLoading
@@ -789,6 +804,7 @@ class HomePage extends StatelessWidget {
   Widget _buildCategoryCard(BuildContext context, DashboardCategory category) {
     return GestureDetector(
       onTap: () {
+        print('🎯 Category tapped: ${category.id} - ${category.title}'); // Debug log
         // Navigate to category page
         switch (category.id) {
           case 'library':
@@ -847,6 +863,23 @@ class HomePage extends StatelessWidget {
               ),
             );
             break;
+          case 'interventions':
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const GoalsView(),
+              ),
+            );
+            break;
+          case 'intervention-domains':
+            print('🎯 Navigating to DomainsView...'); // Debug log
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DomainsView(),
+              ),
+            );
+            break;
           default:
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -854,6 +887,7 @@ class HomePage extends StatelessWidget {
                 backgroundColor: AppColors.primary,
               ),
             );
+            break;
         }
       },
       child: Container(
