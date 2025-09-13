@@ -16,6 +16,7 @@ import '../uiElement/chat_dialog.dart';
 import '../uiElement/fab_utility.dart';
 import '../features/intervention_domains/views/domains_view.dart';
 import '../features/intervention_goals/views/goals_view.dart';
+import '../features/intervention_methods/views/method_groups_view.dart';
 import 'login_view_html.dart';
 
 class PolicyView extends StatefulWidget {
@@ -877,6 +878,15 @@ class HomePage extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => const DomainsView(),
+              ),
+            );
+            break;
+          case 'intervention-methods':
+            print('🎯 Navigating to MethodGroupsView...'); // Debug log
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MethodGroupsView(),
               ),
             );
             break;

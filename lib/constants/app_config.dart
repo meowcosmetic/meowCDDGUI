@@ -12,6 +12,7 @@ class AppConfig {
   static const bool showDonation = true;          // Đóng góp
   static const bool showInterventions = true;     // Mục tiêu can thiệp
   static const bool showInterventionDomains = true; // Lĩnh vực can thiệp
+  static const bool showInterventionMethods = true; // Nhóm phương pháp can thiệp
   
   // Feature Flags - Cờ bật/tắt tính năng
   static const bool enableNotifications = true;   // Thông báo
@@ -21,6 +22,7 @@ class AppConfig {
   static const bool enableAddTestCategory = true; // Bật nút thêm category bài test
   static const bool enableInterventions = true;   // Bật tính năng mục tiêu can thiệp
   static const bool enableInterventionDomains = true; // Bật tính năng lĩnh vực can thiệp
+  static const bool enableInterventionMethods = true; // Bật tính năng nhóm phương pháp can thiệp
   
   // UI Configuration - Cấu hình giao diện
   static const bool showWelcomeMessage = true;    // Hiển thị tin nhắn chào mừng
@@ -161,6 +163,17 @@ class AppConfig {
       ));
     }
     
+    if (showInterventionMethods && enableInterventionMethods) {
+      categories.add(DashboardCategory(
+        id: 'intervention-methods',
+        title: 'Nhóm Phương Pháp',
+        subtitle: 'Quản lý nhóm phương pháp can thiệp',
+        icon: 'science',
+        color: 0xFF607D8B,
+        route: '/intervention-methods',
+      ));
+    }
+    
     return categories;
   }
   
@@ -185,6 +198,8 @@ class AppConfig {
         return showInterventions && enableInterventions;
       case 'intervention-domains':
         return showInterventionDomains && enableInterventionDomains;
+      case 'intervention-methods':
+        return showInterventionMethods && enableInterventionMethods;
       default:
         return false;
     }
