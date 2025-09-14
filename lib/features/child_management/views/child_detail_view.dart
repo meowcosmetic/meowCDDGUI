@@ -11,6 +11,9 @@ import 'child_completed_tests_view.dart';
 import '../../../view/test_detail_view.dart';
 import '../../../models/test_models.dart';
 import '../../../uiElement/selectable_text_widget.dart';
+import '../../intervention_domains/services/domain_service.dart';
+import '../../intervention_domains/models/domain_models.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class ChildDetailView extends StatefulWidget {
   final Child child;
@@ -23,18 +26,28 @@ class ChildDetailView extends StatefulWidget {
 
 class _ChildDetailViewState extends State<ChildDetailView> {
   final ApiService _api = ApiService();
+  final InterventionDomainService _domainService = InterventionDomainService();
   List<CDDTest> _tests = [];
   List<CDDTest> _filteredTests = [];
   bool _isLoadingTests = true;
   bool _hasTestsError = false;
   String _testsErrorMessage = '';
+  bool _isTestsExpanded = false;
   int _filterIndex = 0; // 0=Tất cả, 1=Khuyến nghị, 2=Không khuyến nghị
   bool _infoExpanded = false;
+  
+  // Domain-related state variables
+  List<InterventionDomainModel> _domains = [];
+  bool _isLoadingDomains = true;
+  bool _hasDomainsError = false;
+  String _domainsErrorMessage = '';
+  Map<String, bool> _expandedDomains = {}; // Track which domains are expanded
 
   @override
   void initState() {
     super.initState();
     _loadTests();
+    _loadDomains();
   }
 
   Future<void> _loadTests() async {
@@ -67,6 +80,28 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         _hasTestsError = true;
         _testsErrorMessage = 'Lỗi kết nối: $e';
         _isLoadingTests = false;
+      });
+    }
+  }
+
+  Future<void> _loadDomains() async {
+    setState(() {
+      _isLoadingDomains = true;
+      _hasDomainsError = false;
+      _domainsErrorMessage = '';
+    });
+
+    try {
+      final paginatedDomains = await _domainService.getDomains(page: 0, size: 50);
+      setState(() {
+        _domains = paginatedDomains.content;
+        _isLoadingDomains = false;
+      });
+    } catch (e) {
+      setState(() {
+        _hasDomainsError = true;
+        _domainsErrorMessage = 'Lỗi kết nối: $e';
+        _isLoadingDomains = false;
       });
     }
   }
@@ -738,187 +773,220 @@ class _ChildDetailViewState extends State<ChildDetailView> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.quiz, color: AppColors.primary, size: 20),
-              const SizedBox(width: 8),
-              const Text(
-                'Danh Sách Bài Test',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+        children: _buildTestsCardChildren(childAgeMonths),
+      ),
+    );
+  }
+
+  List<Widget> _buildTestsCardChildren(int childAgeMonths) {
+    return [
+      InkWell(
+        onTap: () {
+          setState(() {
+            _isTestsExpanded = !_isTestsExpanded;
+          });
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Row(
+          children: [
+            const Icon(Icons.quiz, color: AppColors.primary, size: 20),
+            const SizedBox(width: 8),
+            const Text(
+              'Danh Sách Bài Test',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: () async {
+            ),
+            const Spacer(),
+            AnimatedRotation(
+              turns: _isTestsExpanded ? 0.5 : 0,
+              duration: const Duration(milliseconds: 300),
+              child: const Icon(
+                Icons.keyboard_arrow_down,
+                color: AppColors.primary,
+                size: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextButton.icon(
+        onPressed: () async {
+          try {
+            // Hiển thị loading
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+
+            // Gọi API để lấy kết quả bài test đã làm
+            final response = await _api.getTestResultsByChildId(widget.child.id);
+            
+            // Đóng loading dialog
+            Navigator.pop(context);
+
+            if (response.statusCode >= 200 && response.statusCode < 300) {
+              final dynamic responseData = jsonDecode(response.body);
+              
+              // Parse dữ liệu nhận được
+              late List<dynamic> data;
+              if (responseData is List) {
+                data = responseData;
+              } else if (responseData is Map<String, dynamic>) {
+                data = responseData['content'] ?? responseData['data'] ?? [];
+              } else {
+                data = [];
+              }
+              
+              // Chuyển đổi data từ API thành TestResult objects
+              final List<TestResult> results = data.map((e) {
+                int timeSpent = 0;
+                if (e['startTime'] != null && e['endTime'] != null) {
                   try {
-                    // Hiển thị loading
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-
-                    // Gọi API để lấy kết quả bài test đã làm
-                    final response = await _api.getTestResultsByChildId(widget.child.id);
-                    
-                    // Đóng loading dialog
-                    Navigator.pop(context);
-
-                                                             if (response.statusCode >= 200 && response.statusCode < 300) {
-                      final dynamic responseData = jsonDecode(response.body);
-                      
-                      // Parse dữ liệu nhận được
-                      
-                      // Xử lý cả trường hợp response là array hoặc object
-                      late List<dynamic> data;
-                      if (responseData is List) {
-                        // Trường hợp response trực tiếp là array
-                        data = responseData;
-                      } else if (responseData is Map<String, dynamic>) {
-                        // Trường hợp response là object có chứa array
-                        data = responseData['content'] ?? responseData['data'] ?? [];
-                      } else {
-                        data = [];
-                      }
-                      
-                      
-                      
-                                             // Chuyển đổi data từ API thành TestResult objects
-                       final List<TestResult> results = data.map((e) {
-                         // Tính thời gian làm bài từ startTime và endTime
-                         int timeSpent = 0;
-                         if (e['startTime'] != null && e['endTime'] != null) {
-                           try {
-                             final startTime = DateTime.parse(e['startTime']);
-                             final endTime = DateTime.parse(e['endTime']);
-                             timeSpent = endTime.difference(startTime).inSeconds;
-                           } catch (e) {
-                             timeSpent = 0;
-                           }
-                         }
-                         
-                         return TestResult(
-                           id: e['id']?.toString() ?? '',
-                           testId: e['testId']?.toString() ?? '',
-                           userId: e['childId']?.toString() ?? '',
-                           userName: widget.child.name,
-                           score: (e['totalScore'] as num?)?.toDouble().toInt() ?? 0,
-                           totalQuestions: (e['totalQuestions'] as num?)?.toInt() ?? 0,
-                           answeredQuestions: (e['correctAnswers'] as num?)?.toInt() ?? 0,
-                           timeSpent: timeSpent,
-                           completedAt: e['testDate'] != null ? DateTime.parse(e['testDate']) : DateTime.now(),
-                           questionResults: [], // API không có field này
-                           notes: e['notes'] ?? '',
-                         );
-                       }).toList();
-
-                      // Navigate to completed tests view
-                      if (mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChildCompletedTestsView(
-                              child: widget.child,
-                              results: results,
-                            ),
-                          ),
-                        );
-                      }
-                    } else {
-                      // Hiển thị lỗi nếu API call thất bại
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Không thể tải kết quả bài test. Mã lỗi: ${response.statusCode}'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
+                    final startTime = DateTime.parse(e['startTime']);
+                    final endTime = DateTime.parse(e['endTime']);
+                    timeSpent = endTime.difference(startTime).inSeconds;
                   } catch (e) {
-                    // Đóng loading dialog nếu có lỗi
-                    if (mounted && Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                    
-                    // Hiển thị lỗi
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Lỗi kết nối: $e'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
+                    timeSpent = 0;
                   }
-                },
-                icon: const Icon(Icons.history),
-                label: const Text('Xem đã làm'),
+                }
+                
+                return TestResult(
+                  id: e['id']?.toString() ?? '',
+                  testId: e['testId']?.toString() ?? '',
+                  userId: e['childId']?.toString() ?? '',
+                  userName: widget.child.name,
+                  score: (e['totalScore'] as num?)?.toDouble().toInt() ?? 0,
+                  totalQuestions: (e['totalQuestions'] as num?)?.toInt() ?? 0,
+                  answeredQuestions: (e['correctAnswers'] as num?)?.toInt() ?? 0,
+                  timeSpent: timeSpent,
+                  completedAt: e['testDate'] != null ? DateTime.parse(e['testDate']) : DateTime.now(),
+                  questionResults: [],
+                  notes: e['notes'] ?? '',
+                );
+              }).toList();
+
+              // Navigate to completed tests view
+              if (mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChildCompletedTestsView(
+                      child: widget.child,
+                      results: results,
+                    ),
+                  ),
+                );
+              }
+            } else {
+              // Hiển thị lỗi nếu API call thất bại
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Không thể tải kết quả bài test. Mã lỗi: ${response.statusCode}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
+          } catch (e) {
+            // Đóng loading dialog nếu có lỗi
+            if (mounted && Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+            
+            // Hiển thị lỗi
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Lỗi kết nối: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
+        icon: const Icon(Icons.history),
+        label: const Text('Xem đã làm'),
+      ),
+      const SizedBox(height: 12),
+      _buildTestsFilter(),
+      const SizedBox(height: 12),
+    ]..addAll(_buildTestsContent(childAgeMonths));
+  }
+
+  List<Widget> _buildTestsContent(int childAgeMonths) {
+    if (_isLoadingTests) {
+      return [
+        const Center(child: Padding(
+          padding: EdgeInsets.all(16),
+          child: CircularProgressIndicator(),
+        ))
+      ];
+    } else if (_hasTestsError) {
+      return [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.red.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Có lỗi khi tải bài test', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(_testsErrorMessage, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: _loadTests,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Thử lại'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.white,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          _buildTestsFilter(),
-          const SizedBox(height: 12),
-          if (_isLoadingTests)
-            const Center(child: Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
-            ))
-          else if (_hasTestsError)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Có lỗi khi tải bài test', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(_testsErrorMessage, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    onPressed: _loadTests,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Thử lại'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.white,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else if (_filteredTests.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.grey50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: const Center(
-                child: Text('Không có bài test phù hợp'),
-              ),
-            )
-          else
-            Column(
-              children: _filteredTests.map((test) => _buildTestItem(test, _isRecommended(test, childAgeMonths))).toList(),
-            ),
-        ],
-      ),
-    );
+        )
+      ];
+    } else if (_filteredTests.isEmpty) {
+      return [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.grey50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: const Center(
+            child: Text('Không có bài test phù hợp'),
+          ),
+        )
+      ];
+    } else {
+      return [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: _isTestsExpanded ? null : 0,
+          child: _isTestsExpanded
+              ? Column(
+                  children: _filteredTests.map((test) => _buildTestItem(test, _isRecommended(test, childAgeMonths))).toList(),
+                )
+              : const SizedBox.shrink(),
+        )
+      ];
+    }
   }
 
   List<TestResult> _generateDummyTestResults() {
@@ -1228,33 +1296,228 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildActivityCard(
-            'Giao tiếp cơ bản',
-            'Luyện tập phát âm và từ vựng',
-            Icons.chat,
-            '30 phút',
-            'Hôm nay',
+          _buildDomainsContent(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDomainsContent() {
+    if (_isLoadingDomains) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    } else if (_hasDomainsError) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.red.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Có lỗi khi tải lĩnh vực can thiệp',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _domainsErrorMessage,
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: _loadDomains,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Thử lại'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (_domains.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.grey50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: const Center(
+          child: Text('Không có lĩnh vực can thiệp nào'),
+        ),
+      );
+    } else {
+      return Column(
+        children: _domains.map((domain) => _buildExpandableDomainCard(domain)).toList(),
+      );
+    }
+  }
+
+  Widget _buildExpandableDomainCard(InterventionDomainModel domain) {
+    final bool isExpanded = _expandedDomains[domain.id] ?? false;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.grey50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                _expandedDomains[domain.id] = !isExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      _getDomainIcon(domain.category),
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          domain.displayedName.vi.isNotEmpty ? domain.displayedName.vi : domain.name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 300),
+                    child: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 12),
-          _buildActivityCard(
-            'Vận động tinh',
-            'Tập cầm bút và vẽ hình',
-            Icons.brush,
-            '45 phút',
-            'Hôm qua',
-          ),
-          const SizedBox(height: 12),
-          _buildActivityCard(
-            'Kỹ năng xã hội',
-            'Tương tác với bạn bè',
-            Icons.people,
-            '60 phút',
-            '2 ngày trước',
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: isExpanded ? null : 0,
+            child: isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(color: AppColors.border),
+                        const SizedBox(height: 8),
+                        if (domain.description != null && domain.description!.vi.isNotEmpty) ...[
+                          const Text(
+                            'Mô tả:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Html(
+                            data: domain.description!.vi,
+                            style: {
+                              "body": Style(
+                                fontSize: FontSize(12),
+                                color: AppColors.textSecondary,
+                                margin: Margins.zero,
+                                padding: HtmlPaddings.zero,
+                              ),
+                              "p": Style(
+                                fontSize: FontSize(12),
+                                color: AppColors.textSecondary,
+                                margin: Margins.only(bottom: 8),
+                              ),
+                              "ul": Style(
+                                fontSize: FontSize(12),
+                                color: AppColors.textSecondary,
+                                margin: Margins.only(bottom: 8),
+                              ),
+                              "li": Style(
+                                fontSize: FontSize(12),
+                                color: AppColors.textSecondary,
+                                margin: Margins.only(bottom: 4),
+                              ),
+                              "strong": Style(
+                                fontSize: FontSize(12),
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              "em": Style(
+                                fontSize: FontSize(12),
+                                color: AppColors.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),
     );
   }
+
+  IconData _getDomainIcon(String category) {
+    switch (category.toUpperCase()) {
+      case 'COMMUNICATION':
+      case 'GIAO_TIEP':
+        return Icons.chat;
+      case 'MOTOR':
+      case 'VAN_DONG':
+        return Icons.accessibility;
+      case 'SOCIAL':
+      case 'XAHOI':
+        return Icons.people;
+      case 'COGNITIVE':
+      case 'NHAN_THUC':
+        return Icons.psychology;
+      case 'BEHAVIOR':
+      case 'HANH_VI':
+        return Icons.psychology;
+      default:
+        return Icons.fitness_center;
+    }
+  }
+
 
   Widget _buildActivityCard(String title, String description, IconData icon, String duration, String date) {
     return Container(
