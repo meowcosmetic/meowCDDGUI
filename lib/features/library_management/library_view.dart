@@ -5,6 +5,10 @@ import '../../constants/app_colors.dart';
 import '../../models/library_item.dart';
 import '../../models/api_service.dart';
 import 'pdf_viewer.dart';
+import 'pages/add_book_page.dart';
+import 'pages/add_video_page.dart';
+import 'pages/add_post_page.dart';
+import '../intervention_domains/models/domain_models.dart';
 
 // Lightweight API response models for books
 class BookApiResponse {
@@ -478,7 +482,99 @@ class _LibraryViewState extends State<LibraryView> {
         title: const Text('Thư Viện'),
         elevation: 0,
         centerTitle: true,
-        actions: const [],
+        actions: [
+          IconButton(
+            onPressed: () {
+              try {
+                final domainModels = domains
+                    .where((domain) => domain != null)
+                    .map((domain) => InterventionDomainModel.fromJson(domain))
+                    .toList();
+                
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddPostPage(
+                      domains: domainModels,
+                    ),
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Lỗi khi mở trang thêm bài post: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.article),
+            tooltip: 'Thêm bài post',
+          ),
+          IconButton(
+            onPressed: () {
+              try {
+                final domainModels = domains
+                    .where((domain) => domain != null)
+                    .map((domain) => InterventionDomainModel.fromJson(domain))
+                    .toList();
+                
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddVideoPage(
+                      domains: domainModels,
+                    ),
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Lỗi khi mở trang thêm video: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.video_library),
+            tooltip: 'Thêm video',
+          ),
+          IconButton(
+            onPressed: () {
+              try {
+                final domainModels = domains
+                    .where((domain) => domain != null)
+                    .map((domain) => InterventionDomainModel.fromJson(domain))
+                    .toList();
+                
+                final formatNames = formats
+                    .where((format) => format != null && format['name'] != null)
+                    .map((format) => format['name'].toString())
+                    .where((name) => name.isNotEmpty)
+                    .toList();
+                
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddBookPage(
+                      domains: domainModels,
+                      formats: formatNames.isNotEmpty ? formatNames : ['PDF', 'EPUB', 'MOBI'],
+                    ),
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Lỗi khi mở trang thêm sách: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.book),
+            tooltip: 'Thêm sách',
+          ),
+        ],
       ),
       body: Column(
         children: [

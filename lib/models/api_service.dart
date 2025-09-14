@@ -375,4 +375,44 @@ class ApiService {
     );
     return resp;
   }
+
+  // Library Management APIs
+  Future<http.Response> createBook(Map<String, dynamic> bookData) async {
+    final uri = Uri.parse('$baseUrl/books');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(bookData),
+    );
+    return resp;
+  }
+
+  Future<http.Response> createVideo(Map<String, dynamic> videoData) async {
+    final uri = Uri.parse('$baseUrl/videos');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(videoData),
+    );
+    return resp;
+  }
+
+  Future<http.Response> createPost(Map<String, dynamic> postData) async {
+    final uri = Uri.parse('$baseUrl/posts');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(postData),
+    );
+    return resp;
+  }
 }
