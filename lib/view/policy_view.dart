@@ -5,6 +5,7 @@ import '../constants/app_config.dart';
 import '../models/policy_service.dart';
 import '../models/policy_data.dart';
 import '../models/user_session.dart';
+import '../services/messaging_service.dart';
 import 'children_list_view.dart';
 import '../features/library_management/library_view.dart';
 import 'test_view.dart';
@@ -1571,6 +1572,10 @@ class ProfilePage extends StatelessWidget {
     try {
       // Clear user session
       await UserSession.clearSession();
+      // Disconnect messaging socket on logout
+      try {
+        await MessagingService.instance.disconnect();
+      } catch (_) {}
       
       // Clear SharedPreferences
       final prefs = await SharedPreferences.getInstance();

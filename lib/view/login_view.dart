@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_config.dart';
 import '../models/api_service.dart';
+import '../services/messaging_service.dart';
 import '../models/policy_service.dart';
 import '../dummy_data/dummy_users.dart';
 import '../models/user_session.dart';
@@ -180,6 +181,10 @@ class _LoginViewState extends State<LoginView> {
         await prefs.setString('user_email', _emailCtrl.text.trim());
         
         if (!mounted) return;
+        // Auto-connect messaging socket after login
+        try {
+          await MessagingService.instance.autoConnectIfLoggedIn();
+        } catch (_) {}
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Đăng nhập thành công!'),

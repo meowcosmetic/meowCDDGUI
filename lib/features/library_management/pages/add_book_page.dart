@@ -8,12 +8,10 @@ import 'web_file_input.dart';
 
 class AddBookPage extends StatefulWidget {
   final List<InterventionDomainModel> domains;
-  final List<String> formats;
 
   const AddBookPage({
     Key? key,
     required this.domains,
-    required this.formats,
   }) : super(key: key);
 
   @override
@@ -27,24 +25,29 @@ class _AddBookPageState extends State<AddBookPage> {
   final _publisherController = TextEditingController();
   final _isbnController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _summaryController = TextEditingController();
   String? _selectedFilePath;
   final _filePathController = TextEditingController();
+  dynamic _selectedFile; // Lưu trữ file thực tế
   final _pageCountController = TextEditingController();
   final _languageController = TextEditingController();
+  final _publicationYearController = TextEditingController();
+  final _minAgeController = TextEditingController();
+  final _maxAgeController = TextEditingController();
+  final _tagsController = TextEditingController();
+  final _contentUploadedByController = TextEditingController();
   final _coverImageUrlController = TextEditingController();
   final _downloadUrlController = TextEditingController();
   final _previewUrlController = TextEditingController();
 
-  String _selectedFormat = 'PDF';
   List<String> _selectedDomainIds = [];
   bool _isLoading = false;
+  bool _isActive = true;
+  String _ageGroupValue = '7-12';
 
   @override
   void initState() {
     super.initState();
-    if (widget.formats.isNotEmpty) {
-      _selectedFormat = widget.formats.first;
-    }
   }
 
   @override
@@ -54,9 +57,15 @@ class _AddBookPageState extends State<AddBookPage> {
     _publisherController.dispose();
     _isbnController.dispose();
     _descriptionController.dispose();
+    _summaryController.dispose();
     _filePathController.dispose();
     _pageCountController.dispose();
     _languageController.dispose();
+    _publicationYearController.dispose();
+    _minAgeController.dispose();
+    _maxAgeController.dispose();
+    _tagsController.dispose();
+    _contentUploadedByController.dispose();
     _coverImageUrlController.dispose();
     _downloadUrlController.dispose();
     _previewUrlController.dispose();
@@ -71,24 +80,72 @@ class _AddBookPageState extends State<AddBookPage> {
     });
 
     try {
+      // Validate selected file and size to avoid 413 (Request Entity Too Large)
+      if (_selectedFile == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Vui lòng chọn file nội dung sách'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Determine file size (bytes)
+      int fileSizeBytes = 0;
+      try {
+        if (kIsWeb) {
+          // html.File has .size
+          fileSizeBytes = (_selectedFile.size as int);
+        } else {
+          // PlatformFile has .size
+          fileSizeBytes = (_selectedFile.size as int);
+        }
+      } catch (_) {
+        fileSizeBytes = 0;
+      }
+
+      // Enforce a client-side max to prevent server 413. Adjust as needed.
+      const int maxUploadBytes = 15 * 1024 * 1024; // 15 MB
+      if (fileSizeBytes > maxUploadBytes) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('File quá lớn (${(fileSizeBytes / (1024*1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
       final bookData = {
+        // Basic fields
         'title': _titleController.text,
         'author': _authorController.text,
-        'publisher': _publisherController.text,
-        'isbn': _isbnController.text,
         'description': _descriptionController.text,
-        'content': _selectedFilePath ?? _filePathController.text,
+        'isbn': _isbnController.text,
+        'publicationYear': int.tryParse(_publicationYearController.text) ?? DateTime.now().year,
         'pageCount': int.tryParse(_pageCountController.text) ?? 0,
         'language': _languageController.text,
-        'format': _selectedFormat,
-        'coverImageUrl': _coverImageUrlController.text,
-        'downloadUrl': _downloadUrlController.text,
-        'previewUrl': _previewUrlController.text,
-        'developmentalDomainIds': _selectedDomainIds,
+        // Sample-specific fields
+        'ageGroup': _ageGroupValue, // e.g., '7-12'
+        'minAge': int.tryParse(_minAgeController.text) ?? 0,
+        'maxAge': int.tryParse(_maxAgeController.text) ?? 0,
+        'summary': _summaryController.text,
+        'tags': _tagsController.text, // comma-separated string
+        'isActive': _isActive,
+        'supportedFormatId': 1,
+        'developmentalDomainIds': _selectedDomainIds.join(','),
+        'contentUploadedBy': _contentUploadedByController.text,
+        // Optional legacy fields for server compatibility (may be ignored)
+        'contentMimeType': 'application/pdf',
       };
 
       final apiService = ApiService();
-      final response = await apiService.createBook(bookData);
+      final response = await apiService.createBookWithFile(bookData, _selectedFile);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
@@ -186,19 +243,48 @@ class _AddBookPageState extends State<AddBookPage> {
                 validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập mô tả' : null,
               ),
               _buildFileUploadField(),
-              _buildFilePathField(),
               _buildTextField(
                 controller: _pageCountController,
                 label: 'Số trang',
                 keyboardType: TextInputType.number,
               ),
               _buildTextField(
+                controller: _summaryController,
+                label: 'Tóm tắt',
+                maxLines: 3,
+              ),
+              _buildTextField(
                 controller: _languageController,
                 label: 'Ngôn ngữ',
               ),
-              _buildSectionTitle('Định dạng và lĩnh vực'),
-              _buildFormatDropdown(),
+              _buildTextField(
+                controller: _publicationYearController,
+                label: 'Năm xuất bản',
+                keyboardType: TextInputType.number,
+              ),
+              _buildAgeGroupAndRange(),
+              _buildTextField(
+                controller: _minAgeController,
+                label: 'Min age',
+                keyboardType: TextInputType.number,
+              ),
+              _buildTextField(
+                controller: _maxAgeController,
+                label: 'Max age',
+                keyboardType: TextInputType.number,
+              ),
+              _buildTextField(
+                controller: _tagsController,
+                label: 'Tags (phân tách bằng dấu phẩy)',
+                hintText: 'thiếu_nhi,kinh_điển',
+              ),
+              _buildSectionTitle('Lĩnh vực'),
               _buildDomainSelection(),
+              SwitchListTile(
+                title: const Text('Kích hoạt (isActive)'),
+                value: _isActive,
+                onChanged: (v) => setState(() => _isActive = v),
+              ),
               _buildSectionTitle('Liên kết'),
               _buildTextField(
                 controller: _coverImageUrlController,
@@ -212,8 +298,13 @@ class _AddBookPageState extends State<AddBookPage> {
                 controller: _previewUrlController,
                 label: 'URL xem trước',
               ),
+              _buildTextField(
+                controller: _contentUploadedByController,
+                label: 'Uploaded by (email)',
+                hintText: 'admin@example.com',
+              ),
               const SizedBox(height: 32),
-              _buildSubmitButton(),
+              _buildActionButtons(),
             ],
           ),
         ),
@@ -241,6 +332,7 @@ class _AddBookPageState extends State<AddBookPage> {
     int maxLines = 1,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
+    String? hintText,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -251,6 +343,7 @@ class _AddBookPageState extends State<AddBookPage> {
         validator: validator,
         decoration: InputDecoration(
           labelText: label,
+          hintText: hintText,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -263,36 +356,6 @@ class _AddBookPageState extends State<AddBookPage> {
     );
   }
 
-  Widget _buildFormatDropdown() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: DropdownButtonFormField<String>(
-        value: _selectedFormat,
-        decoration: InputDecoration(
-          labelText: 'Định dạng *',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppColors.primary),
-          ),
-        ),
-        items: widget.formats.map((format) {
-          return DropdownMenuItem<String>(
-            value: format,
-            child: Text(format),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            _selectedFormat = value!;
-          });
-        },
-        validator: (value) => value?.isEmpty == true ? 'Vui lòng chọn định dạng' : null,
-      ),
-    );
-  }
 
   Widget _buildDomainSelection() {
     return Padding(
@@ -385,7 +448,7 @@ class _AddBookPageState extends State<AddBookPage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: InkWell(
-              onTap: _pickFile,
+              onTap: _pickFileAny,
               borderRadius: BorderRadius.circular(8),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -419,73 +482,54 @@ class _AddBookPageState extends State<AddBookPage> {
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _pickFileAny,
-                  icon: const Icon(Icons.folder_open, size: 16),
-                  label: const Text('Chọn file bất kỳ'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[50],
-                    foregroundColor: Colors.blue[700],
-                    elevation: 0,
-                  ),
+        ],
+      ),
+    );
+  }
+  Widget _buildAgeGroupAndRange() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: _ageGroupValue,
+              items: const [
+                DropdownMenuItem(value: '3-6', child: Text('3-6')),
+                DropdownMenuItem(value: '7-12', child: Text('7-12')),
+                DropdownMenuItem(value: '13-18', child: Text('13-18')),
+              ],
+              onChanged: (v) => setState(() => _ageGroupValue = v ?? '7-12'),
+              decoration: InputDecoration(
+                labelText: 'Age group',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _pickFile,
-                  icon: const Icon(Icons.description, size: 16),
-                  label: const Text('Chọn tài liệu'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[50],
-                    foregroundColor: Colors.green[700],
-                    elevation: 0,
-                  ),
-                ),
-              ),
-            ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _buildTextField(
+              controller: _minAgeController,
+              label: 'Min age',
+              keyboardType: TextInputType.number,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _buildTextField(
+              controller: _maxAgeController,
+              label: 'Max age',
+              keyboardType: TextInputType.number,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilePathField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Hoặc nhập đường dẫn file thủ công',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _filePathController,
-            decoration: InputDecoration(
-              labelText: 'Đường dẫn file',
-              hintText: 'C:/path/to/your/file.pdf',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.primary),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _pickFileAny() async {
     if (kIsWeb) {
@@ -503,9 +547,23 @@ class _AddBookPageState extends State<AddBookPage> {
     
     // Sử dụng HTML input thực sự để mở dialog chọn file của browser
     WebFileInput.openFileDialog(
-      onFileSelected: (fileName) {
+      onFileSelected: (fileName, file) {
+        // Giới hạn kích thước file phía client để tránh 413
+        const int maxUploadBytes = 15 * 1024 * 1024; // 15 MB
+        if (file.size > maxUploadBytes) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('File quá lớn (${(file.size / (1024*1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
         setState(() {
           _selectedFilePath = fileName;
+          _selectedFile = file; // Lưu trữ file thực tế cho web
         });
         
         if (mounted) {
@@ -527,15 +585,29 @@ class _AddBookPageState extends State<AddBookPage> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: fileType,
         allowMultiple: false,
-        withData: false,
+        withData: true, // Lấy dữ liệu file
         withReadStream: false,
       );
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
+        // Giới hạn kích thước file phía client để tránh 413
+        const int maxUploadBytes = 15 * 1024 * 1024; // 15 MB
+        if (file.size > maxUploadBytes) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('File quá lớn (${(file.size / (1024*1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
         if (file.path != null && file.path!.isNotEmpty) {
           setState(() {
             _selectedFilePath = file.path;
+            _selectedFile = file; // Lưu trữ file thực tế
           });
           
           if (mounted) {
@@ -562,76 +634,10 @@ class _AddBookPageState extends State<AddBookPage> {
     }
   }
 
-  Future<void> _pickFile() async {
-    if (kIsWeb) {
-      _showWebFileNameInput();
-    } else {
-      await _pickDocumentForMobile();
-    }
-  }
 
 
-  Future<void> _pickDocumentForMobile() async {
-    try {
-      // Thử khởi tạo FilePicker trước
-      await FilePicker.platform.clearTemporaryFiles();
-      
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'epub', 'mobi', 'txt', 'doc', 'docx'],
-        allowMultiple: false,
-        withData: false,
-        withReadStream: false,
-      );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        if (file.path != null && file.path!.isNotEmpty) {
-          setState(() {
-            _selectedFilePath = file.path;
-          });
-          
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Đã chọn tài liệu: ${file.name}'),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Không thể lấy đường dẫn file. Vui lòng nhập đường dẫn thủ công.'),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          }
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('File picker không hoạt động. Vui lòng nhập đường dẫn file thủ công.\nLỗi: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-            action: SnackBarAction(
-              label: 'OK',
-              textColor: Colors.white,
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              },
-            ),
-          ),
-        );
-      }
-    }
-  }
-
-  Widget _buildSubmitButton() {
+  Widget _buildActionButtons() {
     return SizedBox(
       width: double.infinity,
       height: 50,
@@ -660,4 +666,5 @@ class _AddBookPageState extends State<AddBookPage> {
       ),
     );
   }
+
 }

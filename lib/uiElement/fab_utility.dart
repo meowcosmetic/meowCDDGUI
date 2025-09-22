@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
-import 'chat_dialog.dart';
+import '../view/multi_chat_view.dart';
 
 class FABUtility {
   static Widget buildSmartFAB(BuildContext context) {
@@ -12,7 +12,10 @@ class FABUtility {
         children: [
           FloatingActionButton.extended(
             onPressed: () {
-              context.showChatDialog();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MultiChatView()),
+              );
             },
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
@@ -59,7 +62,10 @@ class FABUtility {
         children: [
           FloatingActionButton(
             onPressed: () {
-              context.showChatDialog();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MultiChatView()),
+              );
             },
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,

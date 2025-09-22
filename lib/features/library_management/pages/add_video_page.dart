@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import '../../../constants/app_colors.dart';
 import '../../../models/api_service.dart';
 import '../../intervention_domains/models/domain_models.dart';
@@ -19,49 +18,95 @@ class AddVideoPage extends StatefulWidget {
 
 class _AddVideoPageState extends State<AddVideoPage> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _contentController = TextEditingController();
-  final _durationController = TextEditingController();
-  final _languageController = TextEditingController();
-  final _thumbnailUrlController = TextEditingController();
-  final _videoUrlController = TextEditingController();
-  final _transcriptController = TextEditingController();
+  // New schema controllers
+  final _urlController = TextEditingController();
+  final _titleViController = TextEditingController();
+  final _titleEnController = TextEditingController();
+  final _descriptionViController = TextEditingController();
+  final _descriptionEnController = TextEditingController();
+  final _keywordsController = TextEditingController(); // comma-separated
+  final _tagsController = TextEditingController(); // comma-separated
+  final _languageController = TextEditingController(text: 'vi');
+  final _priorityController = TextEditingController(text: '0');
+  final _minAgeController = TextEditingController(); // months
+  final _maxAgeController = TextEditingController(); // months
+  final _publishedAtController = TextEditingController(); // ISO-8601 string
 
   List<String> _selectedDomainIds = [];
   bool _isLoading = false;
+  bool _isActive = true;
+  bool _isFeatured = false;
+
+  // Dropdowns
+  String _ageGroup = 'PRESCHOOL';
+  String _contentRating = 'G';
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _contentController.dispose();
-    _durationController.dispose();
+    _urlController.dispose();
+    _titleViController.dispose();
+    _titleEnController.dispose();
+    _descriptionViController.dispose();
+    _descriptionEnController.dispose();
+    _keywordsController.dispose();
+    _tagsController.dispose();
     _languageController.dispose();
-    _thumbnailUrlController.dispose();
-    _videoUrlController.dispose();
-    _transcriptController.dispose();
+    _priorityController.dispose();
+    _minAgeController.dispose();
+    _maxAgeController.dispose();
+    _publishedAtController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedDomainIds.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng chọn ít nhất một lĩnh vực')),
+      );
+      return;
+    }
 
     setState(() {
       _isLoading = true;
     });
 
     try {
+      final List<String> tags = _tagsController.text
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      final String keywords = _keywordsController.text
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .join(', ');
+
       final videoData = {
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'content': _contentController.text,
-        'duration': int.tryParse(_durationController.text) ?? 0,
-        'language': _languageController.text,
-        'thumbnailUrl': _thumbnailUrlController.text,
-        'videoUrl': _videoUrlController.text,
-        'transcript': _transcriptController.text,
+        'url': _urlController.text,
+        'titleVi': _titleViController.text,
+        'titleEn': _titleEnController.text,
+        'descriptionVi': _descriptionViController.text,
+        'descriptionEn': _descriptionEnController.text,
+        'supportedFormatId': 2,
         'developmentalDomainIds': _selectedDomainIds,
+        'keywords': keywords,
+        'tags': tags,
+        'language': _languageController.text,
+        'isActive': _isActive,
+        'isFeatured': _isFeatured,
+        'priority': int.tryParse(_priorityController.text) ?? 0,
+        'minAge': int.tryParse(_minAgeController.text) ?? 0,
+        'maxAge': int.tryParse(_maxAgeController.text) ?? 0,
+        'ageGroup': _ageGroup,
+        'contentRating': _contentRating,
+        'publishedAt': _publishedAtController.text,
       };
 
       final apiService = ApiService();
@@ -137,49 +182,85 @@ class _AddVideoPageState extends State<AddVideoPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle('Thông tin cơ bản'),
+              _buildSectionTitle('Thông tin Video'),
               _buildTextField(
-                controller: _titleController,
-                label: 'Tiêu đề *',
-                validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập tiêu đề' : null,
+                controller: _urlController,
+                label: 'URL Video *',
+                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập URL' : null,
+              ),
+
+              _buildSectionTitle('Tiêu đề & Mô tả'),
+              _buildTextField(
+                controller: _titleViController,
+                label: 'Tiêu đề (VI) *',
+                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập tiêu đề VI' : null,
               ),
               _buildTextField(
-                controller: _descriptionController,
-                label: 'Mô tả *',
+                controller: _titleEnController,
+                label: 'Title (EN) *',
+                validator: (v) => v == null || v.isEmpty ? 'Please enter English title' : null,
+              ),
+              _buildTextField(
+                controller: _descriptionViController,
+                label: 'Mô tả (VI) *',
                 maxLines: 3,
-                validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập mô tả' : null,
+                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập mô tả VI' : null,
               ),
               _buildTextField(
-                controller: _contentController,
-                label: 'Nội dung',
-                maxLines: 5,
+                controller: _descriptionEnController,
+                label: 'Description (EN) *',
+                maxLines: 3,
+                validator: (v) => v == null || v.isEmpty ? 'Please enter English description' : null,
+              ),
+
+              _buildSectionTitle('Ngôn ngữ'),
+              _buildTextField(
+                controller: _languageController,
+                label: 'Ngôn ngữ nội dung (vi/en)',
+              ),
+
+              _buildSectionTitle('Lĩnh vực phát triển'),
+              _buildDomainSelection(),
+
+              _buildSectionTitle('Từ khóa & Thẻ'),
+              _buildTextField(
+                controller: _keywordsController,
+                label: 'Keywords (phân tách bằng dấu phẩy)',
               ),
               _buildTextField(
-                controller: _durationController,
-                label: 'Thời lượng (giây)',
+                controller: _tagsController,
+                label: 'Tags (phân tách bằng dấu phẩy)',
+              ),
+
+              _buildSectionTitle('Thiết lập hiển thị'),
+              _buildSwitchRow('Kích hoạt', _isActive, (v) => setState(() => _isActive = v)),
+              _buildSwitchRow('Nổi bật', _isFeatured, (v) => setState(() => _isFeatured = v)),
+              _buildTextField(
+                controller: _priorityController,
+                label: 'Độ ưu tiên (số nguyên)',
+                keyboardType: TextInputType.number,
+              ),
+
+              _buildSectionTitle('Độ tuổi & Phân loại'),
+              _buildTextField(
+                controller: _minAgeController,
+                label: 'Tuổi tối thiểu (tháng)',
                 keyboardType: TextInputType.number,
               ),
               _buildTextField(
-                controller: _languageController,
-                label: 'Ngôn ngữ',
+                controller: _maxAgeController,
+                label: 'Tuổi tối đa (tháng)',
+                keyboardType: TextInputType.number,
               ),
-              _buildSectionTitle('Lĩnh vực phát triển'),
-              _buildDomainSelection(),
-              _buildSectionTitle('Liên kết'),
-              _buildTextField(
-                controller: _thumbnailUrlController,
-                label: 'URL ảnh thumbnail',
+              _buildAgeGroupDropdown(),
+              _buildContentRatingDropdown(),
+
+              _buildSectionTitle('Xuất bản'),
+              _buildDateTimeField(
+                controller: _publishedAtController,
+                label: 'Ngày xuất bản (chọn ngày & giờ)',
               ),
-              _buildTextField(
-                controller: _videoUrlController,
-                label: 'URL video *',
-                validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập URL video' : null,
-              ),
-              _buildTextField(
-                controller: _transcriptController,
-                label: 'Transcript',
-                maxLines: 5,
-              ),
+
               const SizedBox(height: 32),
               _buildSubmitButton(),
             ],
@@ -231,6 +312,53 @@ class _AddVideoPageState extends State<AddVideoPage> {
     );
   }
 
+  Widget _buildDateTimeField({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        readOnly: true,
+        decoration: InputDecoration(
+          labelText: label,
+          suffixIcon: const Icon(Icons.calendar_today),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.primary),
+          ),
+        ),
+        onTap: () async {
+          final now = DateTime.now();
+          final pickedDate = await showDatePicker(
+            context: context,
+            initialDate: now,
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2100),
+          );
+          if (pickedDate == null) return;
+          final pickedTime = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.fromDateTime(now),
+          );
+          if (pickedTime == null) return;
+          final combined = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          controller.text = combined.toIso8601String();
+        },
+      ),
+    );
+  }
+
   Widget _buildDomainSelection() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -276,6 +404,56 @@ class _AddVideoPageState extends State<AddVideoPage> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  // Supported format fixed to 2. No UI needed.
+
+  Widget _buildSwitchRow(String label, bool value, ValueChanged<bool> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          Switch(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAgeGroupDropdown() {
+    const groups = ['INFANT', 'TODDLER', 'PRESCHOOL', 'SCHOOL_AGE', 'ADOLESCENT'];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DropdownButtonFormField<String>(
+        value: _ageGroup,
+        items: groups.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+        onChanged: (v) => setState(() => _ageGroup = v ?? _ageGroup),
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          labelText: 'Nhóm tuổi',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentRatingDropdown() {
+    const ratings = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DropdownButtonFormField<String>(
+        value: _contentRating,
+        items: ratings.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+        onChanged: (v) => setState(() => _contentRating = v ?? _contentRating),
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          labelText: 'Phân loại nội dung',
+        ),
       ),
     );
   }

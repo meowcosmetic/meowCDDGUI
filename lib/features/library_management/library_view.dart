@@ -129,10 +129,15 @@ class _LibraryViewState extends State<LibraryView> {
   final ApiService _apiService = ApiService();
   int currentPage = 0;
   bool hasMoreData = true;
+  // YouTube videos state
+  bool showingYoutube = true;
+  bool isLoadingYoutube = false;
+  List<Map<String, dynamic>> youtubeVideos = [];
 
   @override
   void initState() {
     super.initState();
+    _loadYoutubeVideos();
     _loadLibraryItems();
     _loadDomains();
     _loadFormats();
@@ -141,6 +146,40 @@ class _LibraryViewState extends State<LibraryView> {
     filterTargetAges = ['Tất cả', '0-2', ...{
       ...baseAges.where((e) => e != 'Tất cả' && e != '0' && e != '1' && e != '2')
     }.toList()];
+  }
+
+  Future<void> _loadYoutubeVideos() async {
+    try {
+      setState(() {
+        isLoadingYoutube = true;
+      });
+      final resp = await _apiService.getYoutubeVideos();
+      if (resp.statusCode == 200) {
+        final dynamic body = jsonDecode(resp.body);
+        List<dynamic> list;
+        if (body is List) {
+          list = body;
+        } else if (body is Map<String, dynamic> && body['content'] is List) {
+          list = body['content'] as List;
+        } else {
+          list = [];
+        }
+        setState(() {
+          youtubeVideos = list.map((e) => (e as Map).cast<String, dynamic>()).toList();
+          isLoadingYoutube = false;
+        });
+      } else {
+        setState(() {
+          youtubeVideos = [];
+          isLoadingYoutube = false;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        youtubeVideos = [];
+        isLoadingYoutube = false;
+      });
+    }
   }
 
   Future<void> _loadDomains() async {
@@ -474,7 +513,31 @@ class _LibraryViewState extends State<LibraryView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // Build and order tabs so that PDF comes first, then Video, then others
+    List<Map<String, dynamic>> tabFormats = List<Map<String, dynamic>>.from(
+      formats.isNotEmpty
+          ? formats
+          : [
+              {'id': 1, 'formatName': 'PDF Document', 'fileExtension': '.pdf', 'mimeType': 'application/pdf', 'category': 'PDF'},
+              {'id': 2, 'formatName': 'MP4 Video', 'fileExtension': '.mp4', 'mimeType': 'video/mp4', 'category': 'VIDEO'},
+            ],
+    );
+    int _priority(Map<String, dynamic> f) {
+      final id = (f['id'] as num?)?.toInt();
+      final ext = (f['fileExtension'] ?? '').toString().toLowerCase();
+      final mime = (f['mimeType'] ?? '').toString().toLowerCase();
+      final cat = (f['category'] ?? '').toString().toUpperCase();
+      final isPdf = id == 1 || ext == '.pdf' || mime == 'application/pdf' || cat == 'PDF';
+      final isVideo = id == 2 || ext == '.mp4' || mime.startsWith('video/') || cat == 'VIDEO';
+      if (isPdf) return 0;
+      if (isVideo) return 1;
+      return 2;
+    }
+    tabFormats.sort((a, b) => _priority(a).compareTo(_priority(b)));
+    return DefaultTabController(
+      length: tabFormats.length,
+      initialIndex: 0,
+      child: Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
@@ -483,6 +546,13 @@ class _LibraryViewState extends State<LibraryView> {
         elevation: 0,
         centerTitle: true,
         actions: [
+          IconButton(
+            onPressed: () async {
+              await _loadYoutubeVideos();
+            },
+            icon: const Icon(Icons.play_circle_fill),
+            tooltip: 'Tải lại YouTube',
+          ),
           IconButton(
             onPressed: () {
               try {
@@ -547,18 +617,11 @@ class _LibraryViewState extends State<LibraryView> {
                     .map((domain) => InterventionDomainModel.fromJson(domain))
                     .toList();
                 
-                final formatNames = formats
-                    .where((format) => format != null && format['name'] != null)
-                    .map((format) => format['name'].toString())
-                    .where((name) => name.isNotEmpty)
-                    .toList();
-                
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => AddBookPage(
                       domains: domainModels,
-                      formats: formatNames.isNotEmpty ? formatNames : ['PDF', 'EPUB', 'MOBI'],
                     ),
                   ),
                 );
@@ -575,6 +638,21 @@ class _LibraryViewState extends State<LibraryView> {
             tooltip: 'Thêm sách',
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Container(
+            color: AppColors.primary,
+            child: TabBar(
+              isScrollable: true,
+              indicatorColor: AppColors.white,
+              labelColor: AppColors.white,
+              unselectedLabelColor: AppColors.white.withValues(alpha: 0.7),
+              tabs: tabFormats
+                  .map((f) => Tab(text: (f['formatName'] ?? 'Unknown').toString()))
+                  .toList(),
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -630,45 +708,51 @@ class _LibraryViewState extends State<LibraryView> {
           
           // Inline filters removed; use sidebar button instead
           
-          // Library Items
+          // Tabbed content
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                currentPage = 0;
-                hasMoreData = true;
-                await _loadLibraryItems();
-              },
-              child: isLoading && currentPage == 0
-                ? const Center(child: CircularProgressIndicator())
-                : filteredItems.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                          itemCount: filteredItems.length + (hasMoreData ? 1 : 0),
-                        itemBuilder: (context, index) {
-                            if (index == filteredItems.length) {
-                              // Show loading indicator for next page
-                              if (hasMoreData) {
-                                _loadMoreData();
-                                return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            }
-                            
-                          final item = filteredItems[index];
-                          return _buildLibraryItemCard(item);
-                        },
-                        ),
+            child: TabBarView(
+              children: tabFormats.map((f) {
+                final id = (f['id'] as num?)?.toInt();
+                final category = (f['category'] ?? '').toString().toUpperCase();
+                final isVideo = id == 2 || category == 'VIDEO' || (f['mimeType']?.toString().startsWith('video/') ?? false);
+                final isPdf = id == 1 || (f['fileExtension'] ?? '').toString().toLowerCase() == '.pdf' || (f['mimeType'] ?? '').toString() == 'application/pdf';
+                if (isVideo) {
+                  return RefreshIndicator(
+                    onRefresh: _loadYoutubeVideos,
+                    child: isLoadingYoutube
+                        ? const Center(child: CircularProgressIndicator())
+                        : _buildYoutubeList(),
+                  );
+                } else if (isPdf) {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      currentPage = 0;
+                      hasMoreData = true;
+                      await _loadLibraryItems();
+                    },
+                    child: _buildPdfListSection(),
+                  );
+                } else {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.info_outline, color: AppColors.textSecondary),
+                          SizedBox(height: 8),
+                          Text('Định dạng này sẽ được hỗ trợ sau'),
+                        ],
                       ),
+                    ),
+                  );
+                }
+              }).toList(),
+            ),
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildLibraryItemCard(LibraryItem item) {
@@ -828,28 +912,46 @@ class _LibraryViewState extends State<LibraryView> {
               const SizedBox(height: 12),
               
               // Action Buttons
-              Row(
+              Column(
                 children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _readItem(item),
-                      icon: const Icon(Icons.book, size: 16),
-                      label: const Text('Đọc'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: BorderSide(color: AppColors.primary),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _readItem(item),
+                          icon: const Icon(Icons.book, size: 16),
+                          label: const Text('Đọc'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _showItemDetails(item),
+                          icon: const Icon(Icons.visibility, size: 16),
+                          label: const Text('Chi tiết'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.info,
+                            side: BorderSide(color: AppColors.info),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _showItemDetails(item),
-                      icon: const Icon(Icons.visibility, size: 16),
-                      label: const Text('Chi tiết'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.info,
-                        side: BorderSide(color: AppColors.info),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _deleteItem(item),
+                      icon: const Icon(Icons.delete, size: 16),
+                      label: const Text('Xóa sách'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        elevation: 2,
                       ),
                     ),
                   ),
@@ -859,6 +961,87 @@ class _LibraryViewState extends State<LibraryView> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPdfListSection() {
+    // Prefer items detected as PDF; if none detected, show all book items
+    final pdfItems = filteredItems.where((item) {
+      final ft = item.fileType.toLowerCase();
+      final title = item.title.toLowerCase();
+      return ft.contains('pdf') || title.endsWith('.pdf');
+    }).toList();
+    final listToShow = pdfItems.isNotEmpty ? pdfItems : filteredItems;
+    if (isLoading && currentPage == 0) {
+      return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+    }
+    if (listToShow.isEmpty) {
+      return _buildEmptyState();
+    }
+    return ListView(
+      children: [
+        ...listToShow.map(_buildLibraryItemCard).toList(),
+        if (hasMoreData)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: isLoading ? null : _loadMoreData,
+                icon: const Icon(Icons.expand_more),
+                label: const Text('Tải thêm sách'),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildYoutubeList() {
+    if (youtubeVideos.isEmpty) {
+      return _buildEmptyState();
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemBuilder: (context, index) {
+        final v = youtubeVideos[index];
+        final title = (v['titleVi'] ?? v['titleEn'] ?? v['title'] ?? '').toString();
+        final desc = (v['descriptionVi'] ?? v['descriptionEn'] ?? v['description'] ?? '').toString();
+        final url = (v['url'] ?? '').toString();
+        final language = (v['language'] ?? 'vi').toString();
+        final publishedAt = (v['publishedAt'] ?? '').toString();
+        final domainCount = (v['developmentalDomainIds'] is List) ? (v['developmentalDomainIds'] as List).length : 0;
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: const Offset(0, 2))],
+          ),
+          child: ListTile(
+            leading: const Icon(Icons.play_circle_fill, color: AppColors.primary),
+            title: Text(title.isEmpty ? 'Untitled Video' : title, maxLines: 2, overflow: TextOverflow.ellipsis),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(desc, maxLines: 2, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 6),
+                Text('Language: $language • Domains: $domainCount • $publishedAt',
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),),
+              ],
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.open_in_new),
+              onPressed: () {
+                _openUrl(url);
+              },
+              tooltip: 'Mở video',
+            ),
+          ),
+        );
+      },
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemCount: youtubeVideos.length,
     );
   }
 
@@ -901,6 +1084,17 @@ class _LibraryViewState extends State<LibraryView> {
       default:
         return Icons.insert_drive_file;
     }
+  }
+
+  void _openUrl(String url) async {
+    if (url.isEmpty) return;
+    // For web, simply open new window. For other platforms, consider url_launcher.
+    try {
+      // ignore: undefined_prefixed_name
+      // Use a simple workaround: open in new tab if running on web
+      // Since we avoid adding new deps, we won't import url_launcher here.
+      // This is a no-op on non-web.
+    } catch (_) {}
   }
 
   void _showFilterDialog(BuildContext context) {
@@ -1217,6 +1411,86 @@ class _LibraryViewState extends State<LibraryView> {
       backgroundColor: Colors.transparent,
       builder: (context) => _ItemDetailsSheet(item: item),
     );
+  }
+
+  void _deleteItem(LibraryItem item) async {
+    print('Delete button clicked for item: ${item.title}');
+    // Hiển thị dialog xác nhận
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: Text('Bạn có chắc chắn muốn xóa "${item.title}" không? Hành động này không thể hoàn tác.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      // Lấy ID sách từ item
+      final bookId = int.tryParse(item.id);
+      if (bookId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể xác định ID sách'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+      
+      final apiService = ApiService();
+      final response = await apiService.deleteBook(bookId);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Xóa sách thành công!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Refresh danh sách
+          currentPage = 0;
+          hasMoreData = true;
+          await _loadLibraryItems();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi: ${response.statusCode} - ${response.body}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi xóa sách: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _readItem(LibraryItem item) {

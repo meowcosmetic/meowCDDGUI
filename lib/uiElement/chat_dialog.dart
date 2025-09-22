@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:convert';
 import 'chat_bubble.dart';
 import '../constants/app_colors.dart';
+import '../services/messaging_service.dart';
 
 class ChatDialog extends StatefulWidget {
   const ChatDialog({Key? key}) : super(key: key);
@@ -13,24 +16,57 @@ class _ChatDialogState extends State<ChatDialog> {
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
+  StreamSubscription<String>? _messageSub;
 
   @override
   void initState() {
     super.initState();
     _loadInitialMessages();
+    // Realtime socket binding
+    MessagingService.instance.autoConnectIfLoggedIn();
+    _messageSub = MessagingService.instance.messages.listen((msg) {
+      if (!mounted) return;
+      String content = msg;
+      try {
+        final decoded = jsonDecode(msg);
+        if (decoded is Map && decoded['content'] is String) {
+          content = decoded['content'] as String;
+        }
+      } catch (_) {}
+      setState(() {
+        _messages.add(ChatMessage(
+          text: content,
+          isFromMe: false,
+          timestamp: DateTime.now(),
+          senderName: 'Đối tác',
+          showSenderName: true,
+        ));
+      });
+      // Auto scroll
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    });
   }
 
   void _loadInitialMessages() {
-    final now = DateTime.now();
-    _messages.addAll([
-      ChatMessage(
-        text: "Xin chào! Tôi có thể giúp gì cho bạn?",
-        isFromMe: false,
-        timestamp: now.subtract(const Duration(minutes: 2)),
-        senderName: "Chuyên gia tư vấn",
-        showSenderName: true,
-      ),
-    ]);
+    if (_messages.isEmpty) {
+      _messages.add(
+        ChatMessage(
+          text: 'Xin chào! Tôi có thể giúp gì cho bạn?',
+          isFromMe: false,
+          timestamp: DateTime.now(),
+          senderName: 'Chuyên gia tư vấn',
+          showSenderName: true,
+        ),
+      );
+    }
   }
 
   void _sendMessage(String text) {
@@ -41,7 +77,6 @@ class _ChatDialogState extends State<ChatDialog> {
         timestamp: DateTime.now(),
       ));
     });
-    
     // Auto scroll to bottom
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -52,32 +87,8 @@ class _ChatDialogState extends State<ChatDialog> {
         );
       }
     });
-
-    // Simulate reply after 1.5 seconds
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        setState(() {
-          _messages.add(ChatMessage(
-            text: "Cảm ơn bạn đã chia sẻ! Tôi sẽ gửi thêm thông tin về bài test CDD cho bạn.",
-            isFromMe: false,
-            timestamp: DateTime.now(),
-            senderName: "Chuyên gia tư vấn",
-            showSenderName: true,
-          ));
-        });
-        
-        // Auto scroll to bottom again
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients) {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          }
-        });
-      }
-    });
+    // Send via socket
+    MessagingService.instance.sendText(text);
   }
 
   @override
@@ -200,6 +211,7 @@ class _ChatDialogState extends State<ChatDialog> {
   void dispose() {
     _scrollController.dispose();
     _textController.dispose();
+    _messageSub?.cancel();
     super.dispose();
   }
 }

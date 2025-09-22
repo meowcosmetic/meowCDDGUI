@@ -1,12 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:async';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import '../constants/app_config.dart';
+
+// Conditional import for web
+import 'dart:html' as html show FileReader, File;
 import 'user.dart';
 import '../features/cdd_test_management/models/cdd_test.dart';
 import 'user_session.dart';
 import 'child.dart';
 import 'test_result_model.dart';
-import 'library_item.dart';
 import 'test_category.dart';
 
 class ApiService {
@@ -16,6 +23,20 @@ class ApiService {
   
   factory ApiService({String? baseUrl}) {
     return ApiService._(baseUrl ?? AppConfig.apiBaseUrl);
+  }
+
+  // Bulk fetch basic customer profiles
+  Future<http.Response> fetchCustomerProfilesBulk(List<String> userIds) async {
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/customer-profile/basic/bulk');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({'customerIds': userIds}),
+    );
+    return resp;
   }
 
   Future<http.Response> createUser(User user) async {
@@ -378,7 +399,7 @@ class ApiService {
 
   // Library Management APIs
   Future<http.Response> createBook(Map<String, dynamic> bookData) async {
-    final uri = Uri.parse('$baseUrl/books');
+    final uri = Uri.parse('${AppConfig.cddAPI}/books');
     final resp = await http.post(
       uri,
       headers: const {
@@ -390,8 +411,99 @@ class ApiService {
     return resp;
   }
 
+  // Create book with file upload (multipart/form-data)
+  Future<http.Response> createBookWithFile(
+    Map<String, dynamic> bookData,
+    dynamic file,
+  ) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/books/upload');
+    
+    var request = http.MultipartRequest('POST', uri);
+    
+    // Add text fields (all as strings)
+    bookData.forEach((key, value) {
+      if (key != 'file' && value != null) {
+        request.fields[key] = value.toString();
+      }
+    });
+    
+    // Add file if available under field name 'file'
+    if (file != null) {
+      if (file is PlatformFile) {
+        // For mobile
+        if (file.bytes != null) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'file',
+              file.bytes!,
+              filename: file.name,
+            ),
+          );
+        }
+      } else if (file is File) {
+        // For web or other platforms
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'file',
+            file.path,
+          ),
+        );
+      } else {
+        // For web HTML File
+        try {
+          // Convert HTML File to bytes for web
+          final bytes = await _htmlFileToBytes(file);
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'file',
+              bytes,
+              filename: file.name,
+            ),
+          );
+        } catch (e) {
+          print('Error converting HTML file to bytes: $e');
+        }
+      }
+    }
+    
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    return response;
+  }
+
+  // Helper method to convert HTML File to bytes
+  Future<Uint8List> _htmlFileToBytes(dynamic htmlFile) async {
+    if (kIsWeb) {
+      // For web platform
+      final reader = html.FileReader();
+      final completer = Completer<Uint8List>();
+      
+      reader.onLoad.listen((event) {
+        final dynamic result = reader.result;
+        if (result is ByteBuffer) {
+          completer.complete(result.asUint8List());
+        } else if (result is Uint8List) {
+          completer.complete(result);
+        } else if (result is List<int>) {
+          completer.complete(Uint8List.fromList(result));
+        } else {
+          completer.completeError('Unsupported FileReader result type: ${result.runtimeType}');
+        }
+      });
+      
+      reader.onError.listen((event) {
+        completer.completeError('Failed to read file');
+      });
+      
+      reader.readAsArrayBuffer(htmlFile);
+      return completer.future;
+    } else {
+      throw UnsupportedError('HTML file conversion only supported on web');
+    }
+  }
+
   Future<http.Response> createVideo(Map<String, dynamic> videoData) async {
-    final uri = Uri.parse('$baseUrl/videos');
+    final uri = Uri.parse('${AppConfig.cddAPI}/youtube-videos');
     final resp = await http.post(
       uri,
       headers: const {
@@ -403,8 +515,21 @@ class ApiService {
     return resp;
   }
 
+  /// Get list of YouTube videos
+  Future<http.Response> getYoutubeVideos() async {
+    final uri = Uri.parse('http://192.168.1.184/api/cdd/api/v1/neon/youtube-videos');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
   Future<http.Response> createPost(Map<String, dynamic> postData) async {
-    final uri = Uri.parse('$baseUrl/posts');
+    final uri = Uri.parse('${AppConfig.cddAPI}/posts');
     final resp = await http.post(
       uri,
       headers: const {
@@ -412,6 +537,19 @@ class ApiService {
         'Accept': 'application/json',
       },
       body: jsonEncode(postData),
+    );
+    return resp;
+  }
+
+  // Delete book by ID
+  Future<http.Response> deleteBook(int bookId) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/books/$bookId');
+    final resp = await http.delete(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
     );
     return resp;
   }

@@ -42,6 +42,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
   bool _hasDomainsError = false;
   String _domainsErrorMessage = '';
   Map<String, bool> _expandedDomains = {}; // Track which domains are expanded
+  bool _isActivitiesExpanded = false;
 
   @override
   void initState() {
@@ -174,6 +175,11 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             _buildProgressCard(),
             
             const SizedBox(height: 16),
+
+          // Recent Activities (moved up under Progress Details)
+          _buildRecentActivitiesCard(),
+          
+          const SizedBox(height: 16),
             
             // Tracking Button
             _buildTrackingButton(),
@@ -187,11 +193,6 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             
             // Activities Section
             _buildActivitiesCard(),
-            
-            const SizedBox(height: 16),
-            
-            // Recent Activities
-            _buildRecentActivitiesCard(),
             
             const SizedBox(height: 16),
             
@@ -1277,26 +1278,48 @@ class _ChildDetailViewState extends State<ChildDetailView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.fitness_center,
-                color: AppColors.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'Hoạt Động Can Thiệp',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isActivitiesExpanded = !_isActivitiesExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.fitness_center,
+                  color: AppColors.primary,
+                  size: 20,
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                const Text(
+                  'Hoạt Động Can Thiệp',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                AnimatedRotation(
+                  turns: _isActivitiesExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  child: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
-          _buildDomainsContent(),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: _isActivitiesExpanded ? null : 0,
+            child: _isActivitiesExpanded ? _buildDomainsContent() : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
