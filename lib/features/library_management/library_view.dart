@@ -8,6 +8,7 @@ import 'pdf_viewer.dart';
 import 'pages/add_book_page.dart';
 import 'pages/add_video_page.dart';
 import 'pages/add_post_page.dart';
+import 'widgets/pdf_list_widget.dart';
 import '../intervention_domains/models/domain_models.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
@@ -751,7 +752,18 @@ class _LibraryViewState extends State<LibraryView> {
                       hasMoreData = true;
                       await _loadLibraryItems();
                     },
-                    child: _buildPdfListSection(),
+                    child: PdfListWidget(
+                      items: items,
+                      filteredItems: filteredItems,
+                      isLoading: isLoading,
+                      hasMoreData: hasMoreData,
+                      currentPage: currentPage,
+                      onLoadMore: _loadMoreData,
+                      onReadItem: _readItem,
+                      onShowItemDetails: _showItemDetails,
+                      onDeleteItem: _deleteItem,
+                      emptyStateBuilder: _buildEmptyState,
+                    ),
                   );
                 } else {
                   return Center(
@@ -776,247 +788,7 @@ class _LibraryViewState extends State<LibraryView> {
     ));
   }
 
-  Widget _buildLibraryItemCard(LibraryItem item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => _showItemDetails(item),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Color(item.getFileTypeColor()).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      _getIconData(item.getFileTypeIcon()),
-                      color: Color(item.getFileTypeColor()),
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.description,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Bởi ${item.author}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 12),
-              
-              // Filter badges
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Color(item.getFileTypeColor()).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Color(item.getFileTypeColor())),
-                    ),
-                    child: Text(
-                      item.getFileTypeText(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: Color(item.getFileTypeColor()),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Color(item.getDomainColor()).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Color(item.getDomainColor())),
-                    ),
-                    child: Text(
-                      item.getDomainText(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: Color(item.getDomainColor()),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Color(item.getDifficultyColor()).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Color(item.getDifficultyColor())),
-                    ),
-                    child: Text(
-                      item.getDifficultyText(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: Color(item.getDifficultyColor()),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Icon(Icons.star, size: 14, color: AppColors.warning),
-                      const SizedBox(width: 2),
-                      Text(
-                        item.rating.toString(),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        ' (${item.ratingCount})',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 12),
-              
-              // Action Buttons
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _readItem(item),
-                          icon: const Icon(Icons.book, size: 16),
-                          label: const Text('Đọc'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            side: BorderSide(color: AppColors.primary),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _showItemDetails(item),
-                          icon: const Icon(Icons.visibility, size: 16),
-                          label: const Text('Chi tiết'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.info,
-                            side: BorderSide(color: AppColors.info),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _deleteItem(item),
-                      icon: const Icon(Icons.delete, size: 16),
-                      label: const Text('Xóa sách'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        elevation: 2,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildPdfListSection() {
-    // Prefer items detected as PDF; if none detected, show all book items
-    final pdfItems = filteredItems.where((item) {
-      final ft = item.fileType.toLowerCase();
-      final title = item.title.toLowerCase();
-      return ft.contains('pdf') || title.endsWith('.pdf');
-    }).toList();
-    final listToShow = pdfItems.isNotEmpty ? pdfItems : filteredItems;
-    if (isLoading && currentPage == 0) {
-      return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
-    }
-    if (listToShow.isEmpty) {
-      return _buildEmptyState();
-    }
-    return ListView(
-      children: [
-        ...listToShow.map(_buildLibraryItemCard).toList(),
-        if (hasMoreData)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: isLoading ? null : _loadMoreData,
-                icon: const Icon(Icons.expand_more),
-                label: const Text('Tải thêm sách'),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 
   Widget _buildYoutubeList() {
     if (youtubeVideos.isEmpty) {
