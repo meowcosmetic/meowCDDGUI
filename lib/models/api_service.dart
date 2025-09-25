@@ -528,6 +528,19 @@ class ApiService {
     return resp;
   }
 
+  /// Delete a YouTube video by ID
+  Future<http.Response> deleteYoutubeVideo(String videoId) async {
+    final uri = Uri.parse('http://192.168.1.184/api/cdd/api/v1/neon/youtube-videos/$videoId');
+    final resp = await http.delete(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
   Future<http.Response> createPost(Map<String, dynamic> postData) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/posts');
     final resp = await http.post(

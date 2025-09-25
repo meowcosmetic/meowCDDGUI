@@ -9,6 +9,11 @@ import 'pages/add_book_page.dart';
 import 'pages/add_video_page.dart';
 import 'pages/add_post_page.dart';
 import '../intervention_domains/models/domain_models.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
+import 'dart:ui_web' as ui;
 
 // Lightweight API response models for books
 class BookApiResponse {
@@ -132,12 +137,12 @@ class _LibraryViewState extends State<LibraryView> {
   // YouTube videos state
   bool showingYoutube = true;
   bool isLoadingYoutube = false;
+  bool hasLoadedYoutube = false;
   List<Map<String, dynamic>> youtubeVideos = [];
 
   @override
   void initState() {
     super.initState();
-    _loadYoutubeVideos();
     _loadLibraryItems();
     _loadDomains();
     _loadFormats();
@@ -149,6 +154,8 @@ class _LibraryViewState extends State<LibraryView> {
   }
 
   Future<void> _loadYoutubeVideos() async {
+    if (isLoadingYoutube || hasLoadedYoutube) return;
+    
     try {
       setState(() {
         isLoadingYoutube = true;
@@ -167,17 +174,20 @@ class _LibraryViewState extends State<LibraryView> {
         setState(() {
           youtubeVideos = list.map((e) => (e as Map).cast<String, dynamic>()).toList();
           isLoadingYoutube = false;
+          hasLoadedYoutube = true;
         });
       } else {
         setState(() {
           youtubeVideos = [];
           isLoadingYoutube = false;
+          hasLoadedYoutube = true;
         });
       }
     } catch (_) {
       setState(() {
         youtubeVideos = [];
         isLoadingYoutube = false;
+        hasLoadedYoutube = true;
       });
     }
   }
@@ -717,8 +727,19 @@ class _LibraryViewState extends State<LibraryView> {
                 final isVideo = id == 2 || category == 'VIDEO' || (f['mimeType']?.toString().startsWith('video/') ?? false);
                 final isPdf = id == 1 || (f['fileExtension'] ?? '').toString().toLowerCase() == '.pdf' || (f['mimeType'] ?? '').toString() == 'application/pdf';
                 if (isVideo) {
+                  // Lazy-load videos only when the tab is opened
+                  if (!isLoadingYoutube && !hasLoadedYoutube) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted && !hasLoadedYoutube) {
+                        _loadYoutubeVideos();
+                      }
+                    });
+                  }
                   return RefreshIndicator(
-                    onRefresh: _loadYoutubeVideos,
+                    onRefresh: () async {
+                      hasLoadedYoutube = false;
+                      await _loadYoutubeVideos();
+                    },
                     child: isLoadingYoutube
                         ? const Center(child: CircularProgressIndicator())
                         : _buildYoutubeList(),
@@ -1005,11 +1026,36 @@ class _LibraryViewState extends State<LibraryView> {
       padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) {
         final v = youtubeVideos[index];
-        final title = (v['titleVi'] ?? v['titleEn'] ?? v['title'] ?? '').toString();
-        final desc = (v['descriptionVi'] ?? v['descriptionEn'] ?? v['description'] ?? '').toString();
         final url = (v['url'] ?? '').toString();
+        print('[WEB-VIDEO] youtube video url=' + url);
+        final id = (v['id'] ?? v['videoId'] ?? v['uuid'] ?? '').toString();
         final language = (v['language'] ?? 'vi').toString();
         final publishedAt = (v['publishedAt'] ?? '').toString();
+        final minAge = (v['minAge'] ?? '').toString();
+        final maxAge = (v['maxAge'] ?? '').toString();
+        final ageGroup = (v['ageGroup'] ?? '').toString();
+        final contentRating = (v['contentRating'] ?? '').toString();
+        final domainNames = (v['developmentalDomainNames'] as List?)?.join(', ') ?? '';
+        // Derive YouTube thumbnail from watch URL if possible
+        final ytId = _extractYoutubeId(url);
+        final thumb = ytId != null ? 'https://img.youtube.com/vi/$ytId/hqdefault.jpg' : null;
+        // Handle nested title/description structure
+        String title = 'MP4 Video';
+        String desc = '';
+        
+        if (v['title'] is Map) {
+          final titleMap = v['title'] as Map;
+          title = (titleMap['vi'] ?? titleMap['en'] ?? 'MP4 Video').toString();
+        } else {
+          title = (v['titleVi'] ?? v['titleEn'] ?? 'MP4 Video').toString();
+        }
+        
+        if (v['description'] is Map) {
+          final descMap = v['description'] as Map;
+          desc = (descMap['vi'] ?? descMap['en'] ?? '').toString();
+        } else {
+          desc = (v['descriptionVi'] ?? v['descriptionEn'] ?? '').toString();
+        }
         final domainCount = (v['developmentalDomainIds'] is List) ? (v['developmentalDomainIds'] as List).length : 0;
         return Container(
           decoration: BoxDecoration(
@@ -1018,24 +1064,45 @@ class _LibraryViewState extends State<LibraryView> {
             boxShadow: [BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: const Offset(0, 2))],
           ),
           child: ListTile(
-            leading: const Icon(Icons.play_circle_fill, color: AppColors.primary),
+            leading: thumb == null
+                ? const Icon(Icons.play_circle_fill, color: AppColors.primary)
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.network(
+                      thumb,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.play_circle_fill, color: AppColors.primary),
+                    ),
+                  ),
             title: Text(title.isEmpty ? 'Untitled Video' : title, maxLines: 2, overflow: TextOverflow.ellipsis),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 4),
-                Text(desc, maxLines: 2, overflow: TextOverflow.ellipsis),
+                if (desc.isNotEmpty) Text(desc, maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 6),
-                Text('Language: $language • Domains: $domainCount • $publishedAt',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),),
+                Text(
+                  'Lang: $language • Age: $minAge-$maxAge ($ageGroup) • Rated: $contentRating\nDomains: ${domainNames.isEmpty ? domainCount : domainNames}\n$publishedAt',
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.3),
+                ),
               ],
             ),
-            trailing: IconButton(
-              icon: const Icon(Icons.open_in_new),
-              onPressed: () {
-                _openUrl(url);
-              },
-              tooltip: 'Mở video',
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.play_arrow),
+                  onPressed: () => _openVideo(url),
+                  tooltip: 'Phát trong ứng dụng',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  tooltip: 'Xóa video',
+                  onPressed: id.isEmpty ? null : () => _confirmDeleteYoutube(id, title),
+                ),
+              ],
             ),
           ),
         );
@@ -1043,6 +1110,302 @@ class _LibraryViewState extends State<LibraryView> {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemCount: youtubeVideos.length,
     );
+  }
+
+  String? _extractYoutubeId(String url) {
+    if (url.isEmpty) return null;
+    final uri = Uri.tryParse(url);
+    if (uri == null) return null;
+    if (uri.host.contains('youtu.be')) {
+      return uri.pathSegments.isNotEmpty ? uri.pathSegments.first : null;
+    }
+    if (uri.host.contains('youtube.com')) {
+      final v = uri.queryParameters['v'];
+      if (v != null && v.isNotEmpty) return v;
+      // Shorts or embed patterns
+      final segs = uri.pathSegments;
+      final idx = segs.indexWhere((s) => s == 'shorts' || s == 'embed' || s == 'v');
+      if (idx >= 0 && idx + 1 < segs.length) return segs[idx + 1];
+    }
+    return null;
+  }
+
+  void _openVideo(String url) {
+    if (url.isEmpty) return;
+    if (kIsWeb) {
+      _showInlineWebPlayer(url);
+      return;
+    }
+    final ytId = _extractYoutubeId(url);
+    if (ytId != null) {
+      _showYoutubePlayerWithUrl(url);
+    } else {
+      _launchExternal(url);
+    }
+  }
+
+  void _showInlineWebPlayer(String url) {
+    final ytId = _extractYoutubeId(url);
+    if (ytId == null) {
+      // Render HTML5 video element for non-YouTube URLs in-app on web
+      final viewType = 'html5-video-${DateTime.now().millisecondsSinceEpoch}';
+      ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
+        final video = html.VideoElement()
+          ..src = url
+          ..autoplay = true
+          ..muted = true
+          ..controls = true
+          ..preload = 'metadata'
+          ..style.border = '0'
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..setAttribute('playsinline', 'true')
+          ..setAttribute('controlsList', 'nodownload')
+          ..setAttribute('crossorigin', 'anonymous');
+
+        // Best effort autoplay, user can press play if blocked
+        // ignore: body_might_complete_normally_catch_error
+        video.play().catchError((_) {});
+        return video;
+      });
+
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierColor: Colors.black87,
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxW = constraints.maxWidth;
+              final maxH = constraints.maxHeight;
+              // Prefer 16:9, but allow flex for arbitrary videos
+              double width = maxW;
+              double height = width * 9 / 16;
+              if (height > maxH) {
+                height = maxH;
+                width = height * 16 / 9;
+              }
+              return Center(
+                child: SizedBox(
+                  width: width,
+                  height: height + 48,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 4, bottom: 8),
+                          child: Material(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(20),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () => Navigator.pop(context),
+                              child: const Padding(
+                                padding: EdgeInsets.all(6),
+                                child: Icon(Icons.close, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: HtmlElementView(viewType: viewType),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    final viewType = 'yt-iframe-$ytId-${DateTime.now().millisecondsSinceEpoch}';
+    // Register a view factory for this iframe
+    ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
+      final element = html.IFrameElement()
+        ..src = 'https://www.youtube.com/embed/$ytId?autoplay=1&modestbranding=1&rel=0'
+        ..style.border = '0'
+        ..allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+        ..allowFullscreen = true;
+      return element;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black87,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final maxW = constraints.maxWidth;
+            final maxH = constraints.maxHeight;
+            // Target aspect ratio 16:9
+            double width = maxW;
+            double height = width * 9 / 16;
+            if (height > maxH) {
+              height = maxH;
+              width = height * 16 / 9;
+            }
+            return Center(
+              child: SizedBox(
+                width: width,
+                height: height + 48, // extra space for the close button row
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Close button row above the video to avoid iframe overlay issues
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 4, bottom: 8),
+                        child: Material(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(20),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: () => Navigator.pop(context),
+                            child: const Padding(
+                              padding: EdgeInsets.all(6),
+                              child: Icon(Icons.close, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Video area
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: HtmlElementView(viewType: viewType),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showYoutubePlayerWithUrl(String url) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => AlertDialog(
+        title: const Text('Phát Video'),
+        content: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.4,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.play_circle_outline,
+                size: 64,
+                color: Colors.red,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Video sẽ mở trong tab mới',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _launchExternal(url);
+                    },
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('Phát Video'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Hủy'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchExternal(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    if (kIsWeb) {
+      await launchUrl(
+        uri,
+        webOnlyWindowName: '_blank',
+        mode: LaunchMode.platformDefault,
+      );
+      return;
+    }
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _confirmDeleteYoutube(String id, String title) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận xóa video'),
+        content: Text('Bạn có chắc muốn xóa "${title.isEmpty ? id : title}"?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      final resp = await _apiService.deleteYoutubeVideo(id);
+      if (resp.statusCode == 200 || resp.statusCode == 204) {
+        if (mounted) {
+          setState(() {
+            youtubeVideos.removeWhere((e) => (e['id']?.toString() ?? e['videoId']?.toString() ?? e['uuid']?.toString() ?? '') == id);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Xóa video thành công'), backgroundColor: Colors.green),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lỗi xóa video: ${resp.statusCode} - ${resp.body}'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi xóa video: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
   Widget _buildEmptyState() {

@@ -88,26 +88,45 @@ class _AddVideoPageState extends State<AddVideoPage> {
           .where((s) => s.isNotEmpty)
           .join(', ');
 
-      final videoData = {
-        'url': _urlController.text,
-        'titleVi': _titleViController.text,
-        'titleEn': _titleEnController.text,
-        'descriptionVi': _descriptionViController.text,
-        'descriptionEn': _descriptionEnController.text,
+      // Trimmed fields
+      final String url = _urlController.text.trim();
+      final String titleVi = _titleViController.text.trim();
+      final String titleEn = _titleEnController.text.trim();
+      final String descriptionVi = _descriptionViController.text.trim();
+      final String descriptionEn = _descriptionEnController.text.trim();
+      final String language = _languageController.text.trim().isEmpty ? 'vi' : _languageController.text.trim();
+
+      // Build base payload using nested structures for title/description
+      final Map<String, dynamic> videoData = {
+        'url': url,
+        'title': {
+          'vi': titleVi,
+          'en': titleEn,
+        },
+        'description': {
+          'vi': descriptionVi,
+          'en': descriptionEn,
+        },
         'supportedFormatId': 2,
         'developmentalDomainIds': _selectedDomainIds,
         'keywords': keywords,
         'tags': tags,
-        'language': _languageController.text,
+        'language': language,
         'isActive': _isActive,
-        'isFeatured': _isFeatured,
-        'priority': int.tryParse(_priorityController.text) ?? 0,
-        'minAge': int.tryParse(_minAgeController.text) ?? 0,
-        'maxAge': int.tryParse(_maxAgeController.text) ?? 0,
-        'ageGroup': _ageGroup,
-        'contentRating': _contentRating,
-        'publishedAt': _publishedAtController.text,
       };
+
+      // Optionals - include only when meaningful
+      if (_isFeatured) videoData['isFeatured'] = true;
+      final int? priority = int.tryParse(_priorityController.text);
+      if (priority != null) videoData['priority'] = priority;
+      final int? minAge = int.tryParse(_minAgeController.text);
+      if (minAge != null) videoData['minAge'] = minAge;
+      final int? maxAge = int.tryParse(_maxAgeController.text);
+      if (maxAge != null) videoData['maxAge'] = maxAge;
+      if (_ageGroup.isNotEmpty) videoData['ageGroup'] = _ageGroup;
+      if (_contentRating.isNotEmpty) videoData['contentRating'] = _contentRating;
+      final String publishedAt = _publishedAtController.text.trim();
+      if (publishedAt.isNotEmpty) videoData['publishedAt'] = publishedAt;
 
       final apiService = ApiService();
       final response = await apiService.createVideo(videoData);
