@@ -11,6 +11,7 @@ import 'pages/add_post_page.dart';
 import 'widgets/pdf_list_widget.dart';
 import '../intervention_domains/models/domain_models.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'widgets/youtube_list_widget.dart';
 import 'package:flutter/foundation.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
@@ -736,15 +737,7 @@ class _LibraryViewState extends State<LibraryView> {
                       }
                     });
                   }
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      hasLoadedYoutube = false;
-                      await _loadYoutubeVideos();
-                    },
-                    child: isLoadingYoutube
-                        ? const Center(child: CircularProgressIndicator())
-                        : _buildYoutubeList(),
-                  );
+                  return const YoutubeListWidget();
                 } else if (isPdf) {
                   return RefreshIndicator(
                     onRefresh: () async {
