@@ -20,7 +20,7 @@ class TestCategory {
       id: json['id'] as int,
       code: json['code'] as String,
       displayedName: Map<String, String>.from(json['displayedName'] as Map),
-      description: json['description'] != null 
+      description: json['description'] != null
           ? Map<String, String>.from(json['description'] as Map)
           : null,
       createdAt: json['createdAt'] as String?,

@@ -21,7 +21,7 @@ class UserSession {
     jwtToken = token;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_token', token);
-    
+
     final sub = getSubFromJwt(token);
     if (sub != null) {
       userId = sub;
@@ -32,7 +32,7 @@ class UserSession {
   static String? getSubFromJwt(String token) {
     try {
       final parts = token.split('.');
-      
+
       if (parts.length != 3) {
         return null;
       }
@@ -72,7 +72,7 @@ class UserSession {
   static Future<void> clearSession() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Clear all session-related data
       await prefs.remove('user_token');
       await prefs.remove('customer_id');
@@ -80,7 +80,7 @@ class UserSession {
       await prefs.remove('guest_mode_enabled');
       await prefs.remove('guest_policy_accepted');
       await prefs.remove('current_user');
-      
+
       // Reset static variables
       jwtToken = null;
       userId = null;
@@ -91,5 +91,3 @@ class UserSession {
     }
   }
 }
-
-

@@ -18,16 +18,18 @@ import 'test_category.dart';
 
 class ApiService {
   final String baseUrl;
-  
+
   const ApiService._(this.baseUrl);
-  
+
   factory ApiService({String? baseUrl}) {
     return ApiService._(baseUrl ?? AppConfig.apiBaseUrl);
   }
 
   // Bulk fetch basic customer profiles
   Future<http.Response> fetchCustomerProfilesBulk(List<String> userIds) async {
-    final uri = Uri.parse('${AppConfig.apiBaseUrl}/customer-profile/basic/bulk');
+    final uri = Uri.parse(
+      '${AppConfig.apiBaseUrl}/customer-profile/basic/bulk',
+    );
     final resp = await http.post(
       uri,
       headers: const {
@@ -62,12 +64,12 @@ class ApiService {
     return resp;
   }
 
-  Future<http.Response> login({required String email, required String password}) async {
+  Future<http.Response> login({
+    required String email,
+    required String password,
+  }) async {
     final uri = Uri.parse('$baseUrl/auth/login');
-    final payload = <String, dynamic>{
-      'email': email,
-      'password': password,
-    };
+    final payload = <String, dynamic>{'email': email, 'password': password};
     final resp = await http.post(
       uri,
       headers: const {
@@ -75,7 +77,7 @@ class ApiService {
         'Accept': 'application/json',
       },
       body: jsonEncode(payload),
-    );    
+    );
     return resp;
   }
 
@@ -83,10 +85,10 @@ class ApiService {
   Future<http.Response> createChild(ChildData childData) async {
     // Đảm bảo UserSession đã được khởi tạo
     await UserSession.initFromPrefs();
-    
+
     // Lấy parentId từ user session
     final parentId = UserSession.userId;
-    
+
     if (parentId == null || parentId.isEmpty) {
       throw Exception('User ID not found. Please login first.');
     }
@@ -97,15 +99,17 @@ class ApiService {
     // }
 
     // Tạo payload với format mới và parentId từ user session
-    
-    final payload = childData.copyWith(
-      parentId: parentId, // Gửi parentId dưới dạng String
-    ).toJson();
+
+    final payload = childData
+        .copyWith(
+          parentId: parentId, // Gửi parentId dưới dạng String
+        )
+        .toJson();
 
     final uri = Uri.parse('${AppConfig.cddAPI}/children');
-    
+
     // Debug: In thông tin request
-    
+
     final resp = await http.post(
       uri,
       headers: {
@@ -115,15 +119,17 @@ class ApiService {
       },
       body: jsonEncode(payload),
     );
-    
+
     // Debug: In response
-    
+
     return resp;
   }
 
   /// Lấy danh sách bài test có phân trang
   Future<http.Response> getTestsPaginated({int page = 0, int size = 10}) async {
-    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/paginated?page=$page&size=$size');
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/cdd-tests/paginated?page=$page&size=$size',
+    );
     final resp = await http.get(
       uri,
       headers: const {
@@ -135,8 +141,14 @@ class ApiService {
   }
 
   /// Lấy danh sách bài test theo độ tuổi có phân trang
-  Future<http.Response> getTestsByAgePaginated({int ageMonths = 0, int page = 0, int size = 10}) async {
-    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/age/$ageMonths/status/ACTIVE/paginated?page=$page&size=$size');
+  Future<http.Response> getTestsByAgePaginated({
+    int ageMonths = 0,
+    int page = 0,
+    int size = 10,
+  }) async {
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/cdd-tests/age/$ageMonths/status/ACTIVE/paginated?page=$page&size=$size',
+    );
     final resp = await http.get(
       uri,
       headers: const {
@@ -148,8 +160,14 @@ class ApiService {
   }
 
   /// Lấy danh sách bài test theo category có phân trang
-  Future<http.Response> getTestsByCategoryPaginated({String category = '', int page = 0, int size = 10}) async {
-    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/category/$category/status/ACTIVE/paginated?page=$page&size=$size');
+  Future<http.Response> getTestsByCategoryPaginated({
+    String category = '',
+    int page = 0,
+    int size = 10,
+  }) async {
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/cdd-tests/category/$category/status/ACTIVE/paginated?page=$page&size=$size',
+    );
     final resp = await http.get(
       uri,
       headers: const {
@@ -161,8 +179,15 @@ class ApiService {
   }
 
   /// Lấy danh sách bài test theo cả age và category có phân trang
-  Future<http.Response> getTestsByAgeAndCategoryPaginated({int ageMonths = 0, String category = '', int page = 0, int size = 10}) async {
-    final uri = Uri.parse('${AppConfig.cddAPI}/cdd-tests/age/$ageMonths/category/$category/status/ACTIVE/paginated?page=$page&size=$size');
+  Future<http.Response> getTestsByAgeAndCategoryPaginated({
+    int ageMonths = 0,
+    String category = '',
+    int page = 0,
+    int size = 10,
+  }) async {
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/cdd-tests/age/$ageMonths/category/$category/status/ACTIVE/paginated?page=$page&size=$size',
+    );
     final resp = await http.get(
       uri,
       headers: const {
@@ -196,7 +221,7 @@ class ApiService {
         'Accept': 'application/json',
       },
     );
-    
+
     if (resp.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(resp.body);
       return jsonList.map((json) => TestCategory.fromJson(json)).toList();
@@ -259,9 +284,7 @@ class ApiService {
   /// Gửi kết quả bài test lên server
   Future<http.Response> submitTestResult(TestResultModel testResult) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/child-test-records');
-    
-    
-    
+
     final resp = await http.post(
       uri,
       headers: const {
@@ -270,15 +293,15 @@ class ApiService {
       },
       body: jsonEncode(testResult.toJson()),
     );
-    
-    
-    
+
     return resp;
   }
 
   /// Lấy danh sách kết quả bài test của một trẻ
   Future<http.Response> getTestResultsByChildId(String childId) async {
-    final uri = Uri.parse('${AppConfig.cddAPI}/child-test-records/child/$childId');
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/child-test-records/child/$childId',
+    );
     final resp = await http.get(
       uri,
       headers: const {
@@ -286,9 +309,7 @@ class ApiService {
         'Accept': 'application/json',
       },
     );
-    
-    
-    
+
     return resp;
   }
 
@@ -299,10 +320,10 @@ class ApiService {
     String sortBy = 'title',
     String sortDir = 'desc',
   }) async {
-    final uri = Uri.parse('${AppConfig.cddAPI}/books?page=$page&size=$size&sortBy=$sortBy&sortDir=$sortDir');
-    
-    
-    
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/books?page=$page&size=$size&sortBy=$sortBy&sortDir=$sortDir',
+    );
+
     final resp = await http.get(
       uri,
       headers: const {
@@ -310,9 +331,7 @@ class ApiService {
         'Accept': 'application/json',
       },
     );
-    
-    
-    
+
     return resp;
   }
 
@@ -330,15 +349,15 @@ class ApiService {
       'sortBy': sortBy,
       'sortDir': sortDir,
     };
-    
+
     if (filter != null && filter.isNotEmpty) {
       queryParams['filter'] = filter;
     }
-    
-    final uri = Uri.parse('${AppConfig.cddAPI}/books').replace(queryParameters: queryParams);
-    
-    
-    
+
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/books',
+    ).replace(queryParameters: queryParams);
+
     final resp = await http.get(
       uri,
       headers: const {
@@ -346,9 +365,7 @@ class ApiService {
         'Accept': 'application/json',
       },
     );
-    
-    
-    
+
     return resp;
   }
 
@@ -368,9 +385,7 @@ class ApiService {
   /// Lấy chi tiết sách theo ID
   Future<http.Response> getBookById(int bookId) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/books/$bookId');
-    
-    
-    
+
     final resp = await http.get(
       uri,
       headers: const {
@@ -378,9 +393,7 @@ class ApiService {
         'Accept': 'application/json',
       },
     );
-    
-    
-    
+
     return resp;
   }
 
@@ -400,6 +413,22 @@ class ApiService {
   /// Lấy toàn bộ chương trình can thiệp (developmental programs)
   Future<http.Response> getDevelopmentalPrograms() async {
     final uri = Uri.parse('${AppConfig.cddAPI}/developmental-programs');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Lấy danh sách tiêu chí (criteria/items) của một chương trình can thiệp
+  /// Giả định endpoint: /developmental-programs/{programId}/criteria
+  Future<http.Response> getProgramCriteria(int programId) async {
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/developmental-programs/$programId/criteria',
+    );
     final resp = await http.get(
       uri,
       headers: const {
@@ -430,16 +459,16 @@ class ApiService {
     dynamic file,
   ) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/books/upload');
-    
+
     var request = http.MultipartRequest('POST', uri);
-    
+
     // Add text fields (all as strings)
     bookData.forEach((key, value) {
       if (key != 'file' && value != null) {
         request.fields[key] = value.toString();
       }
     });
-    
+
     // Add file if available under field name 'file'
     if (file != null) {
       if (file is PlatformFile) {
@@ -455,30 +484,19 @@ class ApiService {
         }
       } else if (file is File) {
         // For web or other platforms
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'file',
-            file.path,
-          ),
-        );
+        request.files.add(await http.MultipartFile.fromPath('file', file.path));
       } else {
         // For web HTML File
         try {
           // Convert HTML File to bytes for web
           final bytes = await _htmlFileToBytes(file);
           request.files.add(
-            http.MultipartFile.fromBytes(
-              'file',
-              bytes,
-              filename: file.name,
-            ),
+            http.MultipartFile.fromBytes('file', bytes, filename: file.name),
           );
-        } catch (e) {
-          print('Error converting HTML file to bytes: $e');
-        }
+        } catch (e) {}
       }
     }
-    
+
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
     return response;
@@ -490,7 +508,7 @@ class ApiService {
       // For web platform
       final reader = html.FileReader();
       final completer = Completer<Uint8List>();
-      
+
       reader.onLoad.listen((event) {
         final dynamic result = reader.result;
         if (result is ByteBuffer) {
@@ -500,14 +518,16 @@ class ApiService {
         } else if (result is List<int>) {
           completer.complete(Uint8List.fromList(result));
         } else {
-          completer.completeError('Unsupported FileReader result type: ${result.runtimeType}');
+          completer.completeError(
+            'Unsupported FileReader result type: ${result.runtimeType}',
+          );
         }
       });
-      
+
       reader.onError.listen((event) {
         completer.completeError('Failed to read file');
       });
-      
+
       reader.readAsArrayBuffer(htmlFile);
       return completer.future;
     } else {
@@ -530,7 +550,9 @@ class ApiService {
 
   /// Get list of YouTube videos
   Future<http.Response> getYoutubeVideos() async {
-    final uri = Uri.parse('http://192.168.1.184/api/cdd/api/v1/neon/youtube-videos');
+    final uri = Uri.parse(
+      'http://192.168.1.184/api/cdd/api/v1/neon/youtube-videos',
+    );
     final resp = await http.get(
       uri,
       headers: const {
@@ -543,7 +565,9 @@ class ApiService {
 
   /// Delete a YouTube video by ID
   Future<http.Response> deleteYoutubeVideo(String videoId) async {
-    final uri = Uri.parse('http://192.168.1.184/api/cdd/api/v1/neon/youtube-videos/$videoId');
+    final uri = Uri.parse(
+      'http://192.168.1.184/api/cdd/api/v1/neon/youtube-videos/$videoId',
+    );
     final resp = await http.delete(
       uri,
       headers: const {
@@ -568,7 +592,9 @@ class ApiService {
   }
 
   /// Tạo bài post can thiệp mới
-  Future<http.Response> createInterventionPost(Map<String, dynamic> postData) async {
+  Future<http.Response> createInterventionPost(
+    Map<String, dynamic> postData,
+  ) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/intervention-posts');
     final resp = await http.post(
       uri,
@@ -596,17 +622,19 @@ class ApiService {
       'sortBy': sortBy,
       'sortDir': sortDir,
     };
-    
+
     if (postType != null && postType.isNotEmpty) {
       queryParams['postType'] = postType;
     }
-    
+
     if (isPublished != null) {
       queryParams['isPublished'] = isPublished.toString();
     }
-    
-    final uri = Uri.parse('${AppConfig.cddAPI}/intervention-posts').replace(queryParameters: queryParams);
-    
+
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/intervention-posts',
+    ).replace(queryParameters: queryParams);
+
     final resp = await http.get(
       uri,
       headers: const {
@@ -631,7 +659,10 @@ class ApiService {
   }
 
   /// Cập nhật bài post can thiệp
-  Future<http.Response> updateInterventionPost(int postId, Map<String, dynamic> postData) async {
+  Future<http.Response> updateInterventionPost(
+    int postId,
+    Map<String, dynamic> postData,
+  ) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/intervention-posts/$postId');
     final resp = await http.put(
       uri,

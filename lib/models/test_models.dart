@@ -123,7 +123,7 @@ class ScoringCriteria {
   factory ScoringCriteria.fromJson(Map<String, dynamic> json) {
     final ranges = <String, ScoreRange>{};
     final scoreRangesData = json['scoreRanges'] as Map<String, dynamic>? ?? {};
-    
+
     scoreRangesData.forEach((key, value) {
       ranges[key] = ScoreRange.fromJson(value);
     });
@@ -264,9 +264,11 @@ class Test {
       minAgeMonths: json['minAgeMonths'] ?? 0,
       maxAgeMonths: json['maxAgeMonths'] ?? 0,
       status: json['status'] ?? '',
-      questions: (json['questions'] as List<dynamic>?)
-          ?.map((question) => TestQuestion.fromJson(question))
-          .toList() ?? [],
+      questions:
+          (json['questions'] as List<dynamic>?)
+              ?.map((question) => TestQuestion.fromJson(question))
+              .toList() ??
+          [],
       scoringCriteria: ScoringCriteria.fromJson(json['scoringCriteria'] ?? {}),
       notes: Map<String, String>.from(json['notes'] ?? {}),
     );
@@ -417,10 +419,14 @@ class TestResult {
       totalQuestions: json['totalQuestions'] ?? 0,
       answeredQuestions: json['answeredQuestions'] ?? 0,
       timeSpent: json['timeSpent'] ?? 0,
-      completedAt: DateTime.parse(json['completedAt'] ?? DateTime.now().toIso8601String()),
-      questionResults: (json['questionResults'] as List<dynamic>?)
-          ?.map((result) => QuestionResult.fromJson(result))
-          .toList() ?? [],
+      completedAt: DateTime.parse(
+        json['completedAt'] ?? DateTime.now().toIso8601String(),
+      ),
+      questionResults:
+          (json['questionResults'] as List<dynamic>?)
+              ?.map((result) => QuestionResult.fromJson(result))
+              .toList() ??
+          [],
       notes: json['notes'],
     );
   }
@@ -436,7 +442,9 @@ class TestResult {
       'answeredQuestions': answeredQuestions,
       'timeSpent': timeSpent,
       'completedAt': completedAt.toIso8601String(),
-      'questionResults': questionResults.map((result) => result.toJson()).toList(),
+      'questionResults': questionResults
+          .map((result) => result.toJson())
+          .toList(),
       'notes': notes,
     };
   }
@@ -481,7 +489,9 @@ class QuestionResult {
       questionId: json['questionId'] ?? '',
       answer: json['answer'] ?? false,
       timeSpent: json['timeSpent'] ?? 0,
-      answeredAt: DateTime.parse(json['answeredAt'] ?? DateTime.now().toIso8601String()),
+      answeredAt: DateTime.parse(
+        json['answeredAt'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 
@@ -503,8 +513,12 @@ class SampleTests {
         id: '1',
         assessmentCode: 'DEVELOPMENTAL_SCREENING_V1',
         names: {'vi': 'Bảng câu hỏi sàng lọc phát triển trẻ em'},
-        descriptions: {'vi': 'Bảng câu hỏi đánh giá các kỹ năng phát triển của trẻ em'},
-        instructions: {'vi': 'Hãy trả lời các câu hỏi dựa trên quan sát về trẻ'},
+        descriptions: {
+          'vi': 'Bảng câu hỏi đánh giá các kỹ năng phát triển của trẻ em',
+        },
+        instructions: {
+          'vi': 'Hãy trả lời các câu hỏi dựa trên quan sát về trẻ',
+        },
         category: 'DEVELOPMENTAL_SCREENING',
         minAgeMonths: 0,
         maxAgeMonths: 6,

@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 class ExpertTimeSlot {
   final String start; // HH:mm
-  final String end;   // HH:mm
+  final String end; // HH:mm
   final bool available;
 
-  const ExpertTimeSlot({required this.start, required this.end, this.available = true});
+  const ExpertTimeSlot({
+    required this.start,
+    required this.end,
+    this.available = true,
+  });
 }
 
 class ExpertDaySchedule {
@@ -19,7 +23,8 @@ class Expert {
   final String id;
   final String name;
   final String title;
-  final List<String> specialties; // giao_tiep, van_dong, nhan_thuc, xa_hoi, cam_xuc
+  final List<String>
+  specialties; // giao_tiep, van_dong, nhan_thuc, xa_hoi, cam_xuc
   final String city;
   final double rating;
   final int reviews;
@@ -156,7 +161,19 @@ class SampleExperts {
     ];
   }
 
-  static List<String> cities() => ['Tất cả', 'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng'];
-  static List<String> specialties() => ['Tất cả', 'giao_tiep', 'van_dong', 'nhan_thuc', 'xa_hoi', 'cam_xuc'];
+  static List<String> cities() => [
+    'Tất cả',
+    'Hà Nội',
+    'TP. Hồ Chí Minh',
+    'Đà Nẵng',
+  ];
+  static List<String> specialties() => [
+    'Tất cả',
+    'giao_tiep',
+    'van_dong',
+    'nhan_thuc',
+    'xa_hoi',
+    'cam_xuc',
+  ];
   static List<String> ratings() => ['Tất cả', '4.5+', '4.0+', '3.0+'];
 }

@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+enum CardType { default_, elevated, outlined, filled }
 
-enum CardType {
-  default_,
-  elevated,
-  outlined,
-  filled,
-}
-
-enum CardSize {
-  small,
-  medium,
-  large,
-}
+enum CardSize { small, medium, large }
 
 class MeowCard extends StatelessWidget {
   final String? title;
@@ -57,11 +47,7 @@ class MeowCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      height: height,
-      child: _buildCard(context),
-    );
+    return SizedBox(width: width, height: height, child: _buildCard(context));
   }
 
   Widget _buildCard(BuildContext context) {
@@ -82,7 +68,9 @@ class MeowCard extends StatelessWidget {
       margin: margin ?? _getMargin(),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius ?? _getBorderRadius()),
-        side: borderColor != null ? BorderSide(color: borderColor!) : BorderSide.none,
+        side: borderColor != null
+            ? BorderSide(color: borderColor!)
+            : BorderSide.none,
       ),
       color: backgroundColor,
       child: _buildCardContent(context),
@@ -95,7 +83,9 @@ class MeowCard extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius ?? _getBorderRadius()),
-        side: borderColor != null ? BorderSide(color: borderColor!) : BorderSide.none,
+        side: borderColor != null
+            ? BorderSide(color: borderColor!)
+            : BorderSide.none,
       ),
       color: backgroundColor,
       child: _buildCardContent(context),
@@ -108,10 +98,7 @@ class MeowCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius ?? _getBorderRadius()),
-        side: BorderSide(
-          color: borderColor ?? AppColors.cardBorder,
-          width: 1,
-        ),
+        side: BorderSide(color: borderColor ?? AppColors.cardBorder, width: 1),
       ),
       color: backgroundColor,
       child: _buildCardContent(context),
@@ -124,7 +111,9 @@ class MeowCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius ?? _getBorderRadius()),
-        side: borderColor != null ? BorderSide(color: borderColor!) : BorderSide.none,
+        side: borderColor != null
+            ? BorderSide(color: borderColor!)
+            : BorderSide.none,
       ),
       color: backgroundColor ?? AppColors.grey50,
       child: _buildCardContent(context),
@@ -142,29 +131,23 @@ class MeowCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header section with leading, title, description, and trailing
-            if (leading != null || title != null || description != null || trailing != null)
+            if (leading != null ||
+                title != null ||
+                description != null ||
+                trailing != null)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (leading != null) ...[
-                    leading!,
-                    const SizedBox(width: 12),
-                  ],
+                  if (leading != null) ...[leading!, const SizedBox(width: 12)],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (title != null)
-                          Text(
-                            title!,
-                            style: _getTitleStyle(),
-                          ),
+                          Text(title!, style: _getTitleStyle()),
                         if (description != null) ...[
                           if (title != null) const SizedBox(height: 4),
-                          Text(
-                            description!,
-                            style: _getDescriptionStyle(),
-                          ),
+                          Text(description!, style: _getDescriptionStyle()),
                         ],
                       ],
                     ),
@@ -175,29 +158,32 @@ class MeowCard extends StatelessWidget {
                   ],
                 ],
               ),
-            
+
             // Divider
-            if (showDivider && (title != null || description != null) && content != null)
+            if (showDivider &&
+                (title != null || description != null) &&
+                content != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Divider(
-                  color: AppColors.grey300,
-                  height: 1,
-                ),
+                child: Divider(color: AppColors.grey300, height: 1),
               ),
-            
+
             // Content
             if (content != null) content!,
-            
+
             // Actions
             if (actions != null && actions!.isNotEmpty) ...[
               if (content != null) const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: actions!.map((action) => Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: action,
-                )).toList(),
+                children: actions!
+                    .map(
+                      (action) => Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: action,
+                      ),
+                    )
+                    .toList(),
               ),
             ],
           ],
@@ -265,20 +251,11 @@ class MeowCard extends StatelessWidget {
   TextStyle _getDescriptionStyle() {
     switch (size) {
       case CardSize.small:
-        return TextStyle(
-          fontSize: 12,
-          color: AppColors.grey600,
-        );
+        return TextStyle(fontSize: 12, color: AppColors.grey600);
       case CardSize.medium:
-        return TextStyle(
-          fontSize: 14,
-          color: AppColors.grey600,
-        );
+        return TextStyle(fontSize: 14, color: AppColors.grey600);
       case CardSize.large:
-        return TextStyle(
-          fontSize: 16,
-          color: AppColors.grey600,
-        );
+        return TextStyle(fontSize: 16, color: AppColors.grey600);
     }
   }
 }

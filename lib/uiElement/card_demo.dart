@@ -3,20 +3,21 @@ import 'card.dart';
 import 'button.dart';
 import '../constants/app_colors.dart';
 
-
 class CardDemo extends StatelessWidget {
   final bool showAppBar;
-  
+
   const CardDemo({super.key, this.showAppBar = true});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: showAppBar ? AppBar(
-        title: const Text('Card Demo'),
-        backgroundColor: AppColors.cardBorder,
-        foregroundColor: AppColors.white,
-      ) : null,
+      appBar: showAppBar
+          ? AppBar(
+              title: const Text('Card Demo'),
+              backgroundColor: AppColors.cardBorder,
+              foregroundColor: AppColors.white,
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -25,17 +26,25 @@ class CardDemo extends StatelessWidget {
             _buildSection('Default Cards', [
               MeowCard(
                 title: 'Default Card',
-                description: 'This is a default card with title and description',
-                content: const Text('This is the content area of the card. You can put any widget here.'),
+                description:
+                    'This is a default card with title and description',
+                content: const Text(
+                  'This is the content area of the card. You can put any widget here.',
+                ),
                 onTap: () => _showSnackBar(context, 'Default card tapped'),
               ),
               const SizedBox(height: 16),
               MeowCard(
                 title: 'Card with Leading Icon',
                 description: 'Card with an icon on the left side',
-                leading: const Icon(Icons.star, color: AppColors.amber, size: 24),
+                leading: const Icon(
+                  Icons.star,
+                  color: AppColors.amber,
+                  size: 24,
+                ),
                 content: const Text('This card has a leading icon.'),
-                onTap: () => _showSnackBar(context, 'Card with leading icon tapped'),
+                onTap: () =>
+                    _showSnackBar(context, 'Card with leading icon tapped'),
               ),
               const SizedBox(height: 16),
               MeowCard(
@@ -56,7 +65,7 @@ class CardDemo extends StatelessWidget {
                 ],
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Elevated Cards', [
               ElevatedMeowCard(
@@ -71,10 +80,13 @@ class CardDemo extends StatelessWidget {
                 description: 'Card with trailing widget on the right',
                 trailing: const Icon(Icons.more_vert, color: AppColors.primary),
                 content: const Text('This card has a trailing icon.'),
-                onTap: () => _showSnackBar(context, 'Elevated card with trailing tapped'),
+                onTap: () => _showSnackBar(
+                  context,
+                  'Elevated card with trailing tapped',
+                ),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Outlined Cards', [
               OutlinedMeowCard(
@@ -89,10 +101,11 @@ class CardDemo extends StatelessWidget {
                 description: 'Card with custom border color',
                 borderColor: AppColors.cardBorder,
                 content: const Text('This card has a green border.'),
-                onTap: () => _showSnackBar(context, 'Custom border card tapped'),
+                onTap: () =>
+                    _showSnackBar(context, 'Custom border card tapped'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Filled Cards', [
               FilledMeowCard(
@@ -107,10 +120,11 @@ class CardDemo extends StatelessWidget {
                 description: 'Card with custom background color',
                 backgroundColor: AppColors.primaryLight,
                 content: const Text('This card has a light green background.'),
-                onTap: () => _showSnackBar(context, 'Custom background card tapped'),
+                onTap: () =>
+                    _showSnackBar(context, 'Custom background card tapped'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Card Sizes', [
               MeowCard(
@@ -137,7 +151,7 @@ class CardDemo extends StatelessWidget {
                 onTap: () => _showSnackBar(context, 'Large card tapped'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Complex Cards', [
               MeowCard(
@@ -150,7 +164,11 @@ class CardDemo extends StatelessWidget {
                     color: AppColors.cardBorder,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.shopping_bag, color: AppColors.white, size: 30),
+                  child: const Icon(
+                    Icons.shopping_bag,
+                    color: AppColors.white,
+                    size: 30,
+                  ),
                 ),
                 trailing: const Text(
                   '\$99.99',
@@ -212,7 +230,10 @@ class CardDemo extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                   child: Icon(Icons.article, color: AppColors.white),
                 ),
-                trailing: const Icon(Icons.bookmark_border, color: AppColors.primary),
+                trailing: const Icon(
+                  Icons.bookmark_border,
+                  color: AppColors.primary,
+                ),
                 content: const Text(
                   'This is a sample article content. It can contain a longer text that describes the article or provides a preview of the content. The text can span multiple lines and provide rich information to the user.',
                   style: TextStyle(height: 1.5),
@@ -227,24 +248,26 @@ class CardDemo extends StatelessWidget {
                   PrimaryButton(
                     text: 'Read More',
                     size: ButtonSize.small,
-                    onPressed: () => _showSnackBar(context, 'Read More pressed'),
+                    onPressed: () =>
+                        _showSnackBar(context, 'Read More pressed'),
                   ),
                 ],
                 onTap: () => _showSnackBar(context, 'Article card tapped'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Cards without Divider', [
               MeowCard(
                 title: 'No Divider Card',
-                description: 'This card has no divider between header and content',
+                description:
+                    'This card has no divider between header and content',
                 content: const Text('The divider is hidden in this card.'),
                 showDivider: false,
                 onTap: () => _showSnackBar(context, 'No divider card tapped'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Custom Styled Cards', [
               MeowCard(
@@ -254,7 +277,8 @@ class CardDemo extends StatelessWidget {
                 borderColor: AppColors.cardBorder,
                 borderRadius: 16,
                 content: const Text('This card has custom styling.'),
-                onTap: () => _showSnackBar(context, 'Custom styled card tapped'),
+                onTap: () =>
+                    _showSnackBar(context, 'Custom styled card tapped'),
               ),
             ]),
           ],
@@ -290,4 +314,4 @@ class CardDemo extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -6,11 +6,8 @@ import '../services/method_service.dart';
 
 class MethodsView extends StatefulWidget {
   final InterventionMethodGroupModel methodGroup;
-  
-  const MethodsView({
-    super.key,
-    required this.methodGroup,
-  });
+
+  const MethodsView({super.key, required this.methodGroup});
 
   @override
   State<MethodsView> createState() => _MethodsViewState();
@@ -32,25 +29,23 @@ class _MethodsViewState extends State<MethodsView> {
   @override
   void initState() {
     super.initState();
-    print('🎯 MethodsView initState called for group: ${widget.methodGroup.id}'); // Debug log
+
     _load();
   }
 
   Future<void> _load() async {
-    print('🚀 Starting to load methods for group ${widget.methodGroup.id}...'); // Debug log
     setState(() {
       _isLoading = true;
       _hasError = false;
       _errorMessage = '';
     });
     try {
-      print('📞 Calling service.getMethodsByGroup...'); // Debug log
       final paged = await _service.getMethodsByGroup(
         groupId: widget.methodGroup.id,
         page: _page,
         size: _size,
       );
-      print('✅ Service returned ${paged.content.length} methods'); // Debug log
+
       setState(() {
         _methods = paged.content;
         _totalElements = paged.totalElements;
@@ -59,7 +54,6 @@ class _MethodsViewState extends State<MethodsView> {
         _hasPrevious = paged.hasPrevious;
       });
     } catch (e) {
-      print('❌ Error in _load: $e'); // Debug log
       setState(() {
         _hasError = true;
         _errorMessage = e.toString();
@@ -80,12 +74,24 @@ class _MethodsViewState extends State<MethodsView> {
 
   Future<void> _createOrEditMethod({InterventionMethodModel? method}) async {
     final codeController = TextEditingController(text: method?.code ?? '');
-    final displayedNameViController = TextEditingController(text: method?.displayedName.vi ?? '');
-    final displayedNameEnController = TextEditingController(text: method?.displayedName.en ?? '');
-    final descViController = TextEditingController(text: method?.description?.vi ?? '');
-    final descEnController = TextEditingController(text: method?.description?.en ?? '');
-    final minAgeController = TextEditingController(text: method?.minAgeMonths.toString() ?? '12');
-    final maxAgeController = TextEditingController(text: method?.maxAgeMonths.toString() ?? '60');
+    final displayedNameViController = TextEditingController(
+      text: method?.displayedName.vi ?? '',
+    );
+    final displayedNameEnController = TextEditingController(
+      text: method?.displayedName.en ?? '',
+    );
+    final descViController = TextEditingController(
+      text: method?.description?.vi ?? '',
+    );
+    final descEnController = TextEditingController(
+      text: method?.description?.en ?? '',
+    );
+    final minAgeController = TextEditingController(
+      text: method?.minAgeMonths.toString() ?? '12',
+    );
+    final maxAgeController = TextEditingController(
+      text: method?.maxAgeMonths.toString() ?? '60',
+    );
     final isEdit = method != null;
 
     final result = await showDialog<InterventionMethodModel>(
@@ -101,15 +107,15 @@ class _MethodsViewState extends State<MethodsView> {
               children: [
                 Text(
                   isEdit ? 'Chỉnh sửa phương pháp' : 'Tạo phương pháp mới',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Trong nhóm: ${widget.methodGroup.displayedName.vi}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 Expanded(
@@ -173,7 +179,8 @@ class _MethodsViewState extends State<MethodsView> {
                           controller: descViController,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: 'VD: <p>Phương pháp trị liệu sử dụng trò chơi...</p>',
+                            hintText:
+                                'VD: <p>Phương pháp trị liệu sử dụng trò chơi...</p>',
                           ),
                           maxLines: 3,
                         ),
@@ -187,7 +194,8 @@ class _MethodsViewState extends State<MethodsView> {
                           controller: descEnController,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: 'VD: <p>Therapeutic method using play...</p>',
+                            hintText:
+                                'VD: <p>Therapeutic method using play...</p>',
                           ),
                           maxLines: 3,
                         ),
@@ -207,22 +215,25 @@ class _MethodsViewState extends State<MethodsView> {
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          final minAgeMonths = int.tryParse(minAgeController.text) ?? 12;
-                          final maxAgeMonths = int.tryParse(maxAgeController.text) ?? 60;
-                          
+                          final minAgeMonths =
+                              int.tryParse(minAgeController.text) ?? 12;
+                          final maxAgeMonths =
+                              int.tryParse(maxAgeController.text) ?? 60;
+
                           final displayedName = LocalizedText(
                             vi: displayedNameViController.text.trim(),
                             en: displayedNameEnController.text.trim(),
                           );
-                          
+
                           LocalizedText? description;
-                          if (descViController.text.trim().isNotEmpty || descEnController.text.trim().isNotEmpty) {
+                          if (descViController.text.trim().isNotEmpty ||
+                              descEnController.text.trim().isNotEmpty) {
                             description = LocalizedText(
                               vi: descViController.text.trim(),
                               en: descEnController.text.trim(),
                             );
                           }
-                          
+
                           InterventionMethodModel result;
                           if (isEdit) {
                             result = await _service.updateMethod(
@@ -244,7 +255,7 @@ class _MethodsViewState extends State<MethodsView> {
                               groupId: widget.methodGroup.id,
                             );
                           }
-                          
+
                           Navigator.pop(context, result);
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -276,7 +287,9 @@ class _MethodsViewState extends State<MethodsView> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc chắn muốn xóa phương pháp "${method.displayedName.vi}"?'),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa phương pháp "${method.displayedName.vi}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -314,8 +327,8 @@ class _MethodsViewState extends State<MethodsView> {
 
   @override
   Widget build(BuildContext context) {
-    final groupDisplayName = widget.methodGroup.displayedName.vi.isNotEmpty 
-        ? widget.methodGroup.displayedName.vi 
+    final groupDisplayName = widget.methodGroup.displayedName.vi.isNotEmpty
+        ? widget.methodGroup.displayedName.vi
         : widget.methodGroup.displayedName.en;
 
     return Scaffold(
@@ -342,9 +355,7 @@ class _MethodsViewState extends State<MethodsView> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_hasError) {
@@ -352,11 +363,7 @@ class _MethodsViewState extends State<MethodsView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'Có lỗi xảy ra',
@@ -369,10 +376,7 @@ class _MethodsViewState extends State<MethodsView> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _load,
-              child: const Text('Thử lại'),
-            ),
+            ElevatedButton(onPressed: _load, child: const Text('Thử lại')),
           ],
         ),
       );
@@ -383,11 +387,7 @@ class _MethodsViewState extends State<MethodsView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.inbox_outlined,
-              size: 64,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             const Text(
               'Chưa có phương pháp nào',
@@ -420,17 +420,11 @@ class _MethodsViewState extends State<MethodsView> {
             children: [
               Text(
                 'Hiển thị ${_methods.length} / $_totalElements phương pháp',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
               Text(
                 'Trang ${_page + 1} / $_totalPages',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -451,9 +445,7 @@ class _MethodsViewState extends State<MethodsView> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.grey[300]!),
-            ),
+            border: Border(top: BorderSide(color: Colors.grey[300]!)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -466,9 +458,9 @@ class _MethodsViewState extends State<MethodsView> {
               const SizedBox(width: 16),
               // Page numbers
               ...List.generate(_totalPages, (index) {
-                if (_totalPages <= 7 || 
-                    index == 0 || 
-                    index == _totalPages - 1 || 
+                if (_totalPages <= 7 ||
+                    index == 0 ||
+                    index == _totalPages - 1 ||
                     (index >= _page - 1 && index <= _page + 1)) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -476,16 +468,25 @@ class _MethodsViewState extends State<MethodsView> {
                       onTap: () => _loadPage(index),
                       borderRadius: BorderRadius.circular(4),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: index == _page ? AppColors.primary : Colors.transparent,
+                          color: index == _page
+                              ? AppColors.primary
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           '${index + 1}',
                           style: TextStyle(
-                            color: index == _page ? Colors.white : Colors.black87,
-                            fontWeight: index == _page ? FontWeight.bold : FontWeight.normal,
+                            color: index == _page
+                                ? Colors.white
+                                : Colors.black87,
+                            fontWeight: index == _page
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
                       ),
@@ -513,10 +514,11 @@ class _MethodsViewState extends State<MethodsView> {
   }
 
   Widget _buildMethodCard(InterventionMethodModel method) {
-    final displayedName = method.displayedName.vi.isNotEmpty 
-        ? method.displayedName.vi 
+    final displayedName = method.displayedName.vi.isNotEmpty
+        ? method.displayedName.vi
         : method.displayedName.en;
-    final displayedDesc = method.description?.vi ?? method.description?.en ?? '';
+    final displayedDesc =
+        method.description?.vi ?? method.description?.en ?? '';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -538,38 +540,41 @@ class _MethodsViewState extends State<MethodsView> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                        if (method.code.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            method.code,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                              fontFamily: 'monospace',
-                            ),
+                      if (method.code.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          method.code,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            fontFamily: 'monospace',
                           ),
-                        ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '${method.minAgeMonths}-${method.maxAgeMonths} tháng',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${method.minAgeMonths}-${method.maxAgeMonths} tháng',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                    ),
                     const SizedBox(width: 8),
                     PopupMenuButton<String>(
                       onSelected: (value) {
@@ -617,10 +622,7 @@ class _MethodsViewState extends State<MethodsView> {
                 const SizedBox(width: 4),
                 Text(
                   'Độ tuổi: ${method.minAgeMonths}-${method.maxAgeMonths} tháng',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -644,24 +646,12 @@ class _MethodsViewState extends State<MethodsView> {
                       color: AppColors.textSecondary,
                       lineHeight: LineHeight(1.3),
                     ),
-                    "p": Style(
-                      margin: Margins.only(bottom: 6),
-                    ),
-                    "strong": Style(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    "em": Style(
-                      fontStyle: FontStyle.italic,
-                    ),
-                    "ul": Style(
-                      margin: Margins.only(left: 16),
-                    ),
-                    "ol": Style(
-                      margin: Margins.only(left: 16),
-                    ),
-                    "li": Style(
-                      margin: Margins.only(bottom: 4),
-                    ),
+                    "p": Style(margin: Margins.only(bottom: 6)),
+                    "strong": Style(fontWeight: FontWeight.bold),
+                    "em": Style(fontStyle: FontStyle.italic),
+                    "ul": Style(margin: Margins.only(left: 16)),
+                    "ol": Style(margin: Margins.only(left: 16)),
+                    "li": Style(margin: Margins.only(bottom: 4)),
                     "h1": Style(
                       fontSize: FontSize(16),
                       fontWeight: FontWeight.bold,

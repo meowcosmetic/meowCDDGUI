@@ -44,14 +44,19 @@ class _PdfListWidgetState extends State<PdfListWidget> {
       return ft.contains('pdf') || title.endsWith('.pdf');
     }).toList();
     final listToShow = pdfItems.isNotEmpty ? pdfItems : widget.filteredItems;
-    
+
     if (widget.isLoading && widget.currentPage == 0) {
-      return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: CircularProgressIndicator(),
+        ),
+      );
     }
     if (listToShow.isEmpty) {
       return widget.emptyStateBuilder();
     }
-    
+
     return ListView(
       children: [
         ...listToShow.map(_buildLibraryItemCard).toList(),
@@ -121,18 +126,32 @@ class _PdfListWidgetState extends State<PdfListWidget> {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.person, size: 14, color: AppColors.textSecondary),
+                          Icon(
+                            Icons.person,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             item.author,
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                           const SizedBox(width: 16),
-                          Icon(Icons.category, size: 14, color: AppColors.textSecondary),
+                          Icon(
+                            Icons.category,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             item.domain,
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -143,14 +162,24 @@ class _PdfListWidgetState extends State<PdfListWidget> {
                           const SizedBox(width: 4),
                           Text(
                             '${item.rating.toStringAsFixed(1)} (${item.ratingCount})',
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                           const SizedBox(width: 16),
-                          Icon(Icons.visibility, size: 14, color: AppColors.textSecondary),
+                          Icon(
+                            Icons.visibility,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${item.viewCount} lượt xem',
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),

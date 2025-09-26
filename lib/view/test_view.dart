@@ -26,7 +26,7 @@ class _TestViewState extends State<TestView> {
   bool hasError = false;
   String errorMessage = '';
   final ApiService _api = ApiService();
-  
+
   // Pagination variables
   int currentPage = 0;
   int pageSize = 10;
@@ -38,7 +38,7 @@ class _TestViewState extends State<TestView> {
   String selectedCategory = 'Tất cả';
   int? selectedAgeMonths; // null = không filter theo tuổi
   List<String> availableCategories = [];
-  
+
   // Text editing controller for age input
   final TextEditingController _ageController = TextEditingController();
 
@@ -78,7 +78,7 @@ class _TestViewState extends State<TestView> {
 
     try {
       http.Response response;
-      
+
       // Determine which API to call based on filters
       if (selectedCategory != 'Tất cả' && selectedAgeMonths != null) {
         // Both filters active
@@ -106,17 +106,23 @@ class _TestViewState extends State<TestView> {
         );
       } else {
         // No filters active
-        response = await _api.getTestsPaginated(page: currentPage, size: pageSize);
+        response = await _api.getTestsPaginated(
+          page: currentPage,
+          size: pageSize,
+        );
       }
-      
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final List<dynamic> data = responseData['content'] ?? [];
         final int total = responseData['totalElements'] ?? 0;
         final bool isLastPage = responseData['last'] == true;
-        final int totalPages = responseData['totalPages'] ?? ((total + pageSize - 1) ~/ pageSize);
+        final int totalPages =
+            responseData['totalPages'] ?? ((total + pageSize - 1) ~/ pageSize);
 
-        final List<CDDTest> fetchedTests = data.map((json) => CDDTest.fromJson(json)).toList();
+        final List<CDDTest> fetchedTests = data
+            .map((json) => CDDTest.fromJson(json))
+            .toList();
 
         setState(() {
           if (refresh) {
@@ -137,10 +143,10 @@ class _TestViewState extends State<TestView> {
           isLoading = false;
           isLoadingMore = false;
         });
-        
+
         // Update available filter options
         _updateFilterOptions();
-        
+
         // Apply search filter only if no other filters are active
         if (selectedCategory == 'Tất cả' && selectedAgeMonths == null) {
           _applySearchFilter();
@@ -148,7 +154,8 @@ class _TestViewState extends State<TestView> {
       } else {
         setState(() {
           hasError = true;
-          errorMessage = 'Không thể tải danh sách bài test. Mã lỗi: ${response.statusCode}';
+          errorMessage =
+              'Không thể tải danh sách bài test. Mã lỗi: ${response.statusCode}';
           isLoading = false;
           isLoadingMore = false;
         });
@@ -165,7 +172,10 @@ class _TestViewState extends State<TestView> {
 
   void _updateFilterOptions() {
     // Update available categories
-    final categories = tests.map((t) => _getCategoryDisplayName(t.category)).toSet().toList();
+    final categories = tests
+        .map((t) => _getCategoryDisplayName(t.category))
+        .toSet()
+        .toList();
     categories.sort();
     availableCategories = ['Tất cả', ...categories];
   }
@@ -239,8 +249,9 @@ class _TestViewState extends State<TestView> {
         // If other filters are active, keep the current filtered results
       } else {
         // Apply search filter on top of existing filters
-        final baseTests = selectedCategory == 'Tất cả' && selectedAgeMonths == null 
-            ? tests 
+        final baseTests =
+            selectedCategory == 'Tất cả' && selectedAgeMonths == null
+            ? tests
             : filteredTests;
         filteredTests = baseTests.where((t) {
           return t.getName('vi').toLowerCase().contains(q) ||
@@ -281,7 +292,9 @@ class _TestViewState extends State<TestView> {
               icon: const Icon(Icons.category),
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreateCategoryView()),
+                MaterialPageRoute(
+                  builder: (context) => const CreateCategoryView(),
+                ),
               ),
               tooltip: 'Thêm category',
             ),
@@ -291,25 +304,30 @@ class _TestViewState extends State<TestView> {
             tooltip: 'Làm mới',
           ),
         ],
-        bottom: totalItems > 0 ? PreferredSize(
-          preferredSize: const Size.fromHeight(30),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            color: AppColors.primary.withValues(alpha: 0.1),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                                 Text(
-                   'Hiển thị ${filteredTests.length} / ${tests.length} bài test (tổng: $totalItems)',
-                   style: const TextStyle(
-                     fontSize: 12,
-                     color: AppColors.textSecondary,
-                   ),
-                 ),
-              ],
-            ),
-          ),
-        ) : null,
+        bottom: totalItems > 0
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(30),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Hiển thị ${filteredTests.length} / ${tests.length} bài test (tổng: $totalItems)',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
       ),
       body: Column(
         children: [
@@ -345,90 +363,102 @@ class _TestViewState extends State<TestView> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Filter Row
                 Row(
-                   children: [
-                     // Category Filter
-                     Expanded(
-                       child: Container(
-                         padding: const EdgeInsets.symmetric(horizontal: 12),
-                         decoration: BoxDecoration(
-                           border: Border.all(color: AppColors.borderLight),
-                           borderRadius: BorderRadius.circular(8),
-                         ),
-                         child: DropdownButtonHideUnderline(
-                           child: DropdownButton<String>(
-                             value: selectedCategory,
-                             isExpanded: true,
-                             hint: const Text('Danh mục'),
-                             items: availableCategories.map((String category) {
-                               return DropdownMenuItem<String>(
-                                 value: category,
-                                 child: Text(
-                                   category,
-                                   style: const TextStyle(fontSize: 14),
-                                   overflow: TextOverflow.ellipsis,
-                                 ),
-                               );
-                             }).toList(),
-                             onChanged: (String? newValue) {
-                               if (newValue != null) {
-                                 setState(() {
-                                   selectedCategory = newValue;
-                                 });
-                                 _filter();
-                               }
-                             },
-                           ),
-                         ),
-                       ),
-                     ),
-                     const SizedBox(width: 12),
-                     
-                     // Age Input Filter
-                     Expanded(
-                       child: Row(
-                         children: [
-                           Expanded(
-                             child: TextField(
-                               controller: _ageController,
-                               keyboardType: TextInputType.number,
-                               decoration: InputDecoration(
-                                 hintText: 'Nhập số tháng (VD: 24)',
-                                 border: OutlineInputBorder(
-                                   borderRadius: BorderRadius.circular(8),
-                                   borderSide: const BorderSide(color: AppColors.borderLight),
-                                 ),
-                                 enabledBorder: OutlineInputBorder(
-                                   borderRadius: BorderRadius.circular(8),
-                                   borderSide: const BorderSide(color: AppColors.borderLight),
-                                 ),
-                                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                 isDense: true,
-                               ),
-                               onSubmitted: (_) => _applyAgeFilter(),
-                             ),
-                           ),
-                           const SizedBox(width: 8),
-                           ElevatedButton(
-                             onPressed: _applyAgeFilter,
-                             style: ElevatedButton.styleFrom(
-                               backgroundColor: AppColors.primary,
-                               foregroundColor: AppColors.white,
-                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                               minimumSize: const Size(0, 36),
-                             ),
-                             child: const Text('Áp dụng'),
-                           ),
-                         ],
-                       ),
-                     ),
-                   ],
-                 ),
-                
+                  children: [
+                    // Category Filter
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.borderLight),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedCategory,
+                            isExpanded: true,
+                            hint: const Text('Danh mục'),
+                            items: availableCategories.map((String category) {
+                              return DropdownMenuItem<String>(
+                                value: category,
+                                child: Text(
+                                  category,
+                                  style: const TextStyle(fontSize: 14),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedCategory = newValue;
+                                });
+                                _filter();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Age Input Filter
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _ageController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: 'Nhập số tháng (VD: 24)',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.borderLight,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.borderLight,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                isDense: true,
+                              ),
+                              onSubmitted: (_) => _applyAgeFilter(),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: _applyAgeFilter,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              minimumSize: const Size(0, 36),
+                            ),
+                            child: const Text('Áp dụng'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
                 // Clear Filters Button
-                if (selectedCategory != 'Tất cả' || selectedAgeMonths != null || searchQuery.isNotEmpty)
+                if (selectedCategory != 'Tất cả' ||
+                    selectedAgeMonths != null ||
+                    searchQuery.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Align(
@@ -460,28 +490,29 @@ class _TestViewState extends State<TestView> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : hasError
-                    ? _buildErrorState()
-                    : filteredTests.isEmpty
-                        ? _buildEmptyState()
-                        : NotificationListener<ScrollNotification>(
-                            onNotification: (ScrollNotification scrollInfo) {
-                              if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-                                _loadMoreData();
-                              }
-                              return false;
-                            },
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: filteredTests.length + (hasMoreData ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index == filteredTests.length) {
-                                  return _buildLoadMoreIndicator();
-                                }
-                                final test = filteredTests[index];
-                                return _buildTestCard(test);
-                              },
-                            ),
-                          ),
+                ? _buildErrorState()
+                : filteredTests.isEmpty
+                ? _buildEmptyState()
+                : NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification scrollInfo) {
+                      if (scrollInfo.metrics.pixels ==
+                          scrollInfo.metrics.maxScrollExtent) {
+                        _loadMoreData();
+                      }
+                      return false;
+                    },
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filteredTests.length + (hasMoreData ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == filteredTests.length) {
+                          return _buildLoadMoreIndicator();
+                        }
+                        final test = filteredTests[index];
+                        return _buildTestCard(test);
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -506,10 +537,7 @@ class _TestViewState extends State<TestView> {
           const SizedBox(height: 8),
           Text(
             errorMessage,
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -554,7 +582,9 @@ class _TestViewState extends State<TestView> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _getCategoryColor(test.category).withValues(alpha: 0.1),
+                      color: _getCategoryColor(
+                        test.category,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -593,14 +623,26 @@ class _TestViewState extends State<TestView> {
                           spacing: 8,
                           runSpacing: 6,
                           children: [
-                            _buildInfoChip(Icons.timer, '${test.estimatedDuration} phút'),
+                            _buildInfoChip(
+                              Icons.timer,
+                              '${test.estimatedDuration} phút',
+                            ),
                             if (test.version.isNotEmpty)
                               _buildInfoChip(Icons.sell, 'v${test.version}'),
-                            _buildInfoChip(Icons.assignment_ind, _getAdministrationText(test.administrationType)),
+                            _buildInfoChip(
+                              Icons.assignment_ind,
+                              _getAdministrationText(test.administrationType),
+                            ),
                             if (test.createdAt != null)
-                              _buildInfoChip(Icons.event_note, 'Tạo: ${_formatDate(test.createdAt!)}'),
+                              _buildInfoChip(
+                                Icons.event_note,
+                                'Tạo: ${_formatDate(test.createdAt!)}',
+                              ),
                             if (test.updatedAt != null)
-                              _buildInfoChip(Icons.update, 'Cập nhật: ${_formatDate(test.updatedAt!)}'),
+                              _buildInfoChip(
+                                Icons.update,
+                                'Cập nhật: ${_formatDate(test.updatedAt!)}',
+                              ),
                           ],
                         ),
                       ],
@@ -613,24 +655,43 @@ class _TestViewState extends State<TestView> {
 
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 14, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.access_time,
+                    size: 14,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${test.minAgeMonths}-${test.maxAgeMonths} tháng',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(width: 16),
-                  const Icon(Icons.quiz, size: 14, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.quiz,
+                    size: 14,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${test.questions.length} câu',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(test.status).withValues(alpha: 0.1),
+                      color: _getStatusColor(
+                        test.status,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -677,7 +738,10 @@ class _TestViewState extends State<TestView> {
           const SizedBox(width: 4),
           Text(
             text,
-            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.textSecondary,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -733,10 +797,7 @@ class _TestViewState extends State<TestView> {
         child: const Center(
           child: Text(
             'Đã tải hết dữ liệu',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
         ),
       );
@@ -756,10 +817,7 @@ class _TestViewState extends State<TestView> {
             SizedBox(width: 8),
             Text(
               'Đang tải thêm...',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
           ],
         ),

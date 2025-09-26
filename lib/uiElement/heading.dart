@@ -1,31 +1,11 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+enum HeadingLevel { h1, h2, h3, h4, h5, h6 }
 
-enum HeadingLevel {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-}
+enum HeadingSize { small, medium, large, xlarge }
 
-enum HeadingSize {
-  small,
-  medium,
-  large,
-  xlarge,
-}
-
-enum HeadingWeight {
-  light,
-  normal,
-  medium,
-  semibold,
-  bold,
-  extrabold,
-}
+enum HeadingWeight { light, normal, medium, semibold, bold, extrabold }
 
 class Heading extends StatelessWidget {
   final String text;
@@ -78,10 +58,7 @@ class Heading extends StatelessWidget {
     );
 
     if (onTap != null) {
-      headingWidget = GestureDetector(
-        onTap: onTap,
-        child: headingWidget,
-      );
+      headingWidget = GestureDetector(onTap: onTap, child: headingWidget);
     }
 
     if (icon != null || trailing != null) {
@@ -89,11 +66,7 @@ class Heading extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(
-              icon,
-              size: _getIconSize(),
-              color: defaultColor,
-            ),
+            Icon(icon, size: _getIconSize(), color: defaultColor),
             SizedBox(width: _getIconSpacing()),
           ],
           Flexible(child: headingWidget),
@@ -669,4 +642,4 @@ class SubsectionTitle extends StatelessWidget {
       padding: padding,
     );
   }
-} 
+}

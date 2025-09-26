@@ -35,11 +35,9 @@ class _SimpleChatExampleState extends State<SimpleChatExample> {
 
   void _sendMessage(String text) {
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isFromMe: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: text, isFromMe: true, timestamp: DateTime.now()),
+      );
     });
   }
 
@@ -70,7 +68,7 @@ class _SimpleChatExampleState extends State<SimpleChatExample> {
               },
             ),
           ),
-          
+
           // Input để nhập tin nhắn
           ChatInput(
             onSendMessage: _sendMessage,

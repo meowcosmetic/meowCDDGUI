@@ -46,7 +46,7 @@ class _TestDetailViewState extends State<TestDetailView> {
 
     try {
       final response = await _api.getTestById(widget.testId);
-      
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         // Parse using new CDD model then convert to legacy Test model for UI reuse
@@ -60,7 +60,8 @@ class _TestDetailViewState extends State<TestDetailView> {
       } else {
         setState(() {
           hasError = true;
-          errorMessage = 'Không thể tải chi tiết bài test. Mã lỗi: ${response.statusCode}';
+          errorMessage =
+              'Không thể tải chi tiết bài test. Mã lỗi: ${response.statusCode}';
           isLoading = false;
         });
       }
@@ -76,16 +77,18 @@ class _TestDetailViewState extends State<TestDetailView> {
   // Convert new CDDTest model into existing Test model used by TestTakingPage
   Test _convertCDDToLegacyTest(CDDTest cdd) {
     final questions = cdd.questions
-        .map((q) => TestQuestion(
-              questionId: q.questionId,
-              questionNumber: q.questionNumber,
-              questionTexts: q.questionTexts,
-              category: q.category,
-              weight: q.weight,
-              required: q.required,
-              hints: q.hints,
-              explanations: q.explanations,
-            ))
+        .map(
+          (q) => TestQuestion(
+            questionId: q.questionId,
+            questionNumber: q.questionNumber,
+            questionTexts: q.questionTexts,
+            category: q.category,
+            weight: q.weight,
+            required: q.required,
+            hints: q.hints,
+            explanations: q.explanations,
+          ),
+        )
         .toList();
 
     final scoring = ScoringCriteria(
@@ -144,10 +147,10 @@ class _TestDetailViewState extends State<TestDetailView> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : hasError
-              ? _buildErrorState()
-              : test == null
-                  ? _buildEmptyState()
-                  : _buildTestDetail(),
+          ? _buildErrorState()
+          : test == null
+          ? _buildEmptyState()
+          : _buildTestDetail(),
     );
   }
 
@@ -169,10 +172,7 @@ class _TestDetailViewState extends State<TestDetailView> {
           const SizedBox(height: 8),
           Text(
             errorMessage,
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -210,7 +210,7 @@ class _TestDetailViewState extends State<TestDetailView> {
 
   Widget _buildTestDetail() {
     final testData = test!;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -274,12 +274,36 @@ class _TestDetailViewState extends State<TestDetailView> {
           _buildInfoSection(
             title: 'Thông Tin Bài Test',
             children: [
-              _buildInfoRow('Mã bài test', testData.assessmentCode, AppColors.primary),
-              _buildInfoRow('Lĩnh vực', testData.getCategoryText(), testData.getCategoryColor()),
-              _buildInfoRow('Độ tuổi', testData.getAgeRangeText(), AppColors.primary),
-              _buildInfoRow('Số câu hỏi', '${testData.questions.length} câu', AppColors.primary),
-              _buildInfoRow('Trạng thái', testData.getStatusText(), testData.getStatusColor()),
-              _buildInfoRow('Điểm tối đa', '${testData.getMaxScore()} điểm', AppColors.primary),
+              _buildInfoRow(
+                'Mã bài test',
+                testData.assessmentCode,
+                AppColors.primary,
+              ),
+              _buildInfoRow(
+                'Lĩnh vực',
+                testData.getCategoryText(),
+                testData.getCategoryColor(),
+              ),
+              _buildInfoRow(
+                'Độ tuổi',
+                testData.getAgeRangeText(),
+                AppColors.primary,
+              ),
+              _buildInfoRow(
+                'Số câu hỏi',
+                '${testData.questions.length} câu',
+                AppColors.primary,
+              ),
+              _buildInfoRow(
+                'Trạng thái',
+                testData.getStatusText(),
+                testData.getStatusColor(),
+              ),
+              _buildInfoRow(
+                'Điểm tối đa',
+                '${testData.getMaxScore()} điểm',
+                AppColors.primary,
+              ),
             ],
           ),
 
@@ -296,7 +320,9 @@ class _TestDetailViewState extends State<TestDetailView> {
                   decoration: BoxDecoration(
                     color: AppColors.primaryLight,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     testData.getInstruction(),
@@ -316,9 +342,21 @@ class _TestDetailViewState extends State<TestDetailView> {
           _buildInfoSection(
             title: 'Tiêu Chí Chấm Điểm',
             children: [
-              _buildInfoRow('Điểm "Có"', '${testData.scoringCriteria.yesScore} điểm', AppColors.primary),
-              _buildInfoRow('Điểm "Không"', '${testData.scoringCriteria.noScore} điểm', AppColors.primary),
-              _buildInfoRow('Tổng câu hỏi', '${testData.scoringCriteria.totalQuestions} câu', AppColors.primary),
+              _buildInfoRow(
+                'Điểm "Có"',
+                '${testData.scoringCriteria.yesScore} điểm',
+                AppColors.primary,
+              ),
+              _buildInfoRow(
+                'Điểm "Không"',
+                '${testData.scoringCriteria.noScore} điểm',
+                AppColors.primary,
+              ),
+              _buildInfoRow(
+                'Tổng câu hỏi',
+                '${testData.scoringCriteria.totalQuestions} câu',
+                AppColors.primary,
+              ),
               const SizedBox(height: 12),
               Text(
                 'Các mức độ nguy cơ:',
@@ -329,8 +367,8 @@ class _TestDetailViewState extends State<TestDetailView> {
                 ),
               ),
               const SizedBox(height: 8),
-              ...testData.scoringCriteria.scoreRanges.values.map((range) => 
-                _buildScoreRangeItem(range)
+              ...testData.scoringCriteria.scoreRanges.values.map(
+                (range) => _buildScoreRangeItem(range),
               ),
             ],
           ),
@@ -342,7 +380,9 @@ class _TestDetailViewState extends State<TestDetailView> {
             _buildInfoSection(
               title: 'Xem Trước Câu Hỏi (${testData.questions.length} câu)',
               children: [
-                ...testData.questions.take(3).map((question) => _buildQuestionPreview(question)),
+                ...testData.questions
+                    .take(3)
+                    .map((question) => _buildQuestionPreview(question)),
                 if (testData.questions.length > 3)
                   Container(
                     width: double.infinity,
@@ -559,10 +599,7 @@ class _TestDetailViewState extends State<TestDetailView> {
                 ),
                 child: Text(
                   question.getCategoryText(),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppColors.primary,
-                  ),
+                  style: TextStyle(fontSize: 10, color: AppColors.primary),
                 ),
               ),
             ],
@@ -602,14 +639,19 @@ class _TestDetailViewState extends State<TestDetailView> {
         ),
       ),
     );
-    
+
     // Xử lý kết quả sau khi hoàn thành test
-    if (result != null && result is Map<String, dynamic> && widget.child != null) {
+    if (result != null &&
+        result is Map<String, dynamic> &&
+        widget.child != null) {
       await _submitTestResult(result, test);
     }
   }
 
-  Future<void> _submitTestResult(Map<String, dynamic> testResult, Test test) async {
+  Future<void> _submitTestResult(
+    Map<String, dynamic> testResult,
+    Test test,
+  ) async {
     try {
       // Tạo TestResultModel từ kết quả test
       final now = DateTime.now();
@@ -618,14 +660,21 @@ class _TestDetailViewState extends State<TestDetailView> {
         testId: test.id,
         testType: 'CDD_TEST',
         testDate: now,
-        startTime: testResult['startTime'] != null ? DateTime.parse(testResult['startTime']) : now,
+        startTime: testResult['startTime'] != null
+            ? DateTime.parse(testResult['startTime'])
+            : now,
         endTime: now,
         status: 'COMPLETED',
         totalScore: (testResult['totalScore'] as num?)?.toDouble() ?? 0.0,
         maxScore: (testResult['maxScore'] as num?)?.toDouble() ?? 100.0,
-        percentageScore: (testResult['percentageScore'] as num?)?.toDouble() ?? 0.0,
-        resultLevel: _getResultLevel((testResult['percentageScore'] as num?)?.toDouble() ?? 0.0),
-        interpretation: testResult['interpretation'] ?? 'Kết quả đánh giá phát triển của trẻ.',
+        percentageScore:
+            (testResult['percentageScore'] as num?)?.toDouble() ?? 0.0,
+        resultLevel: _getResultLevel(
+          (testResult['percentageScore'] as num?)?.toDouble() ?? 0.0,
+        ),
+        interpretation:
+            testResult['interpretation'] ??
+            'Kết quả đánh giá phát triển của trẻ.',
         questionAnswers: jsonEncode(testResult['questionAnswers'] ?? {}),
         correctAnswers: testResult['correctAnswers'] ?? 0,
         totalQuestions: testResult['totalQuestions'] ?? test.questions.length,
@@ -638,7 +687,7 @@ class _TestDetailViewState extends State<TestDetailView> {
 
       // Gửi kết quả lên server
       final response = await _api.submitTestResult(testResultModel);
-      
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

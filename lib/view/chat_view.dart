@@ -32,13 +32,15 @@ class _ChatViewState extends State<ChatView> {
         }
       } catch (_) {}
       setState(() {
-        _messages.add(ChatMessage(
-          text: content,
-          isFromMe: false,
-          timestamp: DateTime.now(),
-          senderName: "Đối tác",
-          showSenderName: true,
-        ));
+        _messages.add(
+          ChatMessage(
+            text: content,
+            isFromMe: false,
+            timestamp: DateTime.now(),
+            senderName: "Đối tác",
+            showSenderName: true,
+          ),
+        );
       });
       _scrollToBottom();
     });
@@ -60,11 +62,9 @@ class _ChatViewState extends State<ChatView> {
 
   void _sendMessage(String text) {
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isFromMe: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: text, isFromMe: true, timestamp: DateTime.now()),
+      );
     });
     _scrollToBottom();
     // Send through STOMP
@@ -149,16 +149,14 @@ class _ChatViewState extends State<ChatView> {
                   icon: const Icon(Icons.more_vert),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Menu tùy chọn'),
-                      ),
+                      const SnackBar(content: Text('Menu tùy chọn')),
                     );
                   },
                 ),
               ],
             ),
           ),
-          
+
           // Danh sách tin nhắn
           Expanded(
             child: ChatList(
@@ -167,7 +165,7 @@ class _ChatViewState extends State<ChatView> {
               reverse: false,
             ),
           ),
-          
+
           // Input để nhập tin nhắn
           ChatInput(
             onSendMessage: _sendMessage,

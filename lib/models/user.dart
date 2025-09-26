@@ -124,7 +124,8 @@ class User {
   }
 
   String toJsonString() => jsonEncode(toJson());
-  static User fromJsonString(String s) => fromJson(jsonDecode(s) as Map<String, dynamic>);
+  static User fromJsonString(String s) =>
+      fromJson(jsonDecode(s) as Map<String, dynamic>);
 }
 
 class Address {
@@ -145,22 +146,22 @@ class Address {
   });
 
   Map<String, dynamic> toJson() => {
-        'line1': line1,
-        'line2': line2,
-        'city': city,
-        'state': state,
-        'country': country,
-        'postalCode': postalCode,
-      };
+    'line1': line1,
+    'line2': line2,
+    'city': city,
+    'state': state,
+    'country': country,
+    'postalCode': postalCode,
+  };
 
   static Address fromJson(Map<String, dynamic> json) => Address(
-        line1: json['line1'] as String,
-        line2: json['line2'] as String? ?? '',
-        city: json['city'] as String,
-        state: json['state'] as String,
-        country: json['country'] as String,
-        postalCode: json['postalCode'] as String,
-      );
+    line1: json['line1'] as String,
+    line2: json['line2'] as String? ?? '',
+    city: json['city'] as String,
+    state: json['state'] as String,
+    country: json['country'] as String,
+    postalCode: json['postalCode'] as String,
+  );
 }
 
 class CardDetail {
@@ -179,20 +180,20 @@ class CardDetail {
   });
 
   Map<String, dynamic> toJson() => {
-        'holderName': holderName,
-        'cardNumberMasked': cardNumberMasked,
-        'expiryMonth': expiryMonth,
-        'expiryYear': expiryYear,
-        'brand': brand,
-      };
+    'holderName': holderName,
+    'cardNumberMasked': cardNumberMasked,
+    'expiryMonth': expiryMonth,
+    'expiryYear': expiryYear,
+    'brand': brand,
+  };
 
   static CardDetail fromJson(Map<String, dynamic> json) => CardDetail(
-        holderName: json['holderName'] as String,
-        cardNumberMasked: json['cardNumberMasked'] as String,
-        expiryMonth: json['expiryMonth'] as String,
-        expiryYear: json['expiryYear'] as String,
-        brand: json['brand'] as String,
-      );
+    holderName: json['holderName'] as String,
+    cardNumberMasked: json['cardNumberMasked'] as String,
+    expiryMonth: json['expiryMonth'] as String,
+    expiryYear: json['expiryYear'] as String,
+    brand: json['brand'] as String,
+  );
 }
 
 class Role {
@@ -200,7 +201,8 @@ class Role {
   const Role(this.name);
 
   Map<String, dynamic> toJson() => {'name': name};
-  static Role fromJson(Map<String, dynamic> json) => Role(json['name'] as String);
+  static Role fromJson(Map<String, dynamic> json) =>
+      Role(json['name'] as String);
 }
 
 class Metadata {
@@ -215,14 +217,14 @@ class Metadata {
   });
 
   Map<String, dynamic> toJson() => {
-        'createdAtIso': createdAtIso,
-        'updatedAtIso': updatedAtIso,
-        'extra': extra,
-      };
+    'createdAtIso': createdAtIso,
+    'updatedAtIso': updatedAtIso,
+    'extra': extra,
+  };
 
   static Metadata fromJson(Map<String, dynamic> json) => Metadata(
-        createdAtIso: json['createdAtIso'] as String,
-        updatedAtIso: json['updatedAtIso'] as String,
-        extra: (json['extra'] as Map<String, dynamic>?) ?? <String, dynamic>{},
-      );
+    createdAtIso: json['createdAtIso'] as String,
+    updatedAtIso: json['updatedAtIso'] as String,
+    extra: (json['extra'] as Map<String, dynamic>?) ?? <String, dynamic>{},
+  );
 }

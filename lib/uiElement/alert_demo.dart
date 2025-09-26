@@ -3,10 +3,9 @@ import 'alert.dart';
 import 'button.dart';
 import '../constants/app_colors.dart';
 
-
 class AlertDemo extends StatefulWidget {
   final bool showAppBar;
-  
+
   const AlertDemo({super.key, this.showAppBar = true});
 
   @override
@@ -19,11 +18,13 @@ class _AlertDemoState extends State<AlertDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-              appBar: widget.showAppBar ? AppBar(
-          title: const Text('Alert Components Demo'),
-          backgroundColor: AppColors.cardBorder,
-          foregroundColor: AppColors.white,
-        ) : null,
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('Alert Components Demo'),
+              backgroundColor: AppColors.cardBorder,
+              foregroundColor: AppColors.white,
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -42,7 +43,8 @@ class _AlertDemoState extends State<AlertDemo> {
                 const SizedBox(height: 12),
                 SuccessAlert(
                   title: 'Đăng ký thành công',
-                  message: 'Tài khoản của bạn đã được tạo thành công. Vui lòng kiểm tra email để xác nhận.',
+                  message:
+                      'Tài khoản của bạn đã được tạo thành công. Vui lòng kiểm tra email để xác nhận.',
                   size: AlertSize.large,
                   actions: [
                     TextButton(
@@ -54,67 +56,51 @@ class _AlertDemoState extends State<AlertDemo> {
                 ),
               ],
             ),
-            _buildSection(
-              context,
-              'Error Alerts',
-              'Thông báo lỗi với màu đỏ',
-              [
-                ErrorAlert(
-                  title: 'Lỗi!',
-                  message: 'Không thể kết nối đến máy chủ.',
-                  onDismiss: () => _removeAlert(2),
-                ),
-                const SizedBox(height: 12),
-                ErrorAlert(
-                  title: 'Đăng nhập thất bại',
-                  message: 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.',
-                  size: AlertSize.large,
-                  actions: [
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('Quên mật khẩu?'),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('Thử lại'),
-                    ),
-                  ],
-                  onDismiss: () => _removeAlert(3),
-                ),
-              ],
-            ),
-            _buildSection(
-              context,
-              'Warning Alerts',
-              'Cảnh báo với màu vàng',
-              [
-                WarningAlert(
-                  title: 'Cảnh báo!',
-                  message: 'Bạn sắp hết dung lượng lưu trữ.',
-                  onDismiss: () => _removeAlert(4),
-                ),
-                const SizedBox(height: 12),
-                WarningAlert(
-                  title: 'Xác nhận xóa',
-                  message: 'Bạn có chắc chắn muốn xóa mục này? Hành động này không thể hoàn tác.',
-                  size: AlertSize.large,
-                  actions: [
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('Hủy'),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.red,
-                      ),
-                      child: const Text('Xóa'),
-                    ),
-                  ],
-                  onDismiss: () => _removeAlert(5),
-                ),
-              ],
-            ),
+            _buildSection(context, 'Error Alerts', 'Thông báo lỗi với màu đỏ', [
+              ErrorAlert(
+                title: 'Lỗi!',
+                message: 'Không thể kết nối đến máy chủ.',
+                onDismiss: () => _removeAlert(2),
+              ),
+              const SizedBox(height: 12),
+              ErrorAlert(
+                title: 'Đăng nhập thất bại',
+                message:
+                    'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.',
+                size: AlertSize.large,
+                actions: [
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('Quên mật khẩu?'),
+                  ),
+                  TextButton(onPressed: () {}, child: const Text('Thử lại')),
+                ],
+                onDismiss: () => _removeAlert(3),
+              ),
+            ]),
+            _buildSection(context, 'Warning Alerts', 'Cảnh báo với màu vàng', [
+              WarningAlert(
+                title: 'Cảnh báo!',
+                message: 'Bạn sắp hết dung lượng lưu trữ.',
+                onDismiss: () => _removeAlert(4),
+              ),
+              const SizedBox(height: 12),
+              WarningAlert(
+                title: 'Xác nhận xóa',
+                message:
+                    'Bạn có chắc chắn muốn xóa mục này? Hành động này không thể hoàn tác.',
+                size: AlertSize.large,
+                actions: [
+                  TextButton(onPressed: () {}, child: const Text('Hủy')),
+                  TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(foregroundColor: AppColors.red),
+                    child: const Text('Xóa'),
+                  ),
+                ],
+                onDismiss: () => _removeAlert(5),
+              ),
+            ]),
             _buildSection(
               context,
               'Info Alerts',
@@ -128,17 +114,15 @@ class _AlertDemoState extends State<AlertDemo> {
                 const SizedBox(height: 12),
                 InfoAlert(
                   title: 'Hướng dẫn',
-                  message: 'Để sử dụng tính năng này, bạn cần cấp quyền truy cập camera.',
+                  message:
+                      'Để sử dụng tính năng này, bạn cần cấp quyền truy cập camera.',
                   size: AlertSize.large,
                   actions: [
                     TextButton(
                       onPressed: () {},
                       child: const Text('Cấp quyền'),
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('Bỏ qua'),
-                    ),
+                    TextButton(onPressed: () {}, child: const Text('Bỏ qua')),
                   ],
                   onDismiss: () => _removeAlert(7),
                 ),
@@ -237,14 +221,12 @@ class _AlertDemoState extends State<AlertDemo> {
               [
                 Alert(
                   title: 'Cập nhật ứng dụng',
-                  message: 'Phiên bản mới 2.1.0 đã có sẵn với nhiều tính năng mới.',
+                  message:
+                      'Phiên bản mới 2.1.0 đã có sẵn với nhiều tính năng mới.',
                   type: AlertType.info,
                   size: AlertSize.large,
                   actions: [
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('Bỏ qua'),
-                    ),
+                    TextButton(onPressed: () {}, child: const Text('Bỏ qua')),
                     TextButton(
                       onPressed: () {},
                       child: const Text('Xem chi tiết'),
@@ -259,50 +241,45 @@ class _AlertDemoState extends State<AlertDemo> {
                 ),
               ],
             ),
-            _buildSection(
-              context,
-              'Dynamic Alerts',
-              'Thêm và xóa alert động',
-              [
-                Row(
-                  children: [
-                    Expanded(
-                      child: PrimaryButton(
-                        text: 'Thêm Success Alert',
-                        onPressed: _addSuccessAlert,
-                      ),
+            _buildSection(context, 'Dynamic Alerts', 'Thêm và xóa alert động', [
+              Row(
+                children: [
+                  Expanded(
+                    child: PrimaryButton(
+                      text: 'Thêm Success Alert',
+                      onPressed: _addSuccessAlert,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: PrimaryButton(
-                        text: 'Thêm Error Alert',
-                        onPressed: _addErrorAlert,
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: PrimaryButton(
+                      text: 'Thêm Error Alert',
+                      onPressed: _addErrorAlert,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: PrimaryButton(
-                        text: 'Thêm Warning Alert',
-                        onPressed: _addWarningAlert,
-                      ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: PrimaryButton(
+                      text: 'Thêm Warning Alert',
+                      onPressed: _addWarningAlert,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: PrimaryButton(
-                        text: 'Thêm Info Alert',
-                        onPressed: _addInfoAlert,
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: PrimaryButton(
+                      text: 'Thêm Info Alert',
+                      onPressed: _addInfoAlert,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                ..._alerts,
-              ],
-            ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ..._alerts,
+            ]),
           ],
         ),
       ),
@@ -323,16 +300,16 @@ class _AlertDemoState extends State<AlertDemo> {
           Text(
             title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.cardBorder,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.cardBorder),
           ),
           const SizedBox(height: 16),
           Container(
@@ -342,9 +319,7 @@ class _AlertDemoState extends State<AlertDemo> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.cardBorder),
             ),
-            child: Column(
-              children: children,
-            ),
+            child: Column(children: children),
           ),
         ],
       ),
@@ -437,4 +412,4 @@ class _AlertDemoState extends State<AlertDemo> {
       );
     });
   }
-} 
+}

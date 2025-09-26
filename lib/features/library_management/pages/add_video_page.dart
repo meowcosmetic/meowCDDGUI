@@ -7,10 +7,7 @@ import '../../intervention_domains/models/domain_models.dart';
 class AddVideoPage extends StatefulWidget {
   final List<InterventionDomainModel> domains;
 
-  const AddVideoPage({
-    Key? key,
-    required this.domains,
-  }) : super(key: key);
+  const AddVideoPage({Key? key, required this.domains}) : super(key: key);
 
   @override
   State<AddVideoPage> createState() => _AddVideoPageState();
@@ -94,19 +91,15 @@ class _AddVideoPageState extends State<AddVideoPage> {
       final String titleEn = _titleEnController.text.trim();
       final String descriptionVi = _descriptionViController.text.trim();
       final String descriptionEn = _descriptionEnController.text.trim();
-      final String language = _languageController.text.trim().isEmpty ? 'vi' : _languageController.text.trim();
+      final String language = _languageController.text.trim().isEmpty
+          ? 'vi'
+          : _languageController.text.trim();
 
       // Build base payload using nested structures for title/description
       final Map<String, dynamic> videoData = {
         'url': url,
-        'title': {
-          'vi': titleVi,
-          'en': titleEn,
-        },
-        'description': {
-          'vi': descriptionVi,
-          'en': descriptionEn,
-        },
+        'title': {'vi': titleVi, 'en': titleEn},
+        'description': {'vi': descriptionVi, 'en': descriptionEn},
         'supportedFormatId': 2,
         'developmentalDomainIds': _selectedDomainIds,
         'keywords': keywords,
@@ -124,7 +117,8 @@ class _AddVideoPageState extends State<AddVideoPage> {
       final int? maxAge = int.tryParse(_maxAgeController.text);
       if (maxAge != null) videoData['maxAge'] = maxAge;
       if (_ageGroup.isNotEmpty) videoData['ageGroup'] = _ageGroup;
-      if (_contentRating.isNotEmpty) videoData['contentRating'] = _contentRating;
+      if (_contentRating.isNotEmpty)
+        videoData['contentRating'] = _contentRating;
       final String publishedAt = _publishedAtController.text.trim();
       if (publishedAt.isNotEmpty) videoData['publishedAt'] = publishedAt;
 
@@ -154,10 +148,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -205,31 +196,38 @@ class _AddVideoPageState extends State<AddVideoPage> {
               _buildTextField(
                 controller: _urlController,
                 label: 'URL Video *',
-                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập URL' : null,
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Vui lòng nhập URL' : null,
               ),
 
               _buildSectionTitle('Tiêu đề & Mô tả'),
               _buildTextField(
                 controller: _titleViController,
                 label: 'Tiêu đề (VI) *',
-                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập tiêu đề VI' : null,
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Vui lòng nhập tiêu đề VI' : null,
               ),
               _buildTextField(
                 controller: _titleEnController,
                 label: 'Title (EN) *',
-                validator: (v) => v == null || v.isEmpty ? 'Please enter English title' : null,
+                validator: (v) => v == null || v.isEmpty
+                    ? 'Please enter English title'
+                    : null,
               ),
               _buildTextField(
                 controller: _descriptionViController,
                 label: 'Mô tả (VI) *',
                 maxLines: 3,
-                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập mô tả VI' : null,
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Vui lòng nhập mô tả VI' : null,
               ),
               _buildTextField(
                 controller: _descriptionEnController,
                 label: 'Description (EN) *',
                 maxLines: 3,
-                validator: (v) => v == null || v.isEmpty ? 'Please enter English description' : null,
+                validator: (v) => v == null || v.isEmpty
+                    ? 'Please enter English description'
+                    : null,
               ),
 
               _buildSectionTitle('Ngôn ngữ'),
@@ -252,8 +250,16 @@ class _AddVideoPageState extends State<AddVideoPage> {
               ),
 
               _buildSectionTitle('Thiết lập hiển thị'),
-              _buildSwitchRow('Kích hoạt', _isActive, (v) => setState(() => _isActive = v)),
-              _buildSwitchRow('Nổi bật', _isFeatured, (v) => setState(() => _isFeatured = v)),
+              _buildSwitchRow(
+                'Kích hoạt',
+                _isActive,
+                (v) => setState(() => _isActive = v),
+              ),
+              _buildSwitchRow(
+                'Nổi bật',
+                _isFeatured,
+                (v) => setState(() => _isFeatured = v),
+              ),
               _buildTextField(
                 controller: _priorityController,
                 label: 'Độ ưu tiên (số nguyên)',
@@ -319,9 +325,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
         validator: validator,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: AppColors.primary),
@@ -343,9 +347,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
         decoration: InputDecoration(
           labelText: label,
           suffixIcon: const Icon(Icons.calendar_today),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: AppColors.primary),
@@ -386,10 +388,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
         children: [
           const Text(
             'Lĩnh vực phát triển *',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -429,7 +428,11 @@ class _AddVideoPageState extends State<AddVideoPage> {
 
   // Supported format fixed to 2. No UI needed.
 
-  Widget _buildSwitchRow(String label, bool value, ValueChanged<bool> onChanged) {
+  Widget _buildSwitchRow(
+    String label,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -442,17 +445,23 @@ class _AddVideoPageState extends State<AddVideoPage> {
   }
 
   Widget _buildAgeGroupDropdown() {
-    const groups = ['INFANT', 'TODDLER', 'PRESCHOOL', 'SCHOOL_AGE', 'ADOLESCENT'];
+    const groups = [
+      'INFANT',
+      'TODDLER',
+      'PRESCHOOL',
+      'SCHOOL_AGE',
+      'ADOLESCENT',
+    ];
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
         value: _ageGroup,
-        items: groups.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+        items: groups
+            .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+            .toList(),
         onChanged: (v) => setState(() => _ageGroup = v ?? _ageGroup),
         decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           labelText: 'Nhóm tuổi',
         ),
       ),
@@ -465,12 +474,12 @@ class _AddVideoPageState extends State<AddVideoPage> {
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
         value: _contentRating,
-        items: ratings.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+        items: ratings
+            .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+            .toList(),
         onChanged: (v) => setState(() => _contentRating = v ?? _contentRating),
         decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           labelText: 'Phân loại nội dung',
         ),
       ),
@@ -486,9 +495,7 @@ class _AddVideoPageState extends State<AddVideoPage> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: _isLoading
             ? const SizedBox(

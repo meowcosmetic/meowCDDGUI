@@ -4,7 +4,7 @@ import 'navigation_menu.dart';
 
 class NavigationDemo extends StatefulWidget {
   final bool showAppBar;
-  
+
   const NavigationDemo({super.key, this.showAppBar = true});
 
   @override
@@ -17,11 +17,13 @@ class _NavigationDemoState extends State<NavigationDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.showAppBar ? AppBar(
-        title: const Text('Navigation Menu Demo'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-      ) : null,
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('Navigation Menu Demo'),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -30,35 +32,35 @@ class _NavigationDemoState extends State<NavigationDemo> {
             _buildSectionTitle('Default Navigation Menu'),
             _buildDefaultMenu(),
             const SizedBox(height: 32),
-            
+
             _buildSectionTitle('Outlined Navigation Menu'),
             _buildOutlinedMenu(),
             const SizedBox(height: 32),
-            
+
             _buildSectionTitle('Filled Navigation Menu'),
             _buildFilledMenu(),
             const SizedBox(height: 32),
-            
+
             _buildSectionTitle('Minimal Navigation Menu'),
             _buildMinimalMenu(),
             const SizedBox(height: 32),
-            
+
             _buildSectionTitle('Vertical Navigation Menu'),
             _buildVerticalMenu(),
             const SizedBox(height: 32),
-            
+
             _buildSectionTitle('Navigation Menu with Submenu'),
             _buildMenuWithSubmenu(),
             const SizedBox(height: 32),
-            
+
             _buildSectionTitle('Custom Styled Navigation Menu'),
             _buildCustomStyledMenu(),
             const SizedBox(height: 32),
-            
+
             _buildSectionTitle('Different Sizes'),
             _buildDifferentSizes(),
             const SizedBox(height: 32),
-            
+
             _buildSectionTitle('Interactive Demo'),
             _buildInteractiveDemo(),
           ],
@@ -83,9 +85,21 @@ class _NavigationDemoState extends State<NavigationDemo> {
 
   Widget _buildDefaultMenu() {
     final items = [
-      MenuItem(label: 'Dashboard', icon: Icons.dashboard, isActive: _selectedIndex == 0),
-      MenuItem(label: 'Analytics', icon: Icons.analytics, isActive: _selectedIndex == 1),
-      MenuItem(label: 'Settings', icon: Icons.settings, isActive: _selectedIndex == 2),
+      MenuItem(
+        label: 'Dashboard',
+        icon: Icons.dashboard,
+        isActive: _selectedIndex == 0,
+      ),
+      MenuItem(
+        label: 'Analytics',
+        icon: Icons.analytics,
+        isActive: _selectedIndex == 1,
+      ),
+      MenuItem(
+        label: 'Settings',
+        icon: Icons.settings,
+        isActive: _selectedIndex == 2,
+      ),
     ];
 
     return NavigationMenu(
@@ -230,10 +244,7 @@ class _NavigationDemoState extends State<NavigationDemo> {
       children: [
         Text(
           'Selected Index: $_selectedIndex',
-          style: TextStyle(
-            fontSize: 16,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 16),
         Row(
@@ -325,4 +336,4 @@ class _NavigationDemoState extends State<NavigationDemo> {
       ],
     );
   }
-} 
+}

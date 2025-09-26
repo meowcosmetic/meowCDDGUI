@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+enum LoadingType { circular, linear, skeleton, dots, pulse }
 
-enum LoadingType {
-  circular,
-  linear,
-  skeleton,
-  dots,
-  pulse,
-}
-
-enum LoadingSize {
-  small,
-  medium,
-  large,
-}
+enum LoadingSize { small, medium, large }
 
 class Loading extends StatelessWidget {
   final LoadingType type;
@@ -74,10 +63,7 @@ class Loading extends StatelessWidget {
             SizedBox(height: _getTextSpacing()),
             Text(
               text!,
-              style: TextStyle(
-                fontSize: _getTextSize(),
-                color: color,
-              ),
+              style: TextStyle(fontSize: _getTextSize(), color: color),
             ),
           ],
         ],
@@ -101,10 +87,7 @@ class Loading extends StatelessWidget {
             SizedBox(height: _getTextSpacing()),
             Text(
               text!,
-              style: TextStyle(
-                fontSize: _getTextSize(),
-                color: color,
-              ),
+              style: TextStyle(fontSize: _getTextSize(), color: color),
             ),
           ],
         ],
@@ -133,18 +116,12 @@ class Loading extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _DotsAnimation(
-            color: color,
-            size: _getDotSize(),
-          ),
+          _DotsAnimation(color: color, size: _getDotSize()),
           if (showText && text != null) ...[
             SizedBox(height: _getTextSpacing()),
             Text(
               text!,
-              style: TextStyle(
-                fontSize: _getTextSize(),
-                color: color,
-              ),
+              style: TextStyle(fontSize: _getTextSize(), color: color),
             ),
           ],
         ],
@@ -159,18 +136,12 @@ class Loading extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _PulseAnimation(
-            color: color,
-            size: _getSize(),
-          ),
+          _PulseAnimation(color: color, size: _getSize()),
           if (showText && text != null) ...[
             SizedBox(height: _getTextSpacing()),
             Text(
               text!,
-              style: TextStyle(
-                fontSize: _getTextSize(),
-                color: color,
-              ),
+              style: TextStyle(fontSize: _getTextSize(), color: color),
             ),
           ],
         ],
@@ -299,10 +270,7 @@ class _DotsAnimation extends StatefulWidget {
   final Color color;
   final double size;
 
-  const _DotsAnimation({
-    required this.color,
-    required this.size,
-  });
+  const _DotsAnimation({required this.color, required this.size});
 
   @override
   State<_DotsAnimation> createState() => _DotsAnimationState();
@@ -324,9 +292,11 @@ class _DotsAnimationState extends State<_DotsAnimation>
       ),
     );
     _animations = _controllers
-        .map((controller) => Tween<double>(begin: 0.0, end: 1.0).animate(
-              CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-            ))
+        .map(
+          (controller) => Tween<double>(begin: 0.0, end: 1.0).animate(
+            CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+          ),
+        )
         .toList();
 
     for (var controller in _controllers) {
@@ -355,7 +325,9 @@ class _DotsAnimationState extends State<_DotsAnimation>
               width: widget.size,
               height: widget.size,
               decoration: BoxDecoration(
-                color: widget.color.withValues(alpha: 0.3 + (_animations[index].value * 0.7)),
+                color: widget.color.withValues(
+                  alpha: 0.3 + (_animations[index].value * 0.7),
+                ),
                 shape: BoxShape.circle,
               ),
             );
@@ -371,10 +343,7 @@ class _PulseAnimation extends StatefulWidget {
   final Color color;
   final double size;
 
-  const _PulseAnimation({
-    required this.color,
-    required this.size,
-  });
+  const _PulseAnimation({required this.color, required this.size});
 
   @override
   State<_PulseAnimation> createState() => _PulseAnimationState();
@@ -393,12 +362,14 @@ class _PulseAnimationState extends State<_PulseAnimation>
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    _opacityAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.2,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _opacityAnimation = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _controller.repeat(reverse: true);
   }
 
@@ -585,4 +556,4 @@ class PulseLoading extends StatelessWidget {
       showText: showText,
     );
   }
-} 
+}

@@ -1,27 +1,11 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+enum TabSize { small, medium, large }
 
-enum TabSize {
-  small,
-  medium,
-  large,
-}
+enum TabStyle { default_, outlined, filled, pills, underline }
 
-enum TabStyle {
-  default_,
-  outlined,
-  filled,
-  pills,
-  underline,
-}
-
-enum TabPosition {
-  top,
-  bottom,
-  left,
-  right,
-}
+enum TabPosition { top, bottom, left, right }
 
 class TabItem {
   final String label;
@@ -89,7 +73,8 @@ class MeowTabs extends StatefulWidget {
   State<MeowTabs> createState() => _MeowTabsState();
 }
 
-class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin {
+class _MeowTabsState extends State<MeowTabs>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _currentIndex;
 
@@ -124,7 +109,9 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     if (widget.tabs.isEmpty) return const SizedBox.shrink();
 
-    final isVertical = widget.position == TabPosition.left || widget.position == TabPosition.right;
+    final isVertical =
+        widget.position == TabPosition.left ||
+        widget.position == TabPosition.right;
 
     if (isVertical) {
       return Row(
@@ -158,7 +145,9 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
   }
 
   Widget _buildTabBar() {
-    final isVertical = widget.position == TabPosition.left || widget.position == TabPosition.right;
+    final isVertical =
+        widget.position == TabPosition.left ||
+        widget.position == TabPosition.right;
 
     return Container(
       margin: widget.margin ?? _getMargin(),
@@ -172,29 +161,19 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
     if (widget.scrollable) {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-          children: _buildTabItems(),
-        ),
+        child: Row(children: _buildTabItems()),
       );
     }
 
-    return Row(
-      children: _buildTabItems(),
-    );
+    return Row(children: _buildTabItems());
   }
 
   Widget _buildVerticalTabBar() {
     if (widget.scrollable) {
-      return SingleChildScrollView(
-        child: Column(
-          children: _buildTabItems(),
-        ),
-      );
+      return SingleChildScrollView(child: Column(children: _buildTabItems()));
     }
 
-    return Column(
-      children: _buildTabItems(),
-    );
+    return Column(children: _buildTabItems());
   }
 
   List<Widget> _buildTabItems() {
@@ -209,23 +188,32 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
   }
 
   Widget _buildTabItem(TabItem tab, int index, bool isActive, bool isDisabled) {
-    final isVertical = widget.position == TabPosition.left || widget.position == TabPosition.right;
-    final color = isActive 
+    final isVertical =
+        widget.position == TabPosition.left ||
+        widget.position == TabPosition.right;
+    final color = isActive
         ? (widget.activeColor ?? AppColors.cardBorder)
-        : (isDisabled ? AppColors.cardBorder.withValues(alpha: 0.4) : (widget.inactiveColor ?? AppColors.cardBorder.withValues(alpha: 0.7)));
+        : (isDisabled
+              ? AppColors.cardBorder.withValues(alpha: 0.4)
+              : (widget.inactiveColor ??
+                    AppColors.cardBorder.withValues(alpha: 0.7)));
 
     return GestureDetector(
-      onTap: isDisabled ? null : () {
-        setState(() {
-          _currentIndex = index;
-        });
-        _tabController.animateTo(index);
-        widget.onTabChanged?.call(index);
-      },
+      onTap: isDisabled
+          ? null
+          : () {
+              setState(() {
+                _currentIndex = index;
+              });
+              _tabController.animateTo(index);
+              widget.onTabChanged?.call(index);
+            },
       child: Container(
         padding: _getTabItemPadding(),
         decoration: _getTabItemDecoration(isActive, isDisabled),
-        child: isVertical ? _buildVerticalTabContent(tab, color) : _buildHorizontalTabContent(tab, color),
+        child: isVertical
+            ? _buildVerticalTabContent(tab, color)
+            : _buildHorizontalTabContent(tab, color),
       ),
     );
   }
@@ -235,11 +223,7 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
       mainAxisSize: MainAxisSize.min,
       children: [
         if (widget.showIcons && tab.icon != null) ...[
-          Icon(
-            tab.icon,
-            size: _getIconSize(),
-            color: color,
-          ),
+          Icon(tab.icon, size: _getIconSize(), color: color),
           if (widget.showLabels) SizedBox(width: _getIconSpacing()),
         ],
         if (widget.showLabels) ...[
@@ -247,7 +231,9 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
             tab.label,
             style: TextStyle(
               fontSize: _getFontSize(),
-              fontWeight: _currentIndex == widget.tabs.indexOf(tab) ? FontWeight.bold : FontWeight.normal,
+              fontWeight: _currentIndex == widget.tabs.indexOf(tab)
+                  ? FontWeight.bold
+                  : FontWeight.normal,
               color: color,
             ),
           ),
@@ -261,11 +247,7 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
       mainAxisSize: MainAxisSize.min,
       children: [
         if (widget.showIcons && tab.icon != null) ...[
-          Icon(
-            tab.icon,
-            size: _getIconSize(),
-            color: color,
-          ),
+          Icon(tab.icon, size: _getIconSize(), color: color),
           if (widget.showLabels) SizedBox(height: _getIconSpacing()),
         ],
         if (widget.showLabels) ...[
@@ -273,7 +255,9 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
             tab.label,
             style: TextStyle(
               fontSize: _getFontSize(),
-              fontWeight: _currentIndex == widget.tabs.indexOf(tab) ? FontWeight.bold : FontWeight.normal,
+              fontWeight: _currentIndex == widget.tabs.indexOf(tab)
+                  ? FontWeight.bold
+                  : FontWeight.normal,
               color: color,
             ),
           ),
@@ -331,7 +315,9 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
           return BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: widget.indicatorColor ?? (widget.activeColor ?? AppColors.cardBorder),
+                color:
+                    widget.indicatorColor ??
+                    (widget.activeColor ?? AppColors.cardBorder),
                 width: widget.indicatorHeight ?? 2,
               ),
             ),
@@ -373,7 +359,9 @@ class _MeowTabsState extends State<MeowTabs> with SingleTickerProviderStateMixin
           return BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: widget.indicatorColor ?? (widget.activeColor ?? AppColors.cardBorder),
+                color:
+                    widget.indicatorColor ??
+                    (widget.activeColor ?? AppColors.cardBorder),
                 width: widget.indicatorHeight ?? 2,
               ),
             ),
@@ -543,4 +531,4 @@ class UnderlineTabs extends MeowTabs {
     super.indicatorHeight,
     super.indicatorWidth,
   }) : super(style: TabStyle.underline);
-} 
+}

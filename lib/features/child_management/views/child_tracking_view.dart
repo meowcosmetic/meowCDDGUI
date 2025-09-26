@@ -16,7 +16,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
   final Map<String, int> _answers = {};
   final TextEditingController _notesController = TextEditingController();
   bool _isSubmitting = false;
-  
+
   // New tracking fields
   EmotionLevel? _selectedEmotion;
   ParticipationLevel? _selectedParticipation;
@@ -32,7 +32,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
         _answers[question.id] = 0;
       }
     }
-    
+
     // Initialize goal answers
     for (var goal in TrackingData.interventionGoals) {
       _goalAnswers[goal.id] = {};
@@ -57,10 +57,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
         foregroundColor: AppColors.white,
         title: Text(
           'Tracking: ${widget.child.name}',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         elevation: 0,
         centerTitle: true,
@@ -71,9 +68,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-            ),
+            decoration: const BoxDecoration(color: AppColors.primary),
             child: Column(
               children: [
                 Text(
@@ -87,15 +82,12 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
                 const SizedBox(height: 4),
                 Text(
                   'Ngày: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.white,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: AppColors.white),
                 ),
               ],
             ),
           ),
-          
+
           // Questions
           Expanded(
             child: SingleChildScrollView(
@@ -113,7 +105,11 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.info_outline, color: AppColors.info, size: 20),
+                        Icon(
+                          Icons.info_outline,
+                          color: AppColors.info,
+                          size: 20,
+                        ),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -127,38 +123,38 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Emotion Section
                   _buildEmotionSection(),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Participation Section
                   _buildParticipationSection(),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Intervention Goals Section
                   _buildInterventionGoalsSection(),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Notes section
                   _buildNotesSection(),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Summary
                   _buildSummarySection(),
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
-          
+
           // Submit button
           Container(
             padding: const EdgeInsets.all(16),
@@ -193,7 +189,9 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.white,
+                              ),
                             ),
                           ),
                           SizedBox(width: 12),
@@ -251,28 +249,32 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
             ],
           ),
           const SizedBox(height: 16),
-          ...EmotionLevel.values.map((emotion) => Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: RadioListTile<EmotionLevel>(
-              value: emotion,
-              groupValue: _selectedEmotion,
-              onChanged: (value) {
-                setState(() {
-                  _selectedEmotion = value;
-                });
-              },
-              title: Text(
-                emotion.label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textPrimary,
+          ...EmotionLevel.values
+              .map(
+                (emotion) => Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: RadioListTile<EmotionLevel>(
+                    value: emotion,
+                    groupValue: _selectedEmotion,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedEmotion = value;
+                      });
+                    },
+                    title: Text(
+                      emotion.label,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    activeColor: AppColors.primary,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                  ),
                 ),
-              ),
-              activeColor: AppColors.primary,
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-            ),
-          )).toList(),
+              )
+              .toList(),
         ],
       ),
     );
@@ -297,11 +299,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.star,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.star, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Mức độ tham gia của con',
@@ -314,28 +312,32 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
             ],
           ),
           const SizedBox(height: 16),
-          ...ParticipationLevel.values.map((participation) => Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: RadioListTile<ParticipationLevel>(
-              value: participation,
-              groupValue: _selectedParticipation,
-              onChanged: (value) {
-                setState(() {
-                  _selectedParticipation = value;
-                });
-              },
-              title: Text(
-                participation.label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textPrimary,
+          ...ParticipationLevel.values
+              .map(
+                (participation) => Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: RadioListTile<ParticipationLevel>(
+                    value: participation,
+                    groupValue: _selectedParticipation,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedParticipation = value;
+                      });
+                    },
+                    title: Text(
+                      participation.label,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    activeColor: AppColors.primary,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                  ),
                 ),
-              ),
-              activeColor: AppColors.primary,
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-            ),
-          )).toList(),
+              )
+              .toList(),
         ],
       ),
     );
@@ -360,11 +362,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.flag,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.flag, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Chương trình can thiệp (Chọn 3 mục tiêu)',
@@ -385,7 +383,9 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
             ),
           ),
           const SizedBox(height: 16),
-          ...TrackingData.interventionGoals.map((goal) => _buildGoalCard(goal)).toList(),
+          ...TrackingData.interventionGoals
+              .map((goal) => _buildGoalCard(goal))
+              .toList(),
         ],
       ),
     );
@@ -394,11 +394,13 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
   Widget _buildGoalCard(InterventionGoal goal) {
     final isSelected = _selectedGoals.contains(goal);
     final isExpanded = isSelected;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primaryLight.withOpacity(0.1) : AppColors.white,
+        color: isSelected
+            ? AppColors.primaryLight.withOpacity(0.1)
+            : AppColors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isSelected ? AppColors.primary : AppColors.border,
@@ -454,7 +456,9 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         Text(
@@ -475,14 +479,16 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
               ),
             ),
           ),
-          
+
           // Goal questions (only show if selected)
           if (isExpanded) ...[
             const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
-                children: goal.questions.map((question) => _buildGoalQuestion(goal, question)).toList(),
+                children: goal.questions
+                    .map((question) => _buildGoalQuestion(goal, question))
+                    .toList(),
               ),
             ),
           ],
@@ -491,7 +497,10 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
     );
   }
 
-  Widget _buildGoalQuestion(InterventionGoal goal, InterventionQuestion question) {
+  Widget _buildGoalQuestion(
+    InterventionGoal goal,
+    InterventionQuestion question,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -508,7 +517,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
           const SizedBox(height: 8),
           ...question.options.asMap().entries.map((entry) {
             String option = entry.value;
-            
+
             return Container(
               margin: const EdgeInsets.only(bottom: 6),
               child: RadioListTile<String>(
@@ -556,11 +565,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.note,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.note, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Ghi chú bổ sung',
@@ -612,11 +617,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.analytics,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.analytics, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Tổng kết tracking',
@@ -629,7 +630,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Emotion summary
           if (_selectedEmotion != null) ...[
             Row(
@@ -637,10 +638,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
               children: [
                 const Text(
                   'Cảm xúc:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
                 ),
                 Text(
                   _selectedEmotion!.label,
@@ -654,7 +652,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
             ),
             const SizedBox(height: 8),
           ],
-          
+
           // Participation summary
           if (_selectedParticipation != null) ...[
             Row(
@@ -662,10 +660,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
               children: [
                 const Text(
                   'Mức độ tham gia:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
                 ),
                 Text(
                   _selectedParticipation!.label,
@@ -679,7 +674,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
             ),
             const SizedBox(height: 8),
           ],
-          
+
           // Selected goals summary
           if (_selectedGoals.isNotEmpty) ...[
             const Text(
@@ -691,16 +686,20 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
               ),
             ),
             const SizedBox(height: 8),
-            ..._selectedGoals.map((goal) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                '• ${goal.title}',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            )).toList(),
+            ..._selectedGoals
+                .map(
+                  (goal) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      '• ${goal.title}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
           ],
         ],
       ),
@@ -718,7 +717,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
       );
       return;
     }
-    
+
     if (_selectedParticipation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -728,7 +727,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
       );
       return;
     }
-    
+
     if (_selectedGoals.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -767,7 +766,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        
+
         Navigator.pop(context, tracking);
       }
     } catch (e) {
@@ -789,4 +788,3 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
     }
   }
 }
-

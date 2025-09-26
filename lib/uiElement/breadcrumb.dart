@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+enum BreadcrumbSize { small, medium, large }
 
-enum BreadcrumbSize {
-  small,
-  medium,
-  large,
-}
-
-enum BreadcrumbStyle {
-  default_,
-  outlined,
-  filled,
-  minimal,
-}
+enum BreadcrumbStyle { default_, outlined, filled, minimal }
 
 class BreadcrumbItem {
   final String label;
@@ -71,9 +61,7 @@ class Breadcrumb extends StatelessWidget {
       margin: margin ?? _getMargin(),
       padding: padding ?? _getPadding(),
       decoration: _getDecoration(),
-      child: Row(
-        children: _buildBreadcrumbItems(),
-      ),
+      child: Row(children: _buildBreadcrumbItems()),
     );
   }
 
@@ -82,7 +70,7 @@ class Breadcrumb extends StatelessWidget {
 
     for (int i = 0; i < items.length; i++) {
       final item = items[i];
-      
+
       // Add separator if not first item and separators are enabled
       if (i > 0 && showSeparators) {
         widgets.add(_buildSeparator());
@@ -97,7 +85,7 @@ class Breadcrumb extends StatelessWidget {
 
   Widget _buildBreadcrumbItem(BreadcrumbItem item) {
     final isActive = item.isActive;
-    final color = isActive 
+    final color = isActive
         ? (activeColor ?? AppColors.cardBorder)
         : (inactiveColor ?? AppColors.cardBorder.withValues(alpha: 0.7));
 
@@ -110,11 +98,7 @@ class Breadcrumb extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (showIcons && item.icon != null) ...[
-              Icon(
-                item.icon,
-                size: _getIconSize(),
-                color: color,
-              ),
+              Icon(item.icon, size: _getIconSize(), color: color),
               SizedBox(width: _getIconSpacing()),
             ],
             Text(
@@ -138,11 +122,7 @@ class Breadcrumb extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: _getSeparatorSpacing()),
-      child: Icon(
-        icon,
-        size: size,
-        color: color,
-      ),
+      child: Icon(icon, size: size, color: color),
     );
   }
 
@@ -322,4 +302,4 @@ class MinimalBreadcrumb extends Breadcrumb {
     super.showSeparators = true,
     super.separatorIcon,
   }) : super(style: BreadcrumbStyle.minimal);
-} 
+}

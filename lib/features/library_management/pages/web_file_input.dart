@@ -8,11 +8,11 @@ class WebFileInput {
     String? accept,
   }) {
     if (!kIsWeb) return;
-    
+
     // Tạo input element
     final input = html.FileUploadInputElement();
     input.accept = accept ?? '*/*';
-    
+
     // Xử lý khi file được chọn
     input.onChange.listen((event) {
       final files = input.files;
@@ -21,7 +21,7 @@ class WebFileInput {
         onFileSelected(file.name, file);
       }
     });
-    
+
     // Trigger click để mở dialog
     input.click();
   }

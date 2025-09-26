@@ -1,23 +1,11 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-enum MenuSize {
-  small,
-  medium,
-  large,
-}
+enum MenuSize { small, medium, large }
 
-enum MenuStyle {
-  default_,
-  outlined,
-  filled,
-  minimal,
-}
+enum MenuStyle { default_, outlined, filled, minimal }
 
-enum MenuOrientation {
-  horizontal,
-  vertical,
-}
+enum MenuOrientation { horizontal, vertical }
 
 class MenuItem {
   final String label;
@@ -118,15 +106,11 @@ class _NavigationMenuState extends State<NavigationMenu> {
   }
 
   Widget _buildHorizontalMenu() {
-    return Row(
-      children: _buildMenuItems(),
-    );
+    return Row(children: _buildMenuItems());
   }
 
   Widget _buildVerticalMenu() {
-    return Column(
-      children: _buildMenuItems(),
-    );
+    return Column(children: _buildMenuItems());
   }
 
   List<Widget> _buildMenuItems() {
@@ -140,7 +124,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
     }).toList();
   }
 
-  Widget _buildMenuItem(MenuItem item, int index, bool isActive, bool isExpanded) {
+  Widget _buildMenuItem(
+    MenuItem item,
+    int index,
+    bool isActive,
+    bool isExpanded,
+  ) {
     final hasChildren = item.children != null && item.children!.isNotEmpty;
     final isVertical = widget.orientation == MenuOrientation.vertical;
 
@@ -149,7 +138,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
       child: Container(
         padding: _getItemPadding(),
         decoration: _getItemDecoration(isActive, item.disabled),
-        child: isVertical ? _buildVerticalItemContent(item, isActive) : _buildHorizontalItemContent(item, isActive),
+        child: isVertical
+            ? _buildVerticalItemContent(item, isActive)
+            : _buildHorizontalItemContent(item, isActive),
       ),
     );
 
@@ -170,9 +161,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
             menuItem,
             Padding(
               padding: EdgeInsets.only(left: _getSubmenuIndent()),
-              child: Column(
-                children: submenuItems,
-              ),
+              child: Column(children: submenuItems),
             ),
           ],
         );
@@ -222,19 +211,17 @@ class _NavigationMenuState extends State<NavigationMenu> {
   }
 
   Widget _buildHorizontalItemContent(MenuItem item, bool isActive) {
-    final color = isActive 
+    final color = isActive
         ? (widget.activeColor ?? AppColors.primary)
-        : (item.disabled ? AppColors.primaryWithOpacity40 : (widget.inactiveColor ?? AppColors.primaryWithOpacity70));
+        : (item.disabled
+              ? AppColors.primaryWithOpacity40
+              : (widget.inactiveColor ?? AppColors.primaryWithOpacity70));
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (widget.showIcons && item.icon != null) ...[
-          Icon(
-            item.icon,
-            size: _getIconSize(),
-            color: color,
-          ),
+          Icon(item.icon, size: _getIconSize(), color: color),
           if (widget.showLabels) SizedBox(width: _getIconSpacing()),
         ],
         if (widget.showLabels) ...[
@@ -260,18 +247,16 @@ class _NavigationMenuState extends State<NavigationMenu> {
   }
 
   Widget _buildVerticalItemContent(MenuItem item, bool isActive) {
-    final color = isActive 
+    final color = isActive
         ? (widget.activeColor ?? AppColors.primary)
-        : (item.disabled ? AppColors.primaryWithOpacity40 : (widget.inactiveColor ?? AppColors.primaryWithOpacity70));
+        : (item.disabled
+              ? AppColors.primaryWithOpacity40
+              : (widget.inactiveColor ?? AppColors.primaryWithOpacity70));
 
     return Row(
       children: [
         if (widget.showIcons && item.icon != null) ...[
-          Icon(
-            item.icon,
-            size: _getIconSize(),
-            color: color,
-          ),
+          Icon(item.icon, size: _getIconSize(), color: color),
           if (widget.showLabels) SizedBox(width: _getIconSpacing()),
         ],
         if (widget.showLabels) ...[
@@ -288,8 +273,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
         ],
         if (item.children != null && item.children!.isNotEmpty) ...[
           Icon(
-            _expandedItems.contains(widget.items.indexOf(item)) 
-                ? Icons.keyboard_arrow_up 
+            _expandedItems.contains(widget.items.indexOf(item))
+                ? Icons.keyboard_arrow_up
                 : Icons.keyboard_arrow_right,
             size: _getIconSize() * 0.8,
             color: color,
@@ -300,19 +285,17 @@ class _NavigationMenuState extends State<NavigationMenu> {
   }
 
   Widget _buildSubmenuItemContent(MenuItem item, bool isActive) {
-    final color = isActive 
+    final color = isActive
         ? (widget.activeColor ?? AppColors.primary)
-        : (item.disabled ? AppColors.primaryWithOpacity40 : (widget.inactiveColor ?? AppColors.primaryWithOpacity70));
+        : (item.disabled
+              ? AppColors.primaryWithOpacity40
+              : (widget.inactiveColor ?? AppColors.primaryWithOpacity70));
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (widget.showIcons && item.icon != null) ...[
-          Icon(
-            item.icon,
-            size: _getIconSize() * 0.9,
-            color: color,
-          ),
+          Icon(item.icon, size: _getIconSize() * 0.9, color: color),
           if (widget.showLabels) SizedBox(width: _getIconSpacing()),
         ],
         if (widget.showLabels) ...[
@@ -330,7 +313,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
   }
 
   void _handleItemTap(MenuItem item, int index) {
-    if (item.children != null && item.children!.isNotEmpty && widget.showSubmenu) {
+    if (item.children != null &&
+        item.children!.isNotEmpty &&
+        widget.showSubmenu) {
       setState(() {
         if (_expandedItems.contains(index)) {
           _expandedItems.remove(index);
@@ -388,7 +373,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
           return BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: widget.indicatorColor ?? (widget.activeColor ?? AppColors.primary),
+                color:
+                    widget.indicatorColor ??
+                    (widget.activeColor ?? AppColors.primary),
                 width: widget.indicatorHeight ?? 2,
               ),
             ),
@@ -417,7 +404,9 @@ class _NavigationMenuState extends State<NavigationMenu> {
       case MenuStyle.minimal:
         if (isActive) {
           return BoxDecoration(
-            color: (widget.activeColor ?? AppColors.primary).withValues(alpha: 0.1),
+            color: (widget.activeColor ?? AppColors.primary).withValues(
+              alpha: 0.1,
+            ),
             borderRadius: BorderRadius.circular(widget.borderRadius ?? 6),
           );
         }
@@ -610,4 +599,4 @@ class MinimalNavigationMenu extends NavigationMenu {
     super.indicatorColor,
     super.indicatorHeight,
   }) : super(style: MenuStyle.minimal);
-} 
+}

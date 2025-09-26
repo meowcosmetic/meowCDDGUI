@@ -4,7 +4,6 @@ import 'button.dart';
 import 'card.dart';
 import '../constants/app_colors.dart';
 
-
 enum FieldType {
   text,
   email,
@@ -21,14 +20,7 @@ enum FieldType {
   switch_,
 }
 
-enum ValidationType {
-  required,
-  email,
-  minLength,
-  maxLength,
-  pattern,
-  custom,
-}
+enum ValidationType { required, email, minLength, maxLength, pattern, custom }
 
 class FormFieldConfig {
   final String name;
@@ -61,11 +53,7 @@ class ValidationRule {
   final String? message;
   final dynamic value; // For minLength, maxLength, pattern, etc.
 
-  const ValidationRule({
-    required this.type,
-    this.message,
-    this.value,
-  });
+  const ValidationRule({required this.type, this.message, this.value});
 }
 
 class FormConfig {
@@ -139,10 +127,13 @@ class _DynamicFormState extends State<DynamicForm> {
   void _initializeForm() {
     for (var field in widget.config.fields) {
       _controllers[field.name] = TextEditingController(
-        text: widget.initialValues?[field.name]?.toString() ?? field.defaultValue ?? '',
+        text:
+            widget.initialValues?[field.name]?.toString() ??
+            field.defaultValue ??
+            '',
       );
       _focusNodes[field.name] = FocusNode();
-      
+
       // Initialize form data based on field type
       if (field.type == FieldType.checkbox || field.type == FieldType.switch_) {
         // For boolean fields, convert string to bool
@@ -158,7 +149,8 @@ class _DynamicFormState extends State<DynamicForm> {
         _formData[field.name] = widget.initialValues?[field.name] ?? boolValue;
       } else {
         // For other fields, use string value
-        _formData[field.name] = widget.initialValues?[field.name] ?? field.defaultValue ?? '';
+        _formData[field.name] =
+            widget.initialValues?[field.name] ?? field.defaultValue ?? '';
       }
     }
   }
@@ -194,10 +186,7 @@ class _DynamicFormState extends State<DynamicForm> {
               const SizedBox(height: 8),
               Text(
                 widget.config.description!,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.grey600,
-                ),
+                style: TextStyle(fontSize: 14, color: AppColors.grey600),
               ),
             ],
             const SizedBox(height: 24),
@@ -454,13 +443,13 @@ class _DynamicFormState extends State<DynamicForm> {
   Widget _buildDropdownField(FormFieldConfig field) {
     final currentValue = _formData[field.name] as String?;
     final options = field.options ?? [];
-    
+
     // Ensure the current value is in the options list
     String? validValue = currentValue;
     if (currentValue != null && !options.contains(currentValue)) {
       validValue = null;
     }
-    
+
     return DropdownButtonFormField<String>(
       value: validValue,
       decoration: InputDecoration(
@@ -483,12 +472,11 @@ class _DynamicFormState extends State<DynamicForm> {
         enabled: field.enabled,
       ),
       items: options.map((option) {
-        return DropdownMenuItem<String>(
-          value: option,
-          child: Text(option),
-        );
+        return DropdownMenuItem<String>(value: option, child: Text(option));
       }).toList(),
-      onChanged: field.enabled ? (value) => _updateFieldValue(field.name, value) : null,
+      onChanged: field.enabled
+          ? (value) => _updateFieldValue(field.name, value)
+          : null,
       validator: (value) => _validateField(field, value),
     );
   }
@@ -497,7 +485,9 @@ class _DynamicFormState extends State<DynamicForm> {
     return CheckboxListTile(
       title: Text(field.label),
       value: _formData[field.name] as bool? ?? false,
-      onChanged: field.enabled ? (value) => _updateFieldValue(field.name, value) : null,
+      onChanged: field.enabled
+          ? (value) => _updateFieldValue(field.name, value)
+          : null,
       controlAffinity: ListTileControlAffinity.leading,
     );
   }
@@ -508,20 +498,20 @@ class _DynamicFormState extends State<DynamicForm> {
       children: [
         Text(
           field.label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         ...field.options?.map((option) {
-          return RadioListTile<String>(
-            title: Text(option),
-            value: option,
-            groupValue: _formData[field.name] as String?,
-            onChanged: field.enabled ? (value) => _updateFieldValue(field.name, value) : null,
-          );
-        }).toList() ?? [],
+              return RadioListTile<String>(
+                title: Text(option),
+                value: option,
+                groupValue: _formData[field.name] as String?,
+                onChanged: field.enabled
+                    ? (value) => _updateFieldValue(field.name, value)
+                    : null,
+              );
+            }).toList() ??
+            [],
       ],
     );
   }
@@ -539,7 +529,9 @@ class _DynamicFormState extends State<DynamicForm> {
         child: Text(
           _formData[field.name]?.toString() ?? 'Select date',
           style: TextStyle(
-            color: _formData[field.name] != null ? AppColors.textPrimary : AppColors.grey600,
+            color: _formData[field.name] != null
+                ? AppColors.textPrimary
+                : AppColors.grey600,
           ),
         ),
       ),
@@ -559,7 +551,9 @@ class _DynamicFormState extends State<DynamicForm> {
         child: Text(
           _formData[field.name]?.toString() ?? 'Select time',
           style: TextStyle(
-            color: _formData[field.name] != null ? AppColors.textPrimary : AppColors.grey600,
+            color: _formData[field.name] != null
+                ? AppColors.textPrimary
+                : AppColors.grey600,
           ),
         ),
       ),
@@ -582,7 +576,9 @@ class _DynamicFormState extends State<DynamicForm> {
     return SwitchListTile(
       title: Text(field.label),
       value: _formData[field.name] as bool? ?? false,
-      onChanged: field.enabled ? (value) => _updateFieldValue(field.name, value) : null,
+      onChanged: field.enabled
+          ? (value) => _updateFieldValue(field.name, value)
+          : null,
     );
   }
 
@@ -591,7 +587,7 @@ class _DynamicFormState extends State<DynamicForm> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: widget.config.actions.map((action) {
         Widget button;
-        
+
         switch (action.type) {
           case ButtonType.primary:
             button = PrimaryButton(
@@ -635,10 +631,7 @@ class _DynamicFormState extends State<DynamicForm> {
             break;
         }
 
-        return Padding(
-          padding: const EdgeInsets.only(left: 8),
-          child: button,
-        );
+        return Padding(padding: const EdgeInsets.only(left: 8), child: button);
       }).toList(),
     );
   }
@@ -670,12 +663,14 @@ class _DynamicFormState extends State<DynamicForm> {
           break;
         case ValidationType.minLength:
           if (value != null && value.toString().length < validation.value) {
-            return validation.message ?? 'Minimum length is ${validation.value} characters';
+            return validation.message ??
+                'Minimum length is ${validation.value} characters';
           }
           break;
         case ValidationType.maxLength:
           if (value != null && value.toString().length > validation.value) {
-            return validation.message ?? 'Maximum length is ${validation.value} characters';
+            return validation.message ??
+                'Maximum length is ${validation.value} characters';
           }
           break;
         case ValidationType.pattern:
@@ -726,4 +721,4 @@ class _DynamicFormState extends State<DynamicForm> {
     // File selection logic can be implemented here
     _updateFieldValue(field.name, 'selected_file.txt');
   }
-} 
+}

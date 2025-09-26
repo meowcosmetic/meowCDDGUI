@@ -3,10 +3,9 @@ import 'form.dart';
 import 'button.dart';
 import '../constants/app_colors.dart';
 
-
 class FormDemo extends StatefulWidget {
   final bool showAppBar;
-  
+
   const FormDemo({super.key, this.showAppBar = true});
 
   @override
@@ -19,11 +18,13 @@ class _FormDemoState extends State<FormDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.showAppBar ? AppBar(
-        title: const Text('Dynamic Form Demo'),
-        backgroundColor: AppColors.cardBorder,
-        foregroundColor: AppColors.white,
-      ) : null,
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('Dynamic Form Demo'),
+              backgroundColor: AppColors.cardBorder,
+              foregroundColor: AppColors.white,
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -36,7 +37,7 @@ class _FormDemoState extends State<FormDemo> {
                 onChanged: _handleFormChanged,
               ),
             ]),
-            
+
             const SizedBox(height: 32),
             _buildSection('Contact Form', [
               DynamicForm(
@@ -45,7 +46,7 @@ class _FormDemoState extends State<FormDemo> {
                 onChanged: _handleFormChanged,
               ),
             ]),
-            
+
             const SizedBox(height: 32),
             _buildSection('Survey Form', [
               DynamicForm(
@@ -54,7 +55,7 @@ class _FormDemoState extends State<FormDemo> {
                 onChanged: _handleFormChanged,
               ),
             ]),
-            
+
             const SizedBox(height: 32),
             _buildSection('Settings Form', [
               DynamicForm(
@@ -63,7 +64,7 @@ class _FormDemoState extends State<FormDemo> {
                 onChanged: _handleFormChanged,
               ),
             ]),
-            
+
             const SizedBox(height: 32),
             _buildSection('Form Data Preview', [
               Container(
@@ -104,11 +105,11 @@ class _FormDemoState extends State<FormDemo> {
       children: [
         Text(
           title,
-                     style: const TextStyle(
-             fontSize: 18,
-             fontWeight: FontWeight.bold,
-             color: AppColors.textPrimary,
-           ),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 12),
         ...children,
@@ -166,42 +167,30 @@ class _FormDemoState extends State<FormDemo> {
           label: 'Phone Number',
           placeholder: 'Enter your phone number',
           type: FieldType.phone,
-          validations: [
-            ValidationRule(type: ValidationType.required),
-          ],
+          validations: [ValidationRule(type: ValidationType.required)],
         ),
         FormFieldConfig(
           name: 'dateOfBirth',
           label: 'Date of Birth',
           type: FieldType.date,
-          validations: [
-            ValidationRule(type: ValidationType.required),
-          ],
+          validations: [ValidationRule(type: ValidationType.required)],
         ),
         FormFieldConfig(
           name: 'gender',
           label: 'Gender',
           type: FieldType.radio,
           options: ['Male', 'Female', 'Other'],
-          validations: [
-            ValidationRule(type: ValidationType.required),
-          ],
+          validations: [ValidationRule(type: ValidationType.required)],
         ),
         FormFieldConfig(
           name: 'terms',
           label: 'I agree to the terms and conditions',
           type: FieldType.checkbox,
-          validations: [
-            ValidationRule(type: ValidationType.required),
-          ],
+          validations: [ValidationRule(type: ValidationType.required)],
         ),
       ],
       actions: [
-        FormAction(
-          text: 'Cancel',
-          type: ButtonType.secondary,
-          onPressed: null,
-        ),
+        FormAction(text: 'Cancel', type: ButtonType.secondary, onPressed: null),
         FormAction(
           text: 'Register',
           type: ButtonType.primary,
@@ -222,9 +211,7 @@ class _FormDemoState extends State<FormDemo> {
           label: 'Your Name',
           placeholder: 'Enter your full name',
           type: FieldType.text,
-          validations: [
-            ValidationRule(type: ValidationType.required),
-          ],
+          validations: [ValidationRule(type: ValidationType.required)],
         ),
         FormFieldConfig(
           name: 'email',
@@ -242,9 +229,7 @@ class _FormDemoState extends State<FormDemo> {
           placeholder: 'What is this about?',
           type: FieldType.dropdown,
           options: ['General Inquiry', 'Support', 'Feedback', 'Other'],
-          validations: [
-            ValidationRule(type: ValidationType.required),
-          ],
+          validations: [ValidationRule(type: ValidationType.required)],
         ),
         FormFieldConfig(
           name: 'message',
@@ -263,11 +248,7 @@ class _FormDemoState extends State<FormDemo> {
         ),
       ],
       actions: [
-        FormAction(
-          text: 'Clear',
-          type: ButtonType.ghost,
-          onPressed: null,
-        ),
+        FormAction(text: 'Clear', type: ButtonType.ghost, onPressed: null),
         FormAction(
           text: 'Send Message',
           type: ButtonType.primary,
@@ -287,19 +268,27 @@ class _FormDemoState extends State<FormDemo> {
           name: 'satisfaction',
           label: 'How satisfied are you with our service?',
           type: FieldType.radio,
-          options: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'],
-          validations: [
-            ValidationRule(type: ValidationType.required),
+          options: [
+            'Very Satisfied',
+            'Satisfied',
+            'Neutral',
+            'Dissatisfied',
+            'Very Dissatisfied',
           ],
+          validations: [ValidationRule(type: ValidationType.required)],
         ),
         FormFieldConfig(
           name: 'recommend',
           label: 'Would you recommend us to others?',
           type: FieldType.radio,
-          options: ['Definitely', 'Probably', 'Not sure', 'Probably not', 'Definitely not'],
-          validations: [
-            ValidationRule(type: ValidationType.required),
+          options: [
+            'Definitely',
+            'Probably',
+            'Not sure',
+            'Probably not',
+            'Definitely not',
           ],
+          validations: [ValidationRule(type: ValidationType.required)],
         ),
         FormFieldConfig(
           name: 'features',
@@ -326,11 +315,7 @@ class _FormDemoState extends State<FormDemo> {
         ),
       ],
       actions: [
-        FormAction(
-          text: 'Skip',
-          type: ButtonType.secondary,
-          onPressed: null,
-        ),
+        FormAction(text: 'Skip', type: ButtonType.secondary, onPressed: null),
         FormAction(
           text: 'Submit Survey',
           type: ButtonType.primary,
@@ -399,11 +384,7 @@ class _FormDemoState extends State<FormDemo> {
         ),
       ],
       actions: [
-        FormAction(
-          text: 'Reset',
-          type: ButtonType.outline,
-          onPressed: null,
-        ),
+        FormAction(text: 'Reset', type: ButtonType.outline, onPressed: null),
         FormAction(
           text: 'Save Changes',
           type: ButtonType.primary,
@@ -418,7 +399,7 @@ class _FormDemoState extends State<FormDemo> {
     setState(() {
       _formData = data;
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Form submitted: ${data.toString()}'),
@@ -433,4 +414,4 @@ class _FormDemoState extends State<FormDemo> {
       _formData = data;
     });
   }
-} 
+}

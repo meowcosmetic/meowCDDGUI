@@ -27,9 +27,11 @@ class PolicyData {
       serviceName: json['serviceName'] ?? '',
       policyType: json['policyType'] ?? '',
       titles: Map<String, String>.from(json['titles'] ?? {}),
-      sections: (json['sections'] as List<dynamic>?)
-          ?.map((section) => PolicySection.fromJson(section))
-          .toList() ?? [],
+      sections:
+          (json['sections'] as List<dynamic>?)
+              ?.map((section) => PolicySection.fromJson(section))
+              .toList() ??
+          [],
       version: json['version'] ?? 1,
       isActive: json['isActive'] ?? true,
       tags: List<String>.from(json['tags'] ?? []),

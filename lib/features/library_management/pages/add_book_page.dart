@@ -9,10 +9,7 @@ import 'web_file_input.dart';
 class AddBookPage extends StatefulWidget {
   final List<InterventionDomainModel> domains;
 
-  const AddBookPage({
-    Key? key,
-    required this.domains,
-  }) : super(key: key);
+  const AddBookPage({Key? key, required this.domains}) : super(key: key);
 
   @override
   State<AddBookPage> createState() => _AddBookPageState();
@@ -113,7 +110,9 @@ class _AddBookPageState extends State<AddBookPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('File quá lớn (${(fileSizeBytes / (1024*1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.'),
+              content: Text(
+                'File quá lớn (${(fileSizeBytes / (1024 * 1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -127,7 +126,9 @@ class _AddBookPageState extends State<AddBookPage> {
         'author': _authorController.text,
         'description': _descriptionController.text,
         'isbn': _isbnController.text,
-        'publicationYear': int.tryParse(_publicationYearController.text) ?? DateTime.now().year,
+        'publicationYear':
+            int.tryParse(_publicationYearController.text) ??
+            DateTime.now().year,
         'pageCount': int.tryParse(_pageCountController.text) ?? 0,
         'language': _languageController.text,
         // Sample-specific fields
@@ -145,7 +146,10 @@ class _AddBookPageState extends State<AddBookPage> {
       };
 
       final apiService = ApiService();
-      final response = await apiService.createBookWithFile(bookData, _selectedFile);
+      final response = await apiService.createBookWithFile(
+        bookData,
+        _selectedFile,
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
@@ -170,10 +174,7 @@ class _AddBookPageState extends State<AddBookPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -221,26 +222,26 @@ class _AddBookPageState extends State<AddBookPage> {
               _buildTextField(
                 controller: _titleController,
                 label: 'Tiêu đề *',
-                validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập tiêu đề' : null,
+                validator: (value) =>
+                    value?.isEmpty == true ? 'Vui lòng nhập tiêu đề' : null,
               ),
               _buildTextField(
                 controller: _authorController,
                 label: 'Tác giả *',
-                validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập tác giả' : null,
+                validator: (value) =>
+                    value?.isEmpty == true ? 'Vui lòng nhập tác giả' : null,
               ),
               _buildTextField(
                 controller: _publisherController,
                 label: 'Nhà xuất bản',
               ),
-              _buildTextField(
-                controller: _isbnController,
-                label: 'ISBN',
-              ),
+              _buildTextField(controller: _isbnController, label: 'ISBN'),
               _buildTextField(
                 controller: _descriptionController,
                 label: 'Mô tả *',
                 maxLines: 3,
-                validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập mô tả' : null,
+                validator: (value) =>
+                    value?.isEmpty == true ? 'Vui lòng nhập mô tả' : null,
               ),
               _buildFileUploadField(),
               _buildTextField(
@@ -344,9 +345,7 @@ class _AddBookPageState extends State<AddBookPage> {
         decoration: InputDecoration(
           labelText: label,
           hintText: hintText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: AppColors.primary),
@@ -356,7 +355,6 @@ class _AddBookPageState extends State<AddBookPage> {
     );
   }
 
-
   Widget _buildDomainSelection() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -365,10 +363,7 @@ class _AddBookPageState extends State<AddBookPage> {
         children: [
           const Text(
             'Lĩnh vực phát triển *',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -416,10 +411,7 @@ class _AddBookPageState extends State<AddBookPage> {
             children: [
               const Text(
                 'Nội dung (File)',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               const SizedBox(width: 8),
               Container(
@@ -458,12 +450,12 @@ class _AddBookPageState extends State<AddBookPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _selectedFilePath != null 
+                        _selectedFilePath != null
                             ? _selectedFilePath!.split('/').last
                             : 'Chọn file nội dung sách',
                         style: TextStyle(
-                          color: _selectedFilePath != null 
-                              ? Colors.black 
+                          color: _selectedFilePath != null
+                              ? Colors.black
                               : Colors.grey[600],
                         ),
                       ),
@@ -486,6 +478,7 @@ class _AddBookPageState extends State<AddBookPage> {
       ),
     );
   }
+
   Widget _buildAgeGroupAndRange() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -502,7 +495,9 @@ class _AddBookPageState extends State<AddBookPage> {
               onChanged: (v) => setState(() => _ageGroupValue = v ?? '7-12'),
               decoration: InputDecoration(
                 labelText: 'Age group',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.primary),
                 ),
@@ -530,7 +525,6 @@ class _AddBookPageState extends State<AddBookPage> {
     );
   }
 
-
   Future<void> _pickFileAny() async {
     if (kIsWeb) {
       _showWebFileNameInput();
@@ -539,12 +533,9 @@ class _AddBookPageState extends State<AddBookPage> {
     }
   }
 
-
-
-
   void _showWebFileNameInput() {
     if (!kIsWeb) return;
-    
+
     // Sử dụng HTML input thực sự để mở dialog chọn file của browser
     WebFileInput.openFileDialog(
       onFileSelected: (fileName, file) {
@@ -554,7 +545,9 @@ class _AddBookPageState extends State<AddBookPage> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('File quá lớn (${(file.size / (1024*1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.'),
+                content: Text(
+                  'File quá lớn (${(file.size / (1024 * 1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.',
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -565,7 +558,7 @@ class _AddBookPageState extends State<AddBookPage> {
           _selectedFilePath = fileName;
           _selectedFile = file; // Lưu trữ file thực tế cho web
         });
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -597,7 +590,9 @@ class _AddBookPageState extends State<AddBookPage> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('File quá lớn (${(file.size / (1024*1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.'),
+                content: Text(
+                  'File quá lớn (${(file.size / (1024 * 1024)).toStringAsFixed(1)} MB). Giới hạn hiện tại là 15 MB.',
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -609,7 +604,7 @@ class _AddBookPageState extends State<AddBookPage> {
             _selectedFilePath = file.path;
             _selectedFile = file; // Lưu trữ file thực tế
           });
-          
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -634,9 +629,6 @@ class _AddBookPageState extends State<AddBookPage> {
     }
   }
 
-
-
-
   Widget _buildActionButtons() {
     return SizedBox(
       width: double.infinity,
@@ -646,9 +638,7 @@ class _AddBookPageState extends State<AddBookPage> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: _isLoading
             ? const SizedBox(
@@ -666,5 +656,4 @@ class _AddBookPageState extends State<AddBookPage> {
       ),
     );
   }
-
 }

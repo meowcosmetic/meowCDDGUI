@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'pagination.dart';
 import '../constants/app_colors.dart';
 
-
 class PaginationDemo extends StatefulWidget {
   final bool showAppBar;
-  
+
   const PaginationDemo({super.key, this.showAppBar = true});
 
   @override
@@ -19,11 +18,13 @@ class _PaginationDemoState extends State<PaginationDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-              appBar: widget.showAppBar ? AppBar(
-          title: const Text('Pagination Components Demo'),
-          backgroundColor: AppColors.cardBorder,
-          foregroundColor: AppColors.white,
-        ) : null,
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('Pagination Components Demo'),
+              backgroundColor: AppColors.cardBorder,
+              foregroundColor: AppColors.white,
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -351,16 +352,16 @@ class _PaginationDemoState extends State<PaginationDemo> {
           Text(
             title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.cardBorder.withValues(alpha: 0.7),
-                ),
+              color: AppColors.cardBorder.withValues(alpha: 0.7),
+            ),
           ),
           const SizedBox(height: 16),
           Container(
@@ -370,12 +371,10 @@ class _PaginationDemoState extends State<PaginationDemo> {
               border: Border.all(color: AppColors.cardBorder),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Column(
-              children: children,
-            ),
+            child: Column(children: children),
           ),
         ],
       ),
     );
   }
-} 
+}

@@ -21,7 +21,7 @@ class LoginViewHtml extends StatefulWidget {
 class _LoginViewHtmlState extends State<LoginViewHtml> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  
+
   bool _isFormValid = false;
   final ApiService _api = ApiService();
 
@@ -158,9 +158,10 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
   }
 
   void _recomputeFormValidity() {
-    final valid = _emailCtrl.text.trim().isNotEmpty && 
-                  _emailCtrl.text.trim().contains('@') &&
-                  _passwordCtrl.text.isNotEmpty;
+    final valid =
+        _emailCtrl.text.trim().isNotEmpty &&
+        _emailCtrl.text.trim().contains('@') &&
+        _passwordCtrl.text.isNotEmpty;
     if (valid != _isFormValid) {
       setState(() {
         _isFormValid = valid;
@@ -172,23 +173,23 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
   void dispose() {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
-    
+
     // Remove HTML elements
     _formElement.removeEventListener('submit', _onFormSubmit);
     _emailInput.removeEventListener('input', _onEmailInput);
     _passwordInput.removeEventListener('input', _onPasswordInput);
     _formElement.remove();
-    
+
     super.dispose();
   }
 
   Future<void> _login() async {
     if (!_isFormValid) return;
-    
+
     _submitButton.disabled = true;
     _submitButton.text = 'Đang đăng nhập...';
 
-    try {      
+    try {
       final response = await _api.login(
         email: _emailCtrl.text.trim(),
         password: _passwordCtrl.text,
@@ -202,7 +203,7 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
           await UserSession.updateFromLoginToken(token);
         }
         await prefs.setString('user_email', _emailCtrl.text.trim());
-        
+
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -210,7 +211,7 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
             backgroundColor: AppColors.primary,
           ),
         );
-        
+
         // Kiểm tra có cần hiển thị policy screen không
         if (AppConfig.showPolicyScreen) {
           final shouldShowPolicy = await PolicyService.shouldShowPolicyScreen();
@@ -229,21 +230,23 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
           );
         }
       } else {
-          if (!mounted) return;
-          // Parse error response
-          Map<String, dynamic> errorData = {};
-          try {
-            errorData = jsonDecode(response.body);
-          } catch (e) {
-            errorData = {'message': 'Email hoặc mật khẩu không đúng'};
-          }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Đăng nhập thất bại: ${errorData['message'] ?? 'Email hoặc mật khẩu không đúng'}'),
-              backgroundColor: Colors.red,
-            ),
-          );
+        if (!mounted) return;
+        // Parse error response
+        Map<String, dynamic> errorData = {};
+        try {
+          errorData = jsonDecode(response.body);
+        } catch (e) {
+          errorData = {'message': 'Email hoặc mật khẩu không đúng'};
         }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Đăng nhập thất bại: ${errorData['message'] ?? 'Email hoặc mật khẩu không đúng'}',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -259,9 +262,9 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
   }
 
   void _navigateToRegister() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const RegisterView()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const RegisterView()));
   }
 
   @override
@@ -314,15 +317,12 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
             const Center(
               child: Text(
                 'Đăng nhập để tiếp tục hành trình hạnh phúc',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.grey600,
-                ),
+                style: TextStyle(fontSize: 16, color: AppColors.grey600),
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // HTML Form Container
             Container(
               width: double.infinity,
@@ -351,14 +351,12 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // HTML Email Input
-                  HtmlElementView(
-                    viewType: 'email-input',
-                  ),
-                  
+                  HtmlElementView(viewType: 'email-input'),
+
                   const SizedBox(height: 16),
-                  
+
                   // Password label
                   const Text(
                     'Mật khẩu',
@@ -369,22 +367,18 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // HTML Password Input
-                  HtmlElementView(
-                    viewType: 'password-input',
-                  ),
-                  
+                  HtmlElementView(viewType: 'password-input'),
+
                   const SizedBox(height: 24),
-                  
+
                   // HTML Submit Button
-                  HtmlElementView(
-                    viewType: 'submit-button',
-                  ),
+                  HtmlElementView(viewType: 'submit-button'),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
             // Link đăng ký
             Center(
@@ -408,7 +402,7 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
             // Info about HTML form
             Container(
@@ -416,23 +410,18 @@ class _LoginViewHtmlState extends State<LoginViewHtml> {
               decoration: BoxDecoration(
                 color: AppColors.primaryLight,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                ),
               ),
               child: const Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
+                  Icon(Icons.info_outline, color: AppColors.primary, size: 20),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Form này sử dụng HTML trực tiếp để tận dụng auto fill của browser.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.primary,
-                      ),
+                      style: TextStyle(fontSize: 12, color: AppColors.primary),
                     ),
                   ),
                 ],

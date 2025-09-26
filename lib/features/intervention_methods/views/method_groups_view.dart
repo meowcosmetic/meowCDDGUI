@@ -13,7 +13,8 @@ class MethodGroupsView extends StatefulWidget {
 }
 
 class _MethodGroupsViewState extends State<MethodGroupsView> {
-  final InterventionMethodGroupService _service = InterventionMethodGroupService();
+  final InterventionMethodGroupService _service =
+      InterventionMethodGroupService();
   bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = '';
@@ -24,26 +25,23 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
   @override
   void initState() {
     super.initState();
-    print('🎯 MethodGroupsView initState called!'); // Debug log
+
     _load();
   }
 
   Future<void> _load() async {
-    print('🚀 Starting to load method groups...'); // Debug log
     setState(() {
       _isLoading = true;
       _hasError = false;
       _errorMessage = '';
     });
     try {
-      print('📞 Calling service.getMethodGroups...'); // Debug log
       final paged = await _service.getMethodGroups(page: _page, size: _size);
-      print('✅ Service returned ${paged.content.length} method groups'); // Debug log
+
       setState(() {
         _methodGroups = paged.content;
       });
     } catch (e) {
-      print('❌ Error in _load: $e'); // Debug log
       setState(() {
         _hasError = true;
         _errorMessage = e.toString();
@@ -55,14 +53,28 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
     }
   }
 
-  Future<void> _createOrEditMethodGroup({InterventionMethodGroupModel? methodGroup}) async {
+  Future<void> _createOrEditMethodGroup({
+    InterventionMethodGroupModel? methodGroup,
+  }) async {
     final codeController = TextEditingController(text: methodGroup?.code ?? '');
-    final displayedNameViController = TextEditingController(text: methodGroup?.displayedName.vi ?? '');
-    final displayedNameEnController = TextEditingController(text: methodGroup?.displayedName.en ?? '');
-    final descViController = TextEditingController(text: methodGroup?.description?.vi ?? '');
-    final descEnController = TextEditingController(text: methodGroup?.description?.en ?? '');
-    final minAgeController = TextEditingController(text: methodGroup?.minAgeMonths.toString() ?? '12');
-    final maxAgeController = TextEditingController(text: methodGroup?.maxAgeMonths.toString() ?? '24');
+    final displayedNameViController = TextEditingController(
+      text: methodGroup?.displayedName.vi ?? '',
+    );
+    final displayedNameEnController = TextEditingController(
+      text: methodGroup?.displayedName.en ?? '',
+    );
+    final descViController = TextEditingController(
+      text: methodGroup?.description?.vi ?? '',
+    );
+    final descEnController = TextEditingController(
+      text: methodGroup?.description?.en ?? '',
+    );
+    final minAgeController = TextEditingController(
+      text: methodGroup?.minAgeMonths.toString() ?? '12',
+    );
+    final maxAgeController = TextEditingController(
+      text: methodGroup?.maxAgeMonths.toString() ?? '24',
+    );
     final isEdit = methodGroup != null;
 
     final result = await showDialog<InterventionMethodGroupModel>(
@@ -77,8 +89,13 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isEdit ? 'Chỉnh sửa nhóm phương pháp' : 'Tạo nhóm phương pháp mới',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  isEdit
+                      ? 'Chỉnh sửa nhóm phương pháp'
+                      : 'Tạo nhóm phương pháp mới',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Expanded(
@@ -142,7 +159,8 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                           controller: descViController,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: 'VD: <p>Nhóm phương pháp hỗ trợ phát triển nhận thức...</p>',
+                            hintText:
+                                'VD: <p>Nhóm phương pháp hỗ trợ phát triển nhận thức...</p>',
                           ),
                           maxLines: 3,
                         ),
@@ -156,7 +174,8 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                           controller: descEnController,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: 'VD: <p>Methods group supporting cognitive development...</p>',
+                            hintText:
+                                'VD: <p>Methods group supporting cognitive development...</p>',
                           ),
                           maxLines: 3,
                         ),
@@ -176,22 +195,25 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          final minAgeMonths = int.tryParse(minAgeController.text) ?? 12;
-                          final maxAgeMonths = int.tryParse(maxAgeController.text) ?? 24;
-                          
+                          final minAgeMonths =
+                              int.tryParse(minAgeController.text) ?? 12;
+                          final maxAgeMonths =
+                              int.tryParse(maxAgeController.text) ?? 24;
+
                           final displayedName = LocalizedText(
                             vi: displayedNameViController.text.trim(),
                             en: displayedNameEnController.text.trim(),
                           );
-                          
+
                           LocalizedText? description;
-                          if (descViController.text.trim().isNotEmpty || descEnController.text.trim().isNotEmpty) {
+                          if (descViController.text.trim().isNotEmpty ||
+                              descEnController.text.trim().isNotEmpty) {
                             description = LocalizedText(
                               vi: descViController.text.trim(),
                               en: descEnController.text.trim(),
                             );
                           }
-                          
+
                           InterventionMethodGroupModel result;
                           if (isEdit) {
                             result = await _service.updateMethodGroup(
@@ -211,7 +233,7 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                               maxAgeMonths: maxAgeMonths,
                             );
                           }
-                          
+
                           Navigator.pop(context, result);
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -238,12 +260,16 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
     }
   }
 
-  Future<void> _deleteMethodGroup(InterventionMethodGroupModel methodGroup) async {
+  Future<void> _deleteMethodGroup(
+    InterventionMethodGroupModel methodGroup,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc chắn muốn xóa nhóm phương pháp "${methodGroup.displayedName.vi}"?'),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa nhóm phương pháp "${methodGroup.displayedName.vi}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -305,9 +331,7 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_hasError) {
@@ -315,11 +339,7 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'Có lỗi xảy ra',
@@ -332,10 +352,7 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _load,
-              child: const Text('Thử lại'),
-            ),
+            ElevatedButton(onPressed: _load, child: const Text('Thử lại')),
           ],
         ),
       );
@@ -346,11 +363,7 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 64,
-              color: Colors.grey,
-            ),
+            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
               'Chưa có nhóm phương pháp nào',
@@ -377,10 +390,11 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
   }
 
   Widget _buildMethodGroupCard(InterventionMethodGroupModel methodGroup) {
-    final displayedName = methodGroup.displayedName.vi.isNotEmpty 
-        ? methodGroup.displayedName.vi 
+    final displayedName = methodGroup.displayedName.vi.isNotEmpty
+        ? methodGroup.displayedName.vi
         : methodGroup.displayedName.en;
-    final displayedDesc = methodGroup.description?.vi ?? methodGroup.description?.en ?? '';
+    final displayedDesc =
+        methodGroup.description?.vi ?? methodGroup.description?.en ?? '';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -430,7 +444,10 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(12),
@@ -449,7 +466,9 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                         onSelected: (value) {
                           switch (value) {
                             case 'edit':
-                              _createOrEditMethodGroup(methodGroup: methodGroup);
+                              _createOrEditMethodGroup(
+                                methodGroup: methodGroup,
+                              );
                               break;
                             case 'delete':
                               _deleteMethodGroup(methodGroup);
@@ -473,7 +492,10 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                               children: [
                                 Icon(Icons.delete, size: 20, color: Colors.red),
                                 SizedBox(width: 8),
-                                Text('Xóa', style: TextStyle(color: Colors.red)),
+                                Text(
+                                  'Xóa',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ],
                             ),
                           ),
@@ -491,10 +513,7 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                   const SizedBox(width: 4),
                   Text(
                     'Độ tuổi: ${methodGroup.minAgeMonths}-${methodGroup.maxAgeMonths} tháng',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -518,24 +537,12 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
                         color: AppColors.textSecondary,
                         lineHeight: LineHeight(1.3),
                       ),
-                      "p": Style(
-                        margin: Margins.only(bottom: 6),
-                      ),
-                      "strong": Style(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      "em": Style(
-                        fontStyle: FontStyle.italic,
-                      ),
-                      "ul": Style(
-                        margin: Margins.only(left: 16),
-                      ),
-                      "ol": Style(
-                        margin: Margins.only(left: 16),
-                      ),
-                      "li": Style(
-                        margin: Margins.only(bottom: 4),
-                      ),
+                      "p": Style(margin: Margins.only(bottom: 6)),
+                      "strong": Style(fontWeight: FontWeight.bold),
+                      "em": Style(fontStyle: FontStyle.italic),
+                      "ul": Style(margin: Margins.only(left: 16)),
+                      "ol": Style(margin: Margins.only(left: 16)),
+                      "li": Style(margin: Margins.only(bottom: 4)),
                       "h1": Style(
                         fontSize: FontSize(16),
                         fontWeight: FontWeight.bold,

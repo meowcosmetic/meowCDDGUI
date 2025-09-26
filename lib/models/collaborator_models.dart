@@ -4,7 +4,8 @@ class Collaborator {
   final String id;
   final String name;
   final String title; // e.g., Chuyên viên trị liệu, Giáo viên đặc biệt
-  final List<String> specialties; // giao_tiep, van_dong, nhan_thuc, xa_hoi, cam_xuc
+  final List<String>
+  specialties; // giao_tiep, van_dong, nhan_thuc, xa_hoi, cam_xuc
   final String city; // Tỉnh/Thành phố
   final double rating; // 0.0 - 5.0
   final int reviews; // number of reviews
@@ -139,7 +140,14 @@ class SampleCollaborators {
   }
 
   static List<String> specialties() {
-    return ['Tất cả', 'giao_tiep', 'van_dong', 'nhan_thuc', 'xa_hoi', 'cam_xuc'];
+    return [
+      'Tất cả',
+      'giao_tiep',
+      'van_dong',
+      'nhan_thuc',
+      'xa_hoi',
+      'cam_xuc',
+    ];
   }
 
   static List<String> ratings() {

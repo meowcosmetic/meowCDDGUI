@@ -34,7 +34,7 @@ class _RegisterViewState extends State<RegisterView> {
     super.initState();
     // Khởi tạo form với trạng thái không hợp lệ
     _isFormValid = false;
-    
+
     // Thêm listeners để validate form khi user nhập liệu
     _nameCtrl.addListener(_recomputeFormValidity);
     _emailCtrl.addListener(_recomputeFormValidity);
@@ -70,16 +70,19 @@ class _RegisterViewState extends State<RegisterView> {
   void _recomputeFormValidity() {
     final currentYear = DateTime.now().year;
     final year = int.tryParse(_yearCtrl.text.trim()) ?? 0;
-    
+
     // Validate từng trường một cách chi tiết
     final nameValid = _nameCtrl.text.trim().isNotEmpty;
-    final emailValid = _emailCtrl.text.trim().contains('@') && _emailCtrl.text.trim().isNotEmpty;
+    final emailValid =
+        _emailCtrl.text.trim().contains('@') &&
+        _emailCtrl.text.trim().isNotEmpty;
     final passwordValid = _passwordCtrl.text.length >= 6;
     final phoneValid = _phoneCtrl.text.trim().isNotEmpty;
     final yearValid = year >= 1900 && year <= currentYear;
-    
-    final valid = nameValid && emailValid && passwordValid && phoneValid && yearValid;
-    
+
+    final valid =
+        nameValid && emailValid && passwordValid && phoneValid && yearValid;
+
     if (valid != _isFormValid) {
       setState(() {
         _isFormValid = valid;
@@ -119,10 +122,7 @@ class _RegisterViewState extends State<RegisterView> {
       viewed: 0,
       password: _passwordCtrl.text,
       token: '',
-      roles: [
-        const Role('CUSTOMER'),
-        Role(_secondaryRole),
-      ],
+      roles: [const Role('CUSTOMER'), Role(_secondaryRole)],
       metadata: Metadata(
         createdAtIso: nowIso,
         updatedAtIso: nowIso,
@@ -139,7 +139,9 @@ class _RegisterViewState extends State<RegisterView> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đăng ký thất bại (${resp.statusCode}). Vui lòng thử lại.'),
+            content: Text(
+              'Đăng ký thất bại (${resp.statusCode}). Vui lòng thử lại.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -161,15 +163,17 @@ class _RegisterViewState extends State<RegisterView> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.'),
+        content: const Text(
+          'Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.',
+        ),
         backgroundColor: AppColors.primary,
       ),
     );
-    
+
     // Navigate đến màn hình đăng nhập
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LoginView()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginView()));
   }
 
   @override
@@ -191,149 +195,166 @@ class _RegisterViewState extends State<RegisterView> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: AutofillGroup(
-            child: Form(
-              autovalidateMode: AutovalidateMode.disabled,
-              key: _formKey,
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                label: 'Name input field',
-                textField: true,
-                child: TextFormField(
-                  controller: _nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Họ và tên'),
-                  autofillHints: const [AutofillHints.name],
-                  textInputAction: TextInputAction.next,
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ tên' : null,
+          child: Form(
+            autovalidateMode: AutovalidateMode.disabled,
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(
+                  label: 'Name input field',
+                  textField: true,
+                  child: TextFormField(
+                    controller: _nameCtrl,
+                    decoration: const InputDecoration(labelText: 'Họ và tên'),
+                    autofillHints: const [AutofillHints.name],
+                    textInputAction: TextInputAction.next,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Vui lòng nhập họ tên'
+                        : null,
+                  ),
                 ),
-              ),
-              Semantics(
-                label: 'Email input field',
-                textField: true,
-                child: TextFormField(
-                  controller: _emailCtrl,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                  autofillHints: const [AutofillHints.email],
-                  textInputAction: TextInputAction.next,
+                Semantics(
+                  label: 'Email input field',
+                  textField: true,
+                  child: TextFormField(
+                    controller: _emailCtrl,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [AutofillHints.email],
+                    textInputAction: TextInputAction.next,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty)
+                        return 'Vui lòng nhập email';
+                      if (!v.contains('@')) return 'Email không hợp lệ';
+                      return null;
+                    },
+                  ),
+                ),
+                Semantics(
+                  label: 'Phone input field',
+                  textField: true,
+                  child: TextFormField(
+                    controller: _phoneCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Số điện thoại',
+                    ),
+                    keyboardType: TextInputType.phone,
+                    autofillHints: const [AutofillHints.telephoneNumber],
+                    textInputAction: TextInputAction.next,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Vui lòng nhập số điện thoại'
+                        : null,
+                  ),
+                ),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Giới tính'),
+                  value: _sex,
+                  items: const [
+                    DropdownMenuItem(value: 'male', child: Text('Nam')),
+                    DropdownMenuItem(value: 'female', child: Text('Nữ')),
+                    DropdownMenuItem(value: 'other', child: Text('Khác')),
+                  ],
+                  onChanged: (v) {
+                    setState(() => _sex = v ?? 'other');
+                    _recomputeFormValidity();
+                  },
+                ),
+                TextFormField(
+                  controller: _yearCtrl,
+                  decoration: const InputDecoration(labelText: 'Năm sinh'),
+                  keyboardType: TextInputType.number,
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Vui lòng nhập email';
-                    if (!v.contains('@')) return 'Email không hợp lệ';
+                    final year = int.tryParse(v?.trim() ?? '');
+                    final now = DateTime.now().year;
+                    if (year == null) return 'Vui lòng nhập số hợp lệ';
+                    if (year < 1900 || year > now)
+                      return 'Năm sinh không hợp lệ';
                     return null;
                   },
                 ),
-              ),
-              Semantics(
-                label: 'Phone input field',
-                textField: true,
-                child: TextFormField(
-                  controller: _phoneCtrl,
-                  decoration: const InputDecoration(labelText: 'Số điện thoại'),
-                  keyboardType: TextInputType.phone,
-                  autofillHints: const [AutofillHints.telephoneNumber],
-                  textInputAction: TextInputAction.next,
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập số điện thoại' : null,
-                ),
-              ),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Giới tính'),
-                value: _sex,
-                items: const [
-                  DropdownMenuItem(value: 'male', child: Text('Nam')),
-                  DropdownMenuItem(value: 'female', child: Text('Nữ')),
-                  DropdownMenuItem(value: 'other', child: Text('Khác')),
-                ],
-                onChanged: (v) {
-                  setState(() => _sex = v ?? 'other');
-                  _recomputeFormValidity();
-                },
-              ),
-              TextFormField(
-                controller: _yearCtrl,
-                decoration: const InputDecoration(labelText: 'Năm sinh'),
-                keyboardType: TextInputType.number,
-                validator: (v) {
-                  final year = int.tryParse(v?.trim() ?? '');
-                  final now = DateTime.now().year;
-                  if (year == null) return 'Vui lòng nhập số hợp lệ';
-                  if (year < 1900 || year > now) return 'Năm sinh không hợp lệ';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _avatarCtrl,
-                decoration: const InputDecoration(labelText: 'Ảnh đại diện (URL hoặc path)'),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Bạn là'),
-                value: _secondaryRole,
-                items: const [
-                  DropdownMenuItem(value: 'PARENT', child: Text('Phụ huynh')),
-                  DropdownMenuItem(value: 'TEACHER', child: Text('Giáo viên')),
-                ],
-                onChanged: (v) {
-                  setState(() => _secondaryRole = v ?? 'PARENT');
-                  _recomputeFormValidity();
-                },
-              ),
-              const SizedBox(height: 12),
-              Semantics(
-                label: 'Password input field',
-                textField: true,
-                child: TextFormField(
-                  controller: _passwordCtrl,
-                  decoration: const InputDecoration(labelText: 'Mật khẩu'),
-                  obscureText: true,
-                  autofillHints: const [AutofillHints.newPassword],
-                  textInputAction: TextInputAction.done,
-                  validator: (v) => (v == null || v.length < 6) ? 'Mật khẩu tối thiểu 6 ký tự' : null,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting || !_isFormValid ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                TextFormField(
+                  controller: _avatarCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Ảnh đại diện (URL hoặc path)',
                   ),
-                  child: _isSubmitting
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Tạo tài khoản'),
                 ),
-              ),
-              const SizedBox(height: 16),
-              // Link đăng nhập
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Đã có tài khoản? ',
-                      style: TextStyle(color: AppColors.grey600),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const LoginView()),
-                      ),
-                      child: const Text(
-                        'Đăng nhập ngay',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Bạn là'),
+                  value: _secondaryRole,
+                  items: const [
+                    DropdownMenuItem(value: 'PARENT', child: Text('Phụ huynh')),
+                    DropdownMenuItem(
+                      value: 'TEACHER',
+                      child: Text('Giáo viên'),
                     ),
                   ],
+                  onChanged: (v) {
+                    setState(() => _secondaryRole = v ?? 'PARENT');
+                    _recomputeFormValidity();
+                  },
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(height: 12),
+                Semantics(
+                  label: 'Password input field',
+                  textField: true,
+                  child: TextFormField(
+                    controller: _passwordCtrl,
+                    decoration: const InputDecoration(labelText: 'Mật khẩu'),
+                    obscureText: true,
+                    autofillHints: const [AutofillHints.newPassword],
+                    textInputAction: TextInputAction.done,
+                    validator: (v) => (v == null || v.length < 6)
+                        ? 'Mật khẩu tối thiểu 6 ký tự'
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting || !_isFormValid ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isSubmitting
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Tạo tài khoản'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Link đăng nhập
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Đã có tài khoản? ',
+                        style: TextStyle(color: AppColors.grey600),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => const LoginView()),
+                        ),
+                        child: const Text(
+                          'Đăng nhập ngay',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

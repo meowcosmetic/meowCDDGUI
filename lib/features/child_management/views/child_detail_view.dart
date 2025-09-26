@@ -35,7 +35,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
   bool _isTestsExpanded = false;
   int _filterIndex = 0; // 0=Tất cả, 1=Khuyến nghị, 2=Không khuyến nghị
   bool _infoExpanded = false;
-  
+
   // Domain-related state variables
   List<InterventionDomainModel> _domains = [];
   bool _isLoadingDomains = true;
@@ -59,10 +59,14 @@ class _ChildDetailViewState extends State<ChildDetailView> {
     });
 
     try {
-      final resp = await _api.getTestsPaginated(page: 0, size: 100); // Load more tests for child detail
+      final resp = await _api.getTestsPaginated(
+        page: 0,
+        size: 100,
+      ); // Load more tests for child detail
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
         final Map<String, dynamic> responseData = jsonDecode(resp.body);
-        final List<dynamic> data = responseData['content'] ?? responseData['data'] ?? [];
+        final List<dynamic> data =
+            responseData['content'] ?? responseData['data'] ?? [];
         final loaded = data.map((e) => CDDTest.fromJson(e)).toList();
         setState(() {
           _tests = loaded;
@@ -72,7 +76,8 @@ class _ChildDetailViewState extends State<ChildDetailView> {
       } else {
         setState(() {
           _hasTestsError = true;
-          _testsErrorMessage = 'Không thể tải danh sách bài test. Mã lỗi: ${resp.statusCode}';
+          _testsErrorMessage =
+              'Không thể tải danh sách bài test. Mã lỗi: ${resp.statusCode}';
           _isLoadingTests = false;
         });
       }
@@ -93,7 +98,10 @@ class _ChildDetailViewState extends State<ChildDetailView> {
     });
 
     try {
-      final paginatedDomains = await _domainService.getDomains(page: 0, size: 50);
+      final paginatedDomains = await _domainService.getDomains(
+        page: 0,
+        size: 50,
+      );
       setState(() {
         _domains = paginatedDomains.content;
         _isLoadingDomains = false;
@@ -121,7 +129,9 @@ class _ChildDetailViewState extends State<ChildDetailView> {
   }
 
   bool _isRecommended(CDDTest test, int childAgeMonths) {
-    final bool inAgeRange = childAgeMonths >= test.minAgeMonths && childAgeMonths <= test.maxAgeMonths;
+    final bool inAgeRange =
+        childAgeMonths >= test.minAgeMonths &&
+        childAgeMonths <= test.maxAgeMonths;
     final bool isActive = test.status == 'ACTIVE';
     return inAgeRange && isActive;
   }
@@ -135,10 +145,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         foregroundColor: AppColors.white,
         title: Text(
           'Chi tiết: ${widget.child.name}',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         elevation: 0,
         centerTitle: true,
@@ -149,7 +156,9 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               // TODO: Navigate to edit child page
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Tính năng sửa thông tin trẻ sẽ được phát triển'),
+                  content: Text(
+                    'Tính năng sửa thông tin trẻ sẽ được phát triển',
+                  ),
                   backgroundColor: AppColors.info,
                 ),
               );
@@ -165,43 +174,43 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             // Header Card
             _buildHeaderCard(),
             const SizedBox(height: 16),
-            
+
             // Collapsible Info Section
             _buildCollapsibleInfoSection(),
-            
-            const SizedBox(height: 16),
-            
-            // Progress Details
-            _buildProgressCard(),
-            
+
             const SizedBox(height: 16),
 
-          // Recent Activities (moved up under Progress Details)
-          _buildRecentActivitiesCard(),
-          
-          const SizedBox(height: 16),
-            
+            // Progress Details
+            _buildProgressCard(),
+
+            const SizedBox(height: 16),
+
+            // Recent Activities (moved up under Progress Details)
+            _buildRecentActivitiesCard(),
+
+            const SizedBox(height: 16),
+
             // Tracking Button
             _buildTrackingButton(),
-            
+
             const SizedBox(height: 16),
 
             // Tests for Child
             _buildTestsCard(),
 
             const SizedBox(height: 16),
-            
+
             // Activities Section
             _buildActivitiesCard(),
-            
+
             const SizedBox(height: 16),
-            
+
             // Notes
             if (widget.child.notes.isNotEmpty) ...[
               _buildNotesCard(),
               const SizedBox(height: 16),
             ],
-            
+
             const SizedBox(height: 32),
           ],
         ),
@@ -226,7 +235,8 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           initiallyExpanded: _infoExpanded,
-          onExpansionChanged: (expanded) => setState(() => _infoExpanded = expanded),
+          onExpansionChanged: (expanded) =>
+              setState(() => _infoExpanded = expanded),
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           leading: const Icon(Icons.info, color: AppColors.primary, size: 22),
@@ -249,7 +259,10 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               ['Tuổi', '${widget.child.age} tuổi'],
               ['Giới tính', widget.child.gender],
               ['Trạng thái', widget.child.getStatusText()],
-              ['Ngày tham gia', '${widget.child.joinDate.day}/${widget.child.joinDate.month}/${widget.child.joinDate.year}'],
+              [
+                'Ngày tham gia',
+                '${widget.child.joinDate.day}/${widget.child.joinDate.month}/${widget.child.joinDate.year}',
+              ],
             ]),
             const SizedBox(height: 12),
             const SizedBox(height: 8),
@@ -269,15 +282,25 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               ['Địa chỉ', widget.child.address],
               ['Trường học', widget.child.school],
             ]),
-            const SizedBox(height: 12), 
+            const SizedBox(height: 12),
             const SizedBox(height: 8),
             _buildTableSection('Chuyên Gia Điều Trị', [
-              ['Chuyên gia', widget.child.therapist.isNotEmpty ? widget.child.therapist : 'Chưa phân công'],
+              [
+                'Chuyên gia',
+                widget.child.therapist.isNotEmpty
+                    ? widget.child.therapist
+                    : 'Chưa phân công',
+              ],
             ]),
             const SizedBox(height: 12),
             const SizedBox(height: 8),
             _buildTableSection('Ghi Chú', [
-              ['Ghi chú', widget.child.notes.isNotEmpty ? widget.child.notes.join('\n') : 'Không có ghi chú'],
+              [
+                'Ghi chú',
+                widget.child.notes.isNotEmpty
+                    ? widget.child.notes.join('\n')
+                    : 'Không có ghi chú',
+              ],
             ]),
           ],
         ),
@@ -316,9 +339,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             ),
           ),
           Table(
-            columnWidths: const {
-              0: FixedColumnWidth(140),
-            },
+            columnWidths: const {0: FixedColumnWidth(140)},
             border: TableBorder.all(color: AppColors.borderLight, width: 1),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: rows.map((row) {
@@ -328,7 +349,10 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                 children: [
                   Container(
                     color: AppColors.grey50,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: Text(
                       label,
                       style: const TextStyle(
@@ -338,17 +362,20 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                       ),
                     ),
                   ),
-                                     Container(
-                     color: AppColors.white,
-                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                     child: SelectableTextWidget(
-                       text: value,
-                       style: const TextStyle(
-                         fontSize: 14,
-                         color: AppColors.textPrimary,
-                       ),
-                     ),
-                   ),
+                  Container(
+                    color: AppColors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: SelectableTextWidget(
+                      text: value,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
                 ],
               );
             }).toList(),
@@ -377,14 +404,14 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           CircleAvatar(
             radius: 40,
             backgroundColor: AppColors.primaryLight,
-                      child: Text(
-            widget.child.name.split(' ').last[0],
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+            child: Text(
+              widget.child.name.split(' ').last[0],
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
             ),
-          ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -409,11 +436,18 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: Color(widget.child.getStatusColor()).withValues(alpha: 0.1),
+                    color: Color(
+                      widget.child.getStatusColor(),
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Color(widget.child.getStatusColor())),
+                    border: Border.all(
+                      color: Color(widget.child.getStatusColor()),
+                    ),
                   ),
                   child: Text(
                     widget.child.getStatusText(),
@@ -514,11 +548,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.trending_up,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.trending_up, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Tiến Độ Chi Tiết',
@@ -531,42 +561,48 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             ],
           ),
           const SizedBox(height: 16),
-          ...widget.child.progress.entries.map((entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      entry.key,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+          ...widget.child.progress.entries
+              .map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            entry.key,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            '${(entry.value * 100).toInt()}%',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Text(
-                      '${(entry.value * 100).toInt()}%',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                      const SizedBox(height: 6),
+                      LinearProgressIndicator(
+                        value: entry.value,
+                        backgroundColor: AppColors.grey200,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
+                        minHeight: 8,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 6),
-                LinearProgressIndicator(
-                  value: entry.value,
-                  backgroundColor: AppColors.grey200,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                  minHeight: 8,
-                ),
-              ],
-            ),
-          )).toList(),
+              )
+              .toList(),
         ],
       ),
     );
@@ -591,11 +627,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.assessment,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.assessment, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Tracking Tình Trạng',
@@ -610,10 +642,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           const SizedBox(height: 12),
           const Text(
             'Đánh giá tình trạng trẻ hôm nay thông qua bảng câu hỏi chấm điểm hằng ngày.',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
           Row(
@@ -624,10 +653,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                   icon: const Icon(Icons.add_chart),
                   label: const Text(
                     'Bắt đầu tracking',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -646,10 +672,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                   icon: const Icon(Icons.history),
                   label: const Text(
                     'Xem lịch sử',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.white,
@@ -676,12 +699,14 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         builder: (context) => ChildTrackingView(child: widget.child),
       ),
     );
-    
+
     if (result != null && result is ChildTracking) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã lưu tracking cho ${widget.child.name} thành công!'),
+            content: Text(
+              'Đã lưu tracking cho ${widget.child.name} thành công!',
+            ),
             backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
           ),
@@ -692,7 +717,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
 
   void _navigateToTrackingHistory(BuildContext context) {
     final trackingHistory = _generateDummyTrackingHistory();
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -707,27 +732,28 @@ class _ChildDetailViewState extends State<ChildDetailView> {
   List<ChildTracking> _generateDummyTrackingHistory() {
     final now = DateTime.now();
     final List<ChildTracking> history = [];
-    
+
     // Dummy intervention goals
     final dummyGoals = [
       TrackingData.interventionGoals[0], // Giao tiếp bằng lời nói
       TrackingData.interventionGoals[1], // Tương tác xã hội
       TrackingData.interventionGoals[2], // Tự lập trong sinh hoạt
     ];
-    
+
     for (int i = 0; i < 7; i++) {
       final date = now.subtract(Duration(days: i));
-      
+
       // Generate random emotion and participation levels
       final emotionLevels = EmotionLevel.values;
       final participationLevels = ParticipationLevel.values;
-      
+
       final randomEmotion = emotionLevels[i % emotionLevels.length];
-      final randomParticipation = participationLevels[i % participationLevels.length];
-      
+      final randomParticipation =
+          participationLevels[i % participationLevels.length];
+
       // Select 2-3 random goals for each tracking
       final selectedGoals = dummyGoals.take(2 + (i % 2)).toList();
-      
+
       history.add(
         ChildTracking(
           id: 'track_${widget.child.id}_$i',
@@ -745,9 +771,13 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             'independence_1': 1 + ((i + 1) % 2),
             'independence_2': (i % 3),
           },
-          notes: i == 0 ? 'Ngày gần nhất: tinh thần tốt, hợp tác.' : 
-                 i == 1 ? 'Trẻ có tiến bộ trong giao tiếp.' :
-                 i == 2 ? 'Cần hỗ trợ thêm trong kỹ năng tự lập.' : '',
+          notes: i == 0
+              ? 'Ngày gần nhất: tinh thần tốt, hợp tác.'
+              : i == 1
+              ? 'Trẻ có tiến bộ trong giao tiếp.'
+              : i == 2
+              ? 'Cần hỗ trợ thêm trong kỹ năng tự lập.'
+              : '',
           emotionLevel: randomEmotion,
           participationLevel: randomParticipation,
           selectedGoals: selectedGoals,
@@ -821,20 +851,21 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (context) => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              builder: (context) =>
+                  const Center(child: CircularProgressIndicator()),
             );
 
             // Gọi API để lấy kết quả bài test đã làm
-            final response = await _api.getTestResultsByChildId(widget.child.id);
-            
+            final response = await _api.getTestResultsByChildId(
+              widget.child.id,
+            );
+
             // Đóng loading dialog
             Navigator.pop(context);
 
             if (response.statusCode >= 200 && response.statusCode < 300) {
               final dynamic responseData = jsonDecode(response.body);
-              
+
               // Parse dữ liệu nhận được
               late List<dynamic> data;
               if (responseData is List) {
@@ -844,7 +875,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               } else {
                 data = [];
               }
-              
+
               // Chuyển đổi data từ API thành TestResult objects
               final List<TestResult> results = data.map((e) {
                 int timeSpent = 0;
@@ -857,7 +888,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                     timeSpent = 0;
                   }
                 }
-                
+
                 return TestResult(
                   id: e['id']?.toString() ?? '',
                   testId: e['testId']?.toString() ?? '',
@@ -865,9 +896,12 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                   userName: widget.child.name,
                   score: (e['totalScore'] as num?)?.toDouble().toInt() ?? 0,
                   totalQuestions: (e['totalQuestions'] as num?)?.toInt() ?? 0,
-                  answeredQuestions: (e['correctAnswers'] as num?)?.toInt() ?? 0,
+                  answeredQuestions:
+                      (e['correctAnswers'] as num?)?.toInt() ?? 0,
                   timeSpent: timeSpent,
-                  completedAt: e['testDate'] != null ? DateTime.parse(e['testDate']) : DateTime.now(),
+                  completedAt: e['testDate'] != null
+                      ? DateTime.parse(e['testDate'])
+                      : DateTime.now(),
                   questionResults: [],
                   notes: e['notes'] ?? '',
                 );
@@ -890,7 +924,9 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Không thể tải kết quả bài test. Mã lỗi: ${response.statusCode}'),
+                    content: Text(
+                      'Không thể tải kết quả bài test. Mã lỗi: ${response.statusCode}',
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -901,7 +937,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             if (mounted && Navigator.canPop(context)) {
               Navigator.pop(context);
             }
-            
+
             // Hiển thị lỗi
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -925,10 +961,12 @@ class _ChildDetailViewState extends State<ChildDetailView> {
   List<Widget> _buildTestsContent(int childAgeMonths) {
     if (_isLoadingTests) {
       return [
-        const Center(child: Padding(
-          padding: EdgeInsets.all(16),
-          child: CircularProgressIndicator(),
-        ))
+        const Center(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: CircularProgressIndicator(),
+          ),
+        ),
       ];
     } else if (_hasTestsError) {
       return [
@@ -943,9 +981,21 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Có lỗi khi tải bài test', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              const Text(
+                'Có lỗi khi tải bài test',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(_testsErrorMessage, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              Text(
+                _testsErrorMessage,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
               const SizedBox(height: 8),
               ElevatedButton.icon(
                 onPressed: _loadTests,
@@ -958,7 +1008,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               ),
             ],
           ),
-        )
+        ),
       ];
     } else if (_filteredTests.isEmpty) {
       return [
@@ -970,10 +1020,8 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.border),
           ),
-          child: const Center(
-            child: Text('Không có bài test phù hợp'),
-          ),
-        )
+          child: const Center(child: Text('Không có bài test phù hợp')),
+        ),
       ];
     } else {
       return [
@@ -982,17 +1030,27 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           height: _isTestsExpanded ? null : 0,
           child: _isTestsExpanded
               ? Column(
-                  children: _filteredTests.map((test) => _buildTestItem(test, _isRecommended(test, childAgeMonths))).toList(),
+                  children: _filteredTests
+                      .map(
+                        (test) => _buildTestItem(
+                          test,
+                          _isRecommended(test, childAgeMonths),
+                        ),
+                      )
+                      .toList(),
                 )
               : const SizedBox.shrink(),
-        )
+        ),
       ];
     }
   }
 
   List<TestResult> _generateDummyTestResults() {
     // Prefer using loaded tests for names/ids if available
-    final ids = _tests.take(3).map((t) => t.id ?? 'test_${t.assessmentCode}').toList();
+    final ids = _tests
+        .take(3)
+        .map((t) => t.id ?? 'test_${t.assessmentCode}')
+        .toList();
     while (ids.length < 3) {
       ids.add('test_${ids.length + 1}');
     }
@@ -1010,8 +1068,18 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         timeSpent: 420,
         completedAt: now.subtract(const Duration(days: 1, hours: 2)),
         questionResults: [
-          QuestionResult(questionId: 'q1', answer: true, timeSpent: 20, answeredAt: now.subtract(const Duration(days: 1, hours: 2))),
-          QuestionResult(questionId: 'q2', answer: false, timeSpent: 30, answeredAt: now.subtract(const Duration(days: 1, hours: 2))),
+          QuestionResult(
+            questionId: 'q1',
+            answer: true,
+            timeSpent: 20,
+            answeredAt: now.subtract(const Duration(days: 1, hours: 2)),
+          ),
+          QuestionResult(
+            questionId: 'q2',
+            answer: false,
+            timeSpent: 30,
+            answeredAt: now.subtract(const Duration(days: 1, hours: 2)),
+          ),
         ],
         notes: 'Kết quả trong ngưỡng an toàn.',
       ),
@@ -1026,8 +1094,18 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         timeSpent: 610,
         completedAt: now.subtract(const Duration(days: 5, hours: 3)),
         questionResults: [
-          QuestionResult(questionId: 'q1', answer: true, timeSpent: 25, answeredAt: now.subtract(const Duration(days: 5, hours: 3))),
-          QuestionResult(questionId: 'q2', answer: true, timeSpent: 18, answeredAt: now.subtract(const Duration(days: 5, hours: 3))),
+          QuestionResult(
+            questionId: 'q1',
+            answer: true,
+            timeSpent: 25,
+            answeredAt: now.subtract(const Duration(days: 5, hours: 3)),
+          ),
+          QuestionResult(
+            questionId: 'q2',
+            answer: true,
+            timeSpent: 18,
+            answeredAt: now.subtract(const Duration(days: 5, hours: 3)),
+          ),
         ],
         notes: 'Một số dấu hiệu cần theo dõi.',
       ),
@@ -1042,8 +1120,18 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         timeSpent: 900,
         completedAt: now.subtract(const Duration(days: 12, hours: 1)),
         questionResults: [
-          QuestionResult(questionId: 'q1', answer: false, timeSpent: 40, answeredAt: now.subtract(const Duration(days: 12, hours: 1))),
-          QuestionResult(questionId: 'q2', answer: true, timeSpent: 35, answeredAt: now.subtract(const Duration(days: 12, hours: 1))),
+          QuestionResult(
+            questionId: 'q1',
+            answer: false,
+            timeSpent: 40,
+            answeredAt: now.subtract(const Duration(days: 12, hours: 1)),
+          ),
+          QuestionResult(
+            questionId: 'q2',
+            answer: true,
+            timeSpent: 35,
+            answeredAt: now.subtract(const Duration(days: 12, hours: 1)),
+          ),
         ],
         notes: 'Khuyến nghị trao đổi với chuyên gia.',
       ),
@@ -1066,7 +1154,11 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           label: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: selected ? AppColors.white : AppColors.textSecondary),
+              Icon(
+                icon,
+                size: 16,
+                color: selected ? AppColors.white : AppColors.textSecondary,
+              ),
               const SizedBox(width: 6),
               Text(label),
             ],
@@ -1080,8 +1172,12 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           },
           selectedColor: AppColors.primary,
           backgroundColor: AppColors.grey50,
-          labelStyle: TextStyle(color: selected ? AppColors.white : AppColors.textPrimary),
-          side: BorderSide(color: selected ? AppColors.primary : AppColors.borderLight),
+          labelStyle: TextStyle(
+            color: selected ? AppColors.white : AppColors.textPrimary,
+          ),
+          side: BorderSide(
+            color: selected ? AppColors.primary : AppColors.borderLight,
+          ),
         );
       }),
     );
@@ -1105,7 +1201,11 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               color: _getCategoryColor(test.category).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(_getCategoryIcon(test.category), color: _getCategoryColor(test.category), size: 22),
+            child: Icon(
+              _getCategoryIcon(test.category),
+              color: _getCategoryColor(test.category),
+              size: 22,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1117,7 +1217,11 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                     Expanded(
                       child: Text(
                         test.getName('vi'),
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1125,16 +1229,30 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                     if (recommended) ...[
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           children: const [
-                            Icon(Icons.recommend, size: 14, color: Colors.green),
+                            Icon(
+                              Icons.recommend,
+                              size: 14,
+                              color: Colors.green,
+                            ),
                             SizedBox(width: 4),
-                            Text('Khuyến nghị', style: TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w600)),
+                            Text(
+                              'Khuyến nghị',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.green,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -1144,23 +1262,52 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.cake, size: 14, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.cake,
+                      size: 14,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 4),
-                    Text('${test.minAgeMonths}-${test.maxAgeMonths} tháng', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text(
+                      '${test.minAgeMonths}-${test.maxAgeMonths} tháng',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const SizedBox(width: 12),
-                    const Icon(Icons.quiz, size: 14, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.quiz,
+                      size: 14,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 4),
-                    Text('${test.questions.length} câu', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text(
+                      '${test.questions.length} câu',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(test.status).withValues(alpha: 0.1),
+                        color: _getStatusColor(
+                          test.status,
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         _getStatusText(test.status),
-                        style: TextStyle(fontSize: 10, color: _getStatusColor(test.status), fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: _getStatusColor(test.status),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -1318,7 +1465,9 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             height: _isActivitiesExpanded ? null : 0,
-            child: _isActivitiesExpanded ? _buildDomainsContent() : const SizedBox.shrink(),
+            child: _isActivitiesExpanded
+                ? _buildDomainsContent()
+                : const SizedBox.shrink(),
           ),
         ],
       ),
@@ -1352,7 +1501,10 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             const SizedBox(height: 4),
             Text(
               _domainsErrorMessage,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
             ),
             const SizedBox(height: 8),
             ElevatedButton.icon(
@@ -1376,20 +1528,20 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.border),
         ),
-        child: const Center(
-          child: Text('Không có lĩnh vực can thiệp nào'),
-        ),
+        child: const Center(child: Text('Không có lĩnh vực can thiệp nào')),
       );
     } else {
       return Column(
-        children: _domains.map((domain) => _buildExpandableDomainCard(domain)).toList(),
+        children: _domains
+            .map((domain) => _buildExpandableDomainCard(domain))
+            .toList(),
       );
     }
   }
 
   Widget _buildExpandableDomainCard(InterventionDomainModel domain) {
     final bool isExpanded = _expandedDomains[domain.id] ?? false;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -1428,7 +1580,9 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          domain.displayedName.vi.isNotEmpty ? domain.displayedName.vi : domain.name,
+                          domain.displayedName.vi.isNotEmpty
+                              ? domain.displayedName.vi
+                              : domain.name,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -1462,7 +1616,8 @@ class _ChildDetailViewState extends State<ChildDetailView> {
                       children: [
                         const Divider(color: AppColors.border),
                         const SizedBox(height: 8),
-                        if (domain.description != null && domain.description!.vi.isNotEmpty) ...[
+                        if (domain.description != null &&
+                            domain.description!.vi.isNotEmpty) ...[
                           const Text(
                             'Mô tả:',
                             style: TextStyle(
@@ -1541,8 +1696,13 @@ class _ChildDetailViewState extends State<ChildDetailView> {
     }
   }
 
-
-  Widget _buildActivityCard(String title, String description, IconData icon, String duration, String date) {
+  Widget _buildActivityCard(
+    String title,
+    String description,
+    IconData icon,
+    String duration,
+    String date,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1558,11 +1718,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primary,
-              size: 20,
-            ),
+            child: Icon(icon, color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1632,11 +1788,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.history,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.history, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Hoạt Động Gần Đây',
@@ -1677,7 +1829,13 @@ class _ChildDetailViewState extends State<ChildDetailView> {
     );
   }
 
-  Widget _buildActivityItem(String title, String description, String time, IconData icon, Color color) {
+  Widget _buildActivityItem(
+    String title,
+    String description,
+    String time,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1690,14 +1848,10 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 16,
-            ),
+            child: Icon(icon, color: color, size: 16),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1754,11 +1908,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.note,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.note, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Ghi Chú',
@@ -1771,34 +1921,38 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             ],
           ),
           const SizedBox(height: 12),
-          ...widget.child.notes.map((note) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 6),
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
+          ...widget.child.notes
+              .map(
+                (note) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          note,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    note,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )).toList(),
+              )
+              .toList(),
         ],
       ),
     );

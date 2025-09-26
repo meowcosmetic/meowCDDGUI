@@ -19,17 +19,18 @@ class InterventionGoalService {
         'page': page.toString(),
         'size': size.toString(),
       };
-      
+
       if (category != null && category.isNotEmpty) {
         queryParams['category'] = category;
       }
-      
+
       if (isActive != null) {
         queryParams['isActive'] = isActive.toString();
       }
 
-      final uri = Uri.parse('${AppConfig.apiBaseUrl}$_basePath')
-          .replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        '${AppConfig.apiBaseUrl}$_basePath',
+      ).replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -178,7 +179,9 @@ class InterventionGoalService {
   /// Get targets for a specific goal
   Future<List<InterventionTargetModel>> getTargets(String goalId) async {
     try {
-      final uri = Uri.parse('${AppConfig.apiBaseUrl}$_basePath/$goalId/targets');
+      final uri = Uri.parse(
+        '${AppConfig.apiBaseUrl}$_basePath/$goalId/targets',
+      );
 
       final response = await http.get(
         uri,
@@ -210,7 +213,9 @@ class InterventionGoalService {
     int priority = 1,
   }) async {
     try {
-      final uri = Uri.parse('${AppConfig.apiBaseUrl}$_basePath/$goalId/targets');
+      final uri = Uri.parse(
+        '${AppConfig.apiBaseUrl}$_basePath/$goalId/targets',
+      );
 
       final payload = {
         'name': name,
@@ -251,7 +256,9 @@ class InterventionGoalService {
     String? status,
   }) async {
     try {
-      final uri = Uri.parse('${AppConfig.apiBaseUrl}/api/intervention-targets/$targetId');
+      final uri = Uri.parse(
+        '${AppConfig.apiBaseUrl}/api/intervention-targets/$targetId',
+      );
 
       final payload = {
         'name': name,
@@ -284,7 +291,9 @@ class InterventionGoalService {
   /// Delete a target
   Future<bool> deleteTarget(String targetId) async {
     try {
-      final uri = Uri.parse('${AppConfig.apiBaseUrl}/api/intervention-targets/$targetId');
+      final uri = Uri.parse(
+        '${AppConfig.apiBaseUrl}/api/intervention-targets/$targetId',
+      );
 
       final response = await http.delete(
         uri,

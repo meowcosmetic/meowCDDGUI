@@ -34,13 +34,15 @@ class _ChatDialogState extends State<ChatDialog> {
         }
       } catch (_) {}
       setState(() {
-        _messages.add(ChatMessage(
-          text: content,
-          isFromMe: false,
-          timestamp: DateTime.now(),
-          senderName: 'Đối tác',
-          showSenderName: true,
-        ));
+        _messages.add(
+          ChatMessage(
+            text: content,
+            isFromMe: false,
+            timestamp: DateTime.now(),
+            senderName: 'Đối tác',
+            showSenderName: true,
+          ),
+        );
       });
       // Auto scroll
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -71,11 +73,9 @@ class _ChatDialogState extends State<ChatDialog> {
 
   void _sendMessage(String text) {
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isFromMe: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: text, isFromMe: true, timestamp: DateTime.now()),
+      );
     });
     // Auto scroll to bottom
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,7 +95,7 @@ class _ChatDialogState extends State<ChatDialog> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Tính toán kích thước dialog dựa trên màn hình
     final dialogHeight = screenHeight * 0.7;
     final dialogWidth = screenWidth > 600 ? 500.0 : screenWidth * 0.95;
@@ -170,7 +170,7 @@ class _ChatDialogState extends State<ChatDialog> {
                 ],
               ),
             ),
-            
+
             // Chat messages
             Expanded(
               child: Container(
@@ -183,7 +183,7 @@ class _ChatDialogState extends State<ChatDialog> {
                 ),
               ),
             ),
-            
+
             // Input area
             Container(
               decoration: BoxDecoration(

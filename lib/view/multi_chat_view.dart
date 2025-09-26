@@ -17,7 +17,7 @@ class _MultiChatViewState extends State<MultiChatView> {
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
-  
+
   List<Conversation> _conversations = [];
   Conversation? _currentConversation;
   StreamSubscription<Conversation>? _conversationSub;
@@ -35,22 +35,26 @@ class _MultiChatViewState extends State<MultiChatView> {
     MessagingService.instance.autoConnectIfLoggedIn();
     // Enrich profiles on first open
     MessagingService.instance.enrichProfiles();
-    
+
     // Listen to conversations
-    _conversationSub = MessagingService.instance.conversations.listen((conversation) {
+    _conversationSub = MessagingService.instance.conversations.listen((
+      conversation,
+    ) {
       if (mounted) {
         setState(() {
           _conversations = MessagingService.instance.conversationList;
           if (_currentConversation == null && _conversations.isNotEmpty) {
             _currentConversation = _conversations.first;
-            MessagingService.instance.switchConversation(_currentConversation!.id);
+            MessagingService.instance.switchConversation(
+              _currentConversation!.id,
+            );
           }
         });
         // Re-enrich when conversation list changes (new peers)
         MessagingService.instance.enrichProfiles();
       }
     });
-    
+
     // Listen to messages
     _messageSub = MessagingService.instance.messages.listen((msg) {
       if (!mounted) return;
@@ -62,13 +66,15 @@ class _MultiChatViewState extends State<MultiChatView> {
         }
       } catch (_) {}
       setState(() {
-        _messages.add(ChatMessage(
-          text: content,
-          isFromMe: false,
-          timestamp: DateTime.now(),
-          senderName: _currentConversation?.peerName ?? "Đối tác",
-          showSenderName: true,
-        ));
+        _messages.add(
+          ChatMessage(
+            text: content,
+            isFromMe: false,
+            timestamp: DateTime.now(),
+            senderName: _currentConversation?.peerName ?? "Đối tác",
+            showSenderName: true,
+          ),
+        );
       });
       _scrollToBottom();
     });
@@ -90,11 +96,9 @@ class _MultiChatViewState extends State<MultiChatView> {
 
   void _sendMessage(String text) {
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isFromMe: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: text, isFromMe: true, timestamp: DateTime.now()),
+      );
     });
     _scrollToBottom();
     // Send through STOMP
@@ -160,9 +164,7 @@ class _MultiChatViewState extends State<MultiChatView> {
             width: 300,
             decoration: BoxDecoration(
               color: Colors.grey[100],
-              border: Border(
-                right: BorderSide(color: Colors.grey[300]!),
-              ),
+              border: Border(right: BorderSide(color: Colors.grey[300]!)),
             ),
             child: Column(
               children: [
@@ -198,14 +200,19 @@ class _MultiChatViewState extends State<MultiChatView> {
                     itemCount: _conversations.length,
                     itemBuilder: (context, index) {
                       final conversation = _conversations[index];
-                      final isSelected = _currentConversation?.id == conversation.id;
-                      
+                      final isSelected =
+                          _currentConversation?.id == conversation.id;
+
                       return Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary.withOpacity(0.1) : null,
+                          color: isSelected
+                              ? AppColors.primary.withOpacity(0.1)
+                              : null,
                           border: Border(
                             left: BorderSide(
-                              color: isSelected ? AppColors.primary : Colors.transparent,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : Colors.transparent,
                               width: 3,
                             ),
                           ),
@@ -213,12 +220,16 @@ class _MultiChatViewState extends State<MultiChatView> {
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundColor: AppColors.primary,
-                            backgroundImage: (conversation.avatarUrl != null && conversation.avatarUrl!.isNotEmpty)
+                            backgroundImage:
+                                (conversation.avatarUrl != null &&
+                                    conversation.avatarUrl!.isNotEmpty)
                                 ? NetworkImage(conversation.avatarUrl!)
                                 : null,
-                            child: (conversation.avatarUrl == null || conversation.avatarUrl!.isEmpty)
+                            child:
+                                (conversation.avatarUrl == null ||
+                                    conversation.avatarUrl!.isEmpty)
                                 ? Text(
-                                    conversation.peerName.isNotEmpty 
+                                    conversation.peerName.isNotEmpty
                                         ? conversation.peerName[0].toUpperCase()
                                         : '?',
                                     style: const TextStyle(color: Colors.white),
@@ -228,7 +239,9 @@ class _MultiChatViewState extends State<MultiChatView> {
                           title: Text(
                             conversation.peerName,
                             style: TextStyle(
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           ),
                           subtitle: conversation.lastMessage != null
@@ -257,7 +270,7 @@ class _MultiChatViewState extends State<MultiChatView> {
               ],
             ),
           ),
-          
+
           // Chat area
           Expanded(
             child: Column(
@@ -280,13 +293,18 @@ class _MultiChatViewState extends State<MultiChatView> {
                       children: [
                         CircleAvatar(
                           backgroundColor: AppColors.primary,
-                          backgroundImage: (_currentConversation!.avatarUrl != null && _currentConversation!.avatarUrl!.isNotEmpty)
+                          backgroundImage:
+                              (_currentConversation!.avatarUrl != null &&
+                                  _currentConversation!.avatarUrl!.isNotEmpty)
                               ? NetworkImage(_currentConversation!.avatarUrl!)
                               : null,
-                          child: (_currentConversation!.avatarUrl == null || _currentConversation!.avatarUrl!.isEmpty)
+                          child:
+                              (_currentConversation!.avatarUrl == null ||
+                                  _currentConversation!.avatarUrl!.isEmpty)
                               ? Text(
-                                  _currentConversation!.peerName.isNotEmpty 
-                                      ? _currentConversation!.peerName[0].toUpperCase()
+                                  _currentConversation!.peerName.isNotEmpty
+                                      ? _currentConversation!.peerName[0]
+                                            .toUpperCase()
                                       : '?',
                                   style: const TextStyle(color: Colors.white),
                                 )
@@ -317,7 +335,7 @@ class _MultiChatViewState extends State<MultiChatView> {
                       ],
                     ),
                   ),
-                
+
                 // Messages
                 Expanded(
                   child: ChatList(
@@ -326,7 +344,7 @@ class _MultiChatViewState extends State<MultiChatView> {
                     reverse: false,
                   ),
                 ),
-                
+
                 // Input
                 ChatInput(
                   onSendMessage: _sendMessage,
@@ -394,8 +412,8 @@ class _NewConversationDialogState extends State<_NewConversationDialog> {
             if (_userIdController.text.isNotEmpty) {
               MessagingService.instance.createNewConversation(
                 _userIdController.text,
-                peerName: _nameController.text.isNotEmpty 
-                    ? _nameController.text 
+                peerName: _nameController.text.isNotEmpty
+                    ? _nameController.text
                     : null,
               );
               Navigator.pop(context);

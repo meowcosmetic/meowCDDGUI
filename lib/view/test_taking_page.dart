@@ -8,7 +8,7 @@ class TestTakingPage extends StatefulWidget {
   final Child? child; // Thêm thông tin về trẻ
 
   const TestTakingPage({
-    super.key, 
+    super.key,
     required this.test,
     this.child, // Optional parameter
   });
@@ -99,7 +99,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
               ],
             ),
           ),
-          
+
           // Question
           Expanded(
             child: SingleChildScrollView(
@@ -130,7 +130,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: currentQuestion.getCategoryColor().withValues(alpha: 0.1),
+                                color: currentQuestion
+                                    .getCategoryColor()
+                                    .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
@@ -165,9 +167,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // Question Text
                         Text(
                           currentQuestion.getQuestionText(),
@@ -178,7 +180,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        
+
                         // Hint
                         if (currentQuestion.getHint().isNotEmpty) ...[
                           const SizedBox(height: 16),
@@ -187,7 +189,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
                             decoration: BoxDecoration(
                               color: AppColors.primaryLight,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: Row(
                               children: [
@@ -214,9 +218,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Answer Options
                   Text(
                     'Chọn câu trả lời:',
@@ -226,23 +230,28 @@ class _TestTakingPageState extends State<TestTakingPage> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Yes Option
-                  _buildAnswerOption(true, 'Có', Icons.check_circle, Colors.green),
-                  
+                  _buildAnswerOption(
+                    true,
+                    'Có',
+                    Icons.check_circle,
+                    Colors.green,
+                  ),
+
                   const SizedBox(height: 12),
-                  
+
                   // No Option
                   _buildAnswerOption(false, 'Không', Icons.cancel, Colors.red),
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
-          
+
           // Navigation Buttons
           Container(
             padding: const EdgeInsets.all(20),
@@ -268,13 +277,17 @@ class _TestTakingPageState extends State<TestTakingPage> {
                 if (currentQuestionIndex > 0) const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: answers.containsKey(currentQuestion.questionId) ? _nextQuestion : null,
+                    onPressed: answers.containsKey(currentQuestion.questionId)
+                        ? _nextQuestion
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.white,
                     ),
                     child: Text(
-                      currentQuestionIndex == widget.test.questions.length - 1 ? 'Hoàn thành' : 'Câu tiếp',
+                      currentQuestionIndex == widget.test.questions.length - 1
+                          ? 'Hoàn thành'
+                          : 'Câu tiếp',
                     ),
                   ),
                 ),
@@ -286,10 +299,15 @@ class _TestTakingPageState extends State<TestTakingPage> {
     );
   }
 
-  Widget _buildAnswerOption(bool value, String label, IconData icon, Color color) {
+  Widget _buildAnswerOption(
+    bool value,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
     final currentQuestion = widget.test.questions[currentQuestionIndex];
     final isSelected = answers[currentQuestion.questionId] == value;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -327,11 +345,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
                 color: isSelected ? color : Colors.transparent,
               ),
               child: isSelected
-                  ? Icon(
-                      Icons.check,
-                      size: 16,
-                      color: AppColors.white,
-                    )
+                  ? Icon(Icons.check, size: 16, color: AppColors.white)
                   : null,
             ),
             const SizedBox(width: 16),
@@ -401,9 +415,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
                       color: result!.getResultColor(),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Result Text
                   Text(
                     result!.getResultText(),
@@ -413,9 +427,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
                       color: result!.getResultColor(),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Text(
                     'Điểm: ${result!.score}/${result!.totalQuestions}',
                     style: const TextStyle(
@@ -423,9 +437,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Score Details
                   Row(
                     children: [
@@ -440,15 +454,16 @@ class _TestTakingPageState extends State<TestTakingPage> {
                       Expanded(
                         child: _buildScoreItem(
                           'Chưa trả lời',
-                          (result!.totalQuestions - result!.answeredQuestions).toString(),
+                          (result!.totalQuestions - result!.answeredQuestions)
+                              .toString(),
                           Colors.orange,
                         ),
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Time Spent
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -473,9 +488,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Action Buttons
             Row(
               children: [
@@ -565,30 +580,33 @@ class _TestTakingPageState extends State<TestTakingPage> {
   void _completeTest() {
     final endTime = DateTime.now();
     final timeSpent = endTime.difference(startTime).inSeconds;
-    
+
     int score = 0;
     int answeredQuestions = 0;
     int correctAnswers = 0;
     final questionResults = <QuestionResult>[];
     final questionAnswersMap = <String, Map<String, dynamic>>{};
-    
+
     for (int i = 0; i < widget.test.questions.length; i++) {
       final question = widget.test.questions[i];
       final answer = answers[question.questionId];
-      
+
       if (answer != null) {
         answeredQuestions++;
-        if (answer) { // If answered "Yes"
+        if (answer) {
+          // If answered "Yes"
           score += question.weight;
           correctAnswers++;
         }
-        
-        questionResults.add(QuestionResult(
-          questionId: question.questionId,
-          answer: answer,
-          timeSpent: 0, // TODO: Track individual question time
-          answeredAt: DateTime.now(),
-        ));
+
+        questionResults.add(
+          QuestionResult(
+            questionId: question.questionId,
+            answer: answer,
+            timeSpent: 0, // TODO: Track individual question time
+            answeredAt: DateTime.now(),
+          ),
+        );
 
         // Tạo map cho questionAnswers JSON
         questionAnswersMap[question.questionId] = {
@@ -597,11 +615,16 @@ class _TestTakingPageState extends State<TestTakingPage> {
         };
       }
     }
-    
+
     // Tính percentage score
-    final maxPossibleScore = widget.test.questions.fold<int>(0, (sum, q) => sum + q.weight);
-    final percentageScore = maxPossibleScore > 0 ? (score / maxPossibleScore) * 100 : 0.0;
-    
+    final maxPossibleScore = widget.test.questions.fold<int>(
+      0,
+      (sum, q) => sum + q.weight,
+    );
+    final percentageScore = maxPossibleScore > 0
+        ? (score / maxPossibleScore) * 100
+        : 0.0;
+
     // Tạo TestResult cho hiển thị
     final result = TestResult(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -615,7 +638,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
       completedAt: endTime,
       questionResults: questionResults,
     );
-    
+
     // Tạo kết quả chi tiết để trả về cho TestDetailView
     final detailedResult = {
       'startTime': startTime.toIso8601String(),
@@ -630,12 +653,12 @@ class _TestTakingPageState extends State<TestTakingPage> {
       'interpretation': _getInterpretation(percentageScore),
       'notes': 'Hoàn thành bài test ${widget.test.getName()}',
     };
-    
+
     setState(() {
       this.result = result;
       isCompleted = true;
     });
-    
+
     // Trả về kết quả chi tiết cho TestDetailView
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.pop(context, detailedResult);
@@ -671,7 +694,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Thoát bài test?'),
-        content: const Text('Bạn có chắc muốn thoát? Tiến độ hiện tại sẽ bị mất.'),
+        content: const Text(
+          'Bạn có chắc muốn thoát? Tiến độ hiện tại sẽ bị mất.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

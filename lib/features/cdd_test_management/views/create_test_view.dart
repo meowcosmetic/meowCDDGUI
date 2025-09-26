@@ -14,7 +14,7 @@ class CreateTestView extends StatefulWidget {
 class _CreateTestViewState extends State<CreateTestView> {
   final _formKey = GlobalKey<FormState>();
   final _api = ApiService();
-  
+
   // Basic Information
   final _assessmentCodeCtrl = TextEditingController();
   final _nameViCtrl = TextEditingController();
@@ -23,7 +23,7 @@ class _CreateTestViewState extends State<CreateTestView> {
   final _descriptionEnCtrl = TextEditingController();
   final _instructionsViCtrl = TextEditingController();
   final _instructionsEnCtrl = TextEditingController();
-  
+
   // Test Configuration
   String _selectedCategory = 'DEVELOPMENTAL_SCREENING';
   List<TestCategory> _categories = [];
@@ -34,20 +34,21 @@ class _CreateTestViewState extends State<CreateTestView> {
   final _versionCtrl = TextEditingController(text: '1.0');
   final _durationCtrl = TextEditingController(text: '15');
   String _selectedAdminType = CDDAdministrationType.PARENT_REPORT;
-  String _selectedQualifications = CDDRequiredQualifications.NO_QUALIFICATION_REQUIRED;
-  
+  String _selectedQualifications =
+      CDDRequiredQualifications.NO_QUALIFICATION_REQUIRED;
+
   // Materials
   final _materialsCtrl = TextEditingController();
   List<String> _requiredMaterials = [];
-  
+
   // Questions
   List<CDDQuestion> _questions = [];
-  
+
   // Scoring
   final _totalQuestionsCtrl = TextEditingController(text: '20');
   final _yesScoreCtrl = TextEditingController(text: '1');
   final _noScoreCtrl = TextEditingController(text: '0');
-  
+
   bool _isSubmitting = false;
 
   @override
@@ -167,16 +168,13 @@ class _CreateTestViewState extends State<CreateTestView> {
 
   Future<void> _submitTest() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isSubmitting = true);
-    
+
     try {
       final test = CDDTest(
         assessmentCode: _assessmentCodeCtrl.text.trim(),
-        names: {
-          'vi': _nameViCtrl.text.trim(),
-          'en': _nameEnCtrl.text.trim(),
-        },
+        names: {'vi': _nameViCtrl.text.trim(), 'en': _nameEnCtrl.text.trim()},
         descriptions: {
           'vi': _descriptionViCtrl.text.trim(),
           'en': _descriptionEnCtrl.text.trim(),
@@ -210,7 +208,7 @@ class _CreateTestViewState extends State<CreateTestView> {
               level: 'LOW_RISK',
               descriptions: {
                 'vi': 'Nguy cơ thấp - Trẻ có ít dấu hiệu bất thường',
-                'en': 'Low risk - Child has few abnormal signs'
+                'en': 'Low risk - Child has few abnormal signs',
               },
               recommendation: 'Tiếp tục theo dõi phát triển bình thường',
             ),
@@ -220,9 +218,10 @@ class _CreateTestViewState extends State<CreateTestView> {
               level: 'MEDIUM_RISK',
               descriptions: {
                 'vi': 'Nguy cơ trung bình - Trẻ có một số dấu hiệu bất thường',
-                'en': 'Medium risk - Child has some abnormal signs'
+                'en': 'Medium risk - Child has some abnormal signs',
               },
-              recommendation: 'Cần theo dõi chặt chẽ và đánh giá lại sau 1-2 tháng',
+              recommendation:
+                  'Cần theo dõi chặt chẽ và đánh giá lại sau 1-2 tháng',
             ),
             'HIGH_RISK': CDDScoreRange(
               minScore: 6,
@@ -230,12 +229,13 @@ class _CreateTestViewState extends State<CreateTestView> {
               level: 'HIGH_RISK',
               descriptions: {
                 'vi': 'Nguy cơ cao - Trẻ có nhiều dấu hiệu bất thường',
-                'en': 'High risk - Child has many abnormal signs'
+                'en': 'High risk - Child has many abnormal signs',
               },
               recommendation: 'Cần đánh giá chuyên môn ngay lập tức',
             ),
           },
-          interpretation: 'Điểm càng cao, nguy cơ bất thường phát triển càng lớn',
+          interpretation:
+              'Điểm càng cao, nguy cơ bất thường phát triển càng lớn',
         ),
       );
 
@@ -254,7 +254,9 @@ class _CreateTestViewState extends State<CreateTestView> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi tạo bài test: ${response.statusCode} - ${response.body}'),
+              content: Text(
+                'Lỗi tạo bài test: ${response.statusCode} - ${response.body}',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -327,7 +329,8 @@ class _CreateTestViewState extends State<CreateTestView> {
                 labelText: 'Mã bài test *',
                 hintText: 'VD: DEVELOPMENTAL_SCREENING_V1',
               ),
-              validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập mã bài test' : null,
+              validator: (value) =>
+                  value?.isEmpty == true ? 'Vui lòng nhập mã bài test' : null,
             ),
             const SizedBox(height: 16),
             Row(
@@ -339,7 +342,9 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Tên bài test (VI) *',
                       hintText: 'Tên tiếng Việt',
                     ),
-                    validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập tên bài test' : null,
+                    validator: (value) => value?.isEmpty == true
+                        ? 'Vui lòng nhập tên bài test'
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -362,7 +367,8 @@ class _CreateTestViewState extends State<CreateTestView> {
                 hintText: 'Mô tả bài test bằng tiếng Việt',
               ),
               maxLines: 3,
-              validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập mô tả' : null,
+              validator: (value) =>
+                  value?.isEmpty == true ? 'Vui lòng nhập mô tả' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -381,7 +387,8 @@ class _CreateTestViewState extends State<CreateTestView> {
                 hintText: 'Hướng dẫn thực hiện bài test',
               ),
               maxLines: 3,
-              validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập hướng dẫn' : null,
+              validator: (value) =>
+                  value?.isEmpty == true ? 'Vui lòng nhập hướng dẫn' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -414,9 +421,7 @@ class _CreateTestViewState extends State<CreateTestView> {
                 ? const Center(child: CircularProgressIndicator())
                 : DropdownButtonFormField<String>(
                     value: _categories.isEmpty ? null : _selectedCategory,
-                    decoration: const InputDecoration(
-                      labelText: 'Danh mục *',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Danh mục *'),
                     items: _categories
                         .map(
                           (c) => DropdownMenuItem(
@@ -425,8 +430,12 @@ class _CreateTestViewState extends State<CreateTestView> {
                           ),
                         )
                         .toList(),
-                    onChanged: (value) => setState(() => _selectedCategory = value ?? _selectedCategory),
-                    validator: (value) => (value == null || value.isEmpty) ? 'Vui lòng chọn danh mục' : null,
+                    onChanged: (value) => setState(
+                      () => _selectedCategory = value ?? _selectedCategory,
+                    ),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Vui lòng chọn danh mục'
+                        : null,
                   ),
             const SizedBox(height: 16),
             Row(
@@ -438,7 +447,8 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Độ tuổi tối thiểu (tháng) *',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập độ tuổi' : null,
+                    validator: (value) =>
+                        value?.isEmpty == true ? 'Vui lòng nhập độ tuổi' : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -449,7 +459,8 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Độ tuổi tối đa (tháng) *',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập độ tuổi' : null,
+                    validator: (value) =>
+                        value?.isEmpty == true ? 'Vui lòng nhập độ tuổi' : null,
                   ),
                 ),
               ],
@@ -464,21 +475,31 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Trạng thái *',
                     ),
                     items: const [
-                      DropdownMenuItem(value: CDDTestStatus.DRAFT, child: Text('Bản nháp')),
-                      DropdownMenuItem(value: CDDTestStatus.ACTIVE, child: Text('Hoạt động')),
-                      DropdownMenuItem(value: CDDTestStatus.INACTIVE, child: Text('Không hoạt động')),
+                      DropdownMenuItem(
+                        value: CDDTestStatus.DRAFT,
+                        child: Text('Bản nháp'),
+                      ),
+                      DropdownMenuItem(
+                        value: CDDTestStatus.ACTIVE,
+                        child: Text('Hoạt động'),
+                      ),
+                      DropdownMenuItem(
+                        value: CDDTestStatus.INACTIVE,
+                        child: Text('Không hoạt động'),
+                      ),
                     ],
-                    onChanged: (value) => setState(() => _selectedStatus = value!),
+                    onChanged: (value) =>
+                        setState(() => _selectedStatus = value!),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextFormField(
                     controller: _versionCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Phiên bản *',
-                    ),
-                    validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập phiên bản' : null,
+                    decoration: const InputDecoration(labelText: 'Phiên bản *'),
+                    validator: (value) => value?.isEmpty == true
+                        ? 'Vui lòng nhập phiên bản'
+                        : null,
                   ),
                 ),
               ],
@@ -493,7 +514,9 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Thời gian ước tính (phút) *',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập thời gian' : null,
+                    validator: (value) => value?.isEmpty == true
+                        ? 'Vui lòng nhập thời gian'
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -504,11 +527,21 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Loại thực hiện *',
                     ),
                     items: const [
-                      DropdownMenuItem(value: CDDAdministrationType.PARENT_REPORT, child: Text('Báo cáo phụ huynh')),
-                      DropdownMenuItem(value: CDDAdministrationType.PROFESSIONAL_OBSERVATION, child: Text('Quan sát chuyên môn')),
-                      DropdownMenuItem(value: CDDAdministrationType.DIRECT_ASSESSMENT, child: Text('Đánh giá trực tiếp')),
+                      DropdownMenuItem(
+                        value: CDDAdministrationType.PARENT_REPORT,
+                        child: Text('Báo cáo phụ huynh'),
+                      ),
+                      DropdownMenuItem(
+                        value: CDDAdministrationType.PROFESSIONAL_OBSERVATION,
+                        child: Text('Quan sát chuyên môn'),
+                      ),
+                      DropdownMenuItem(
+                        value: CDDAdministrationType.DIRECT_ASSESSMENT,
+                        child: Text('Đánh giá trực tiếp'),
+                      ),
                     ],
-                    onChanged: (value) => setState(() => _selectedAdminType = value!),
+                    onChanged: (value) =>
+                        setState(() => _selectedAdminType = value!),
                   ),
                 ),
               ],
@@ -520,12 +553,25 @@ class _CreateTestViewState extends State<CreateTestView> {
                 labelText: 'Yêu cầu trình độ *',
               ),
               items: const [
-                DropdownMenuItem(value: CDDRequiredQualifications.NO_QUALIFICATION_REQUIRED, child: Text('Không yêu cầu')),
-                DropdownMenuItem(value: CDDRequiredQualifications.PSYCHOLOGIST_REQUIRED, child: Text('Chuyên gia tâm lý')),
-                DropdownMenuItem(value: CDDRequiredQualifications.PEDIATRICIAN_REQUIRED, child: Text('Bác sĩ nhi khoa')),
-                DropdownMenuItem(value: CDDRequiredQualifications.THERAPIST_REQUIRED, child: Text('Nhà trị liệu')),
+                DropdownMenuItem(
+                  value: CDDRequiredQualifications.NO_QUALIFICATION_REQUIRED,
+                  child: Text('Không yêu cầu'),
+                ),
+                DropdownMenuItem(
+                  value: CDDRequiredQualifications.PSYCHOLOGIST_REQUIRED,
+                  child: Text('Chuyên gia tâm lý'),
+                ),
+                DropdownMenuItem(
+                  value: CDDRequiredQualifications.PEDIATRICIAN_REQUIRED,
+                  child: Text('Bác sĩ nhi khoa'),
+                ),
+                DropdownMenuItem(
+                  value: CDDRequiredQualifications.THERAPIST_REQUIRED,
+                  child: Text('Nhà trị liệu'),
+                ),
               ],
-              onChanged: (value) => setState(() => _selectedQualifications = value!),
+              onChanged: (value) =>
+                  setState(() => _selectedQualifications = value!),
             ),
           ],
         ),
@@ -565,7 +611,10 @@ class _CreateTestViewState extends State<CreateTestView> {
             ),
             const SizedBox(height: 16),
             if (_requiredMaterials.isNotEmpty) ...[
-              const Text('Danh sách vật liệu:', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text(
+                'Danh sách vật liệu:',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 8),
               ...(_requiredMaterials.asMap().entries.map((entry) {
                 final index = entry.key;
@@ -610,7 +659,10 @@ class _CreateTestViewState extends State<CreateTestView> {
             const SizedBox(height: 16),
             if (_questions.isEmpty)
               const Center(
-                child: Text('Chưa có câu hỏi nào', style: TextStyle(color: Colors.grey)),
+                child: Text(
+                  'Chưa có câu hỏi nào',
+                  style: TextStyle(color: Colors.grey),
+                ),
               )
             else
               ...(_questions.asMap().entries.map((entry) {
@@ -623,21 +675,24 @@ class _CreateTestViewState extends State<CreateTestView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                                                 Row(
-                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                           children: [
-                             Expanded(
-                               child: Text(
-                                 'Câu hỏi ${question.questionNumber}',
-                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                               ),
-                             ),
-                             IconButton(
-                               icon: const Icon(Icons.delete, color: Colors.red),
-                               onPressed: () => _removeQuestion(index),
-                             ),
-                           ],
-                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Câu hỏi ${question.questionNumber}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _removeQuestion(index),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           question.getQuestionText('vi'),
@@ -647,46 +702,68 @@ class _CreateTestViewState extends State<CreateTestView> {
                           const SizedBox(height: 4),
                           Text(
                             question.getQuestionText('en'),
-                            style: const TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontStyle: FontStyle.italic,
+                            ),
                           ),
                         ],
                         const SizedBox(height: 8),
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 _getCategoryDisplayName(question.category),
-                                style: TextStyle(fontSize: 10, color: AppColors.primary),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.primary,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.success.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 'Trọng số: ${question.weight}',
-                                style: TextStyle(fontSize: 10, color: AppColors.success),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.success,
+                                ),
                               ),
                             ),
                             if (question.required) ...[
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.orange.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Text(
                                   'Bắt buộc',
-                                  style: TextStyle(fontSize: 10, color: Colors.orange),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.orange,
+                                  ),
                                 ),
                               ),
                             ],
@@ -724,7 +801,9 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Tổng số câu hỏi *',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập tổng số câu hỏi' : null,
+                    validator: (value) => value?.isEmpty == true
+                        ? 'Vui lòng nhập tổng số câu hỏi'
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -735,7 +814,8 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Điểm cho "Có" *',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập điểm' : null,
+                    validator: (value) =>
+                        value?.isEmpty == true ? 'Vui lòng nhập điểm' : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -746,7 +826,8 @@ class _CreateTestViewState extends State<CreateTestView> {
                       labelText: 'Điểm cho "Không" *',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập điểm' : null,
+                    validator: (value) =>
+                        value?.isEmpty == true ? 'Vui lòng nhập điểm' : null,
                   ),
                 ),
               ],
@@ -775,11 +856,16 @@ class _CreateTestViewState extends State<CreateTestView> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: _isSubmitting
             ? const CircularProgressIndicator(color: Colors.white)
-            : const Text('Tạo bài test', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            : const Text(
+                'Tạo bài test',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
       ),
     );
   }
@@ -820,7 +906,7 @@ class QuestionDialog extends StatefulWidget {
 
 class _QuestionDialogState extends State<QuestionDialog> {
   final _formKey = GlobalKey<FormState>();
-  
+
   final _questionIdCtrl = TextEditingController();
   final _questionViCtrl = TextEditingController();
   final _questionEnCtrl = TextEditingController();
@@ -828,7 +914,7 @@ class _QuestionDialogState extends State<QuestionDialog> {
   final _hintEnCtrl = TextEditingController();
   final _explanationViCtrl = TextEditingController();
   final _explanationEnCtrl = TextEditingController();
-  
+
   String _selectedCategory = CDDQuestionCategory.COMMUNICATION_LANGUAGE;
   final _weightCtrl = TextEditingController(text: '1');
   bool _isRequired = true;
@@ -836,7 +922,8 @@ class _QuestionDialogState extends State<QuestionDialog> {
   @override
   void initState() {
     super.initState();
-    _questionIdCtrl.text = 'Q_${widget.questionNumber.toString().padLeft(3, '0')}';
+    _questionIdCtrl.text =
+        'Q_${widget.questionNumber.toString().padLeft(3, '0')}';
   }
 
   @override
@@ -865,10 +952,7 @@ class _QuestionDialogState extends State<QuestionDialog> {
       category: _selectedCategory,
       weight: int.parse(_weightCtrl.text),
       required: _isRequired,
-      hints: {
-        'vi': _hintViCtrl.text.trim(),
-        'en': _hintEnCtrl.text.trim(),
-      },
+      hints: {'vi': _hintViCtrl.text.trim(), 'en': _hintEnCtrl.text.trim()},
       explanations: {
         'vi': _explanationViCtrl.text.trim(),
         'en': _explanationEnCtrl.text.trim(),
@@ -896,7 +980,10 @@ class _QuestionDialogState extends State<QuestionDialog> {
                 children: [
                   Text(
                     'Thêm câu hỏi ${widget.questionNumber}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
@@ -917,10 +1004,12 @@ class _QuestionDialogState extends State<QuestionDialog> {
                           labelText: 'ID câu hỏi *',
                           hintText: 'VD: COMM_001',
                         ),
-                        validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập ID câu hỏi' : null,
+                        validator: (value) => value?.isEmpty == true
+                            ? 'Vui lòng nhập ID câu hỏi'
+                            : null,
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Question Text
                       Row(
                         children: [
@@ -932,7 +1021,9 @@ class _QuestionDialogState extends State<QuestionDialog> {
                                 hintText: 'Câu hỏi bằng tiếng Việt',
                               ),
                               maxLines: 3,
-                              validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập nội dung câu hỏi' : null,
+                              validator: (value) => value?.isEmpty == true
+                                  ? 'Vui lòng nhập nội dung câu hỏi'
+                                  : null,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -949,7 +1040,7 @@ class _QuestionDialogState extends State<QuestionDialog> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Category and Weight
                       Row(
                         children: [
@@ -960,14 +1051,34 @@ class _QuestionDialogState extends State<QuestionDialog> {
                                 labelText: 'Danh mục *',
                               ),
                               items: const [
-                                DropdownMenuItem(value: CDDQuestionCategory.COMMUNICATION_LANGUAGE, child: Text('Giao tiếp - Ngôn ngữ')),
-                                DropdownMenuItem(value: CDDQuestionCategory.GROSS_MOTOR, child: Text('Vận động thô')),
-                                DropdownMenuItem(value: CDDQuestionCategory.FINE_MOTOR, child: Text('Vận động tinh')),
-                                DropdownMenuItem(value: CDDQuestionCategory.IMITATION_LEARNING, child: Text('Bắt chước và học')),
-                                DropdownMenuItem(value: CDDQuestionCategory.PERSONAL_SOCIAL, child: Text('Cá nhân - Xã hội')),
-                                DropdownMenuItem(value: CDDQuestionCategory.OTHER, child: Text('Khác')),
+                                DropdownMenuItem(
+                                  value: CDDQuestionCategory
+                                      .COMMUNICATION_LANGUAGE,
+                                  child: Text('Giao tiếp - Ngôn ngữ'),
+                                ),
+                                DropdownMenuItem(
+                                  value: CDDQuestionCategory.GROSS_MOTOR,
+                                  child: Text('Vận động thô'),
+                                ),
+                                DropdownMenuItem(
+                                  value: CDDQuestionCategory.FINE_MOTOR,
+                                  child: Text('Vận động tinh'),
+                                ),
+                                DropdownMenuItem(
+                                  value: CDDQuestionCategory.IMITATION_LEARNING,
+                                  child: Text('Bắt chước và học'),
+                                ),
+                                DropdownMenuItem(
+                                  value: CDDQuestionCategory.PERSONAL_SOCIAL,
+                                  child: Text('Cá nhân - Xã hội'),
+                                ),
+                                DropdownMenuItem(
+                                  value: CDDQuestionCategory.OTHER,
+                                  child: Text('Khác'),
+                                ),
                               ],
-                              onChanged: (value) => setState(() => _selectedCategory = value!),
+                              onChanged: (value) =>
+                                  setState(() => _selectedCategory = value!),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -979,26 +1090,32 @@ class _QuestionDialogState extends State<QuestionDialog> {
                                 hintText: '1',
                               ),
                               keyboardType: TextInputType.number,
-                              validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập trọng số' : null,
+                              validator: (value) => value?.isEmpty == true
+                                  ? 'Vui lòng nhập trọng số'
+                                  : null,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Required checkbox
                       CheckboxListTile(
                         title: const Text('Câu hỏi bắt buộc'),
                         value: _isRequired,
-                        onChanged: (value) => setState(() => _isRequired = value!),
+                        onChanged: (value) =>
+                            setState(() => _isRequired = value!),
                         controlAffinity: ListTileControlAffinity.leading,
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Hints
                       const Text(
                         'Gợi ý',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -1027,11 +1144,14 @@ class _QuestionDialogState extends State<QuestionDialog> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Explanations
                       const Text(
                         'Giải thích',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -1064,7 +1184,7 @@ class _QuestionDialogState extends State<QuestionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Action buttons
               Row(
                 children: [

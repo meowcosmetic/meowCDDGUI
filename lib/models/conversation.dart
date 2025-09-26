@@ -44,8 +44,8 @@ class Conversation {
       peerName: json['peerName'] ?? 'Người dùng',
       avatarUrl: json['avatarUrl'],
       lastMessage: json['lastMessage'],
-      lastMessageTime: json['lastMessageTime'] != null 
-          ? DateTime.tryParse(json['lastMessageTime']) 
+      lastMessageTime: json['lastMessageTime'] != null
+          ? DateTime.tryParse(json['lastMessageTime'])
           : null,
       hasUnreadMessages: json['hasUnreadMessages'] ?? false,
     );

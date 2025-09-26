@@ -33,14 +33,14 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     // Màu sắc mặc định
-    final defaultBubbleColor = isFromMe 
+    final defaultBubbleColor = isFromMe
         ? (isDark ? AppColors.primary : AppColors.primary)
         : (isDark ? Colors.grey[800]! : Colors.grey[200]!);
-    
-    final defaultTextColor = isFromMe 
-        ? Colors.white 
+
+    final defaultTextColor = isFromMe
+        ? Colors.white
         : (isDark ? Colors.white : Colors.black87);
 
     return GestureDetector(
@@ -48,8 +48,8 @@ class ChatBubble extends StatelessWidget {
       child: Container(
         padding: padding,
         child: Column(
-          crossAxisAlignment: isFromMe 
-              ? CrossAxisAlignment.end 
+          crossAxisAlignment: isFromMe
+              ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
             // Tên người gửi (nếu có)
@@ -64,11 +64,11 @@ class ChatBubble extends StatelessWidget {
                   ),
                 ),
               ),
-            
+
             // Bong bóng tin nhắn
             Row(
-              mainAxisAlignment: isFromMe 
-                  ? MainAxisAlignment.end 
+              mainAxisAlignment: isFromMe
+                  ? MainAxisAlignment.end
                   : MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -88,7 +88,7 @@ class ChatBubble extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                   ),
-                
+
                 // Bong bóng tin nhắn
                 Flexible(
                   child: Container(
@@ -124,7 +124,7 @@ class ChatBubble extends StatelessWidget {
                             height: 1.4,
                           ),
                         ),
-                        
+
                         // Thời gian (nếu có)
                         if (showTimestamp && timestamp != null)
                           Padding(
@@ -156,7 +156,7 @@ class ChatBubble extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 // Avatar cho tin nhắn của tôi
                 if (isFromMe)
                   Container(
@@ -185,7 +185,7 @@ class ChatBubble extends StatelessWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final messageDate = DateTime(time.year, time.month, time.day);
-    
+
     if (messageDate == today) {
       return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     } else if (messageDate == today.subtract(const Duration(days: 1))) {
@@ -304,16 +304,13 @@ class _ChatInputState extends State<ChatInput> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.2),
-            width: 1,
-          ),
+          top: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
         ),
       ),
       child: Row(
@@ -321,18 +318,15 @@ class _ChatInputState extends State<ChatInput> {
           // Nút đính kèm
           IconButton(
             onPressed: widget.enabled ? () {} : null,
-            icon: Icon(
-              Icons.attach_file,
-              color: Colors.grey[600],
-            ),
+            icon: Icon(Icons.attach_file, color: Colors.grey[600]),
           ),
-          
+
           // Input field
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: theme.brightness == Brightness.dark 
-                    ? Colors.grey[800] 
+                color: theme.brightness == Brightness.dark
+                    ? Colors.grey[800]
                     : Colors.grey[100],
                 borderRadius: BorderRadius.circular(24),
               ),
@@ -353,24 +347,20 @@ class _ChatInputState extends State<ChatInput> {
               ),
             ),
           ),
-          
+
           const SizedBox(width: 8),
-          
+
           // Nút gửi
           Container(
             decoration: BoxDecoration(
-              color: _hasText && widget.enabled 
-                  ? AppColors.primary 
+              color: _hasText && widget.enabled
+                  ? AppColors.primary
                   : Colors.grey[400],
               shape: BoxShape.circle,
             ),
             child: IconButton(
               onPressed: _hasText && widget.enabled ? _sendMessage : null,
-              icon: Icon(
-                Icons.send,
-                color: Colors.white,
-                size: 20,
-              ),
+              icon: Icon(Icons.send, color: Colors.white, size: 20),
             ),
           ),
         ],

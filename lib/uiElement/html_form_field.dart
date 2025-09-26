@@ -62,7 +62,8 @@ class _HtmlFormFieldState extends State<HtmlFormField> {
       ..value = widget.value ?? ''
       ..placeholder = widget.placeholder ?? ''
       ..disabled = !widget.enabled
-      ..style.cssText = '''
+      ..style.cssText =
+          '''
         width: 100%;
         padding: 12px 16px;
         border: 1px solid #e0e0e0;
@@ -124,7 +125,7 @@ class _HtmlFormFieldState extends State<HtmlFormField> {
       setState(() {
         _errorText = error;
       });
-      
+
       if (error != null) {
         _inputElement.style.borderColor = '#f44336';
       } else {
@@ -158,7 +159,7 @@ class _HtmlFormFieldState extends State<HtmlFormField> {
             ),
           ),
         ),
-        
+
         // Input container with prefix/suffix icons
         Container(
           decoration: BoxDecoration(
@@ -177,14 +178,10 @@ class _HtmlFormFieldState extends State<HtmlFormField> {
                   child: widget.prefixIcon!,
                 ),
               ],
-              
+
               // HTML Input Element
-              Expanded(
-                child: HtmlElementView(
-                  viewType: _inputElement.id,
-                ),
-              ),
-              
+              Expanded(child: HtmlElementView(viewType: _inputElement.id)),
+
               // Suffix icon
               if (widget.suffixIcon != null) ...[
                 Padding(
@@ -195,16 +192,13 @@ class _HtmlFormFieldState extends State<HtmlFormField> {
             ],
           ),
         ),
-        
+
         // Error text
         if (_errorText != null) ...[
           const SizedBox(height: 4),
           Text(
             _errorText!,
-            style: const TextStyle(
-              color: Colors.red,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Colors.red, fontSize: 12),
           ),
         ],
       ],
@@ -264,9 +258,7 @@ class _HtmlFormState extends State<HtmlForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: widget.children,
-    );
+    return Column(children: widget.children);
   }
 }
 
@@ -305,7 +297,8 @@ class _HtmlSubmitButtonState extends State<HtmlSubmitButton> {
       ..type = 'submit'
       ..text = widget.text
       ..disabled = widget.onPressed == null || widget.isLoading
-      ..style.cssText = '''
+      ..style.cssText =
+          '''
         width: 100%;
         padding: 12px 24px;
         border: none;
@@ -340,9 +333,7 @@ class _HtmlSubmitButtonState extends State<HtmlSubmitButton> {
     return SizedBox(
       width: double.infinity,
       height: 50,
-      child: HtmlElementView(
-        viewType: _buttonElement.id,
-      ),
+      child: HtmlElementView(viewType: _buttonElement.id),
     );
   }
 }

@@ -36,19 +36,22 @@ class _ChatBubbleDemoState extends State<ChatBubbleDemo> {
         timestamp: now.subtract(const Duration(minutes: 4)),
       ),
       ChatMessage(
-        text: "Tuyệt vời! Chúng tôi có nhiều bài test phù hợp với các độ tuổi khác nhau. Bạn có thể cho tôi biết con bạn bao nhiêu tuổi không?",
+        text:
+            "Tuyệt vời! Chúng tôi có nhiều bài test phù hợp với các độ tuổi khác nhau. Bạn có thể cho tôi biết con bạn bao nhiêu tuổi không?",
         isFromMe: false,
         timestamp: now.subtract(const Duration(minutes: 3)),
         senderName: "Chuyên gia tư vấn",
         showSenderName: true,
       ),
       ChatMessage(
-        text: "Con tôi 8 tuổi. Tôi lo lắng về việc con có thể bị stress ở trường học.",
+        text:
+            "Con tôi 8 tuổi. Tôi lo lắng về việc con có thể bị stress ở trường học.",
         isFromMe: true,
         timestamp: now.subtract(const Duration(minutes: 2)),
       ),
       ChatMessage(
-        text: "Tôi hiểu nỗi lo của bạn. Với trẻ 8 tuổi, chúng tôi có bài test CDD (Child Depression Detection) rất phù hợp. Bài test này được thiết kế đặc biệt để phát hiện các dấu hiệu stress và trầm cảm ở trẻ em.",
+        text:
+            "Tôi hiểu nỗi lo của bạn. Với trẻ 8 tuổi, chúng tôi có bài test CDD (Child Depression Detection) rất phù hợp. Bài test này được thiết kế đặc biệt để phát hiện các dấu hiệu stress và trầm cảm ở trẻ em.",
         isFromMe: false,
         timestamp: now.subtract(const Duration(minutes: 1)),
         senderName: "Chuyên gia tư vấn",
@@ -59,13 +62,11 @@ class _ChatBubbleDemoState extends State<ChatBubbleDemo> {
 
   void _sendMessage(String text) {
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isFromMe: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: text, isFromMe: true, timestamp: DateTime.now()),
+      );
     });
-    
+
     // Auto scroll to bottom
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -140,14 +141,11 @@ class _ChatBubbleDemoState extends State<ChatBubbleDemo> {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.more_vert),
-                  onPressed: () {},
-                ),
+                IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
               ],
             ),
           ),
-          
+
           // Danh sách tin nhắn
           Expanded(
             child: ChatList(
@@ -156,7 +154,7 @@ class _ChatBubbleDemoState extends State<ChatBubbleDemo> {
               reverse: false,
             ),
           ),
-          
+
           // Input để nhập tin nhắn
           ChatInput(
             onSendMessage: _sendMessage,
@@ -183,7 +181,7 @@ class ChatBubbleVariantsDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat Bubble Variants'),
@@ -194,120 +192,99 @@ class ChatBubbleVariantsDemo extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // Section 1: Tin nhắn cơ bản
-          _buildSection(
-            context,
-            'Tin nhắn cơ bản',
-            [
-              ChatBubble(
-                message: "Đây là tin nhắn từ tôi",
-                isFromMe: true,
-                timestamp: now,
-              ),
-              ChatBubble(
-                message: "Đây là tin nhắn từ người khác",
-                isFromMe: false,
-                timestamp: now,
-              ),
-            ],
-          ),
-          
+          _buildSection(context, 'Tin nhắn cơ bản', [
+            ChatBubble(
+              message: "Đây là tin nhắn từ tôi",
+              isFromMe: true,
+              timestamp: now,
+            ),
+            ChatBubble(
+              message: "Đây là tin nhắn từ người khác",
+              isFromMe: false,
+              timestamp: now,
+            ),
+          ]),
+
           const SizedBox(height: 24),
-          
+
           // Section 2: Tin nhắn với tên người gửi
-          _buildSection(
-            context,
-            'Tin nhắn với tên người gửi',
-            [
-              ChatBubble(
-                message: "Tin nhắn từ chuyên gia",
-                isFromMe: false,
-                timestamp: now,
-                senderName: "Chuyên gia tư vấn",
-                showSenderName: true,
-              ),
-            ],
-          ),
-          
+          _buildSection(context, 'Tin nhắn với tên người gửi', [
+            ChatBubble(
+              message: "Tin nhắn từ chuyên gia",
+              isFromMe: false,
+              timestamp: now,
+              senderName: "Chuyên gia tư vấn",
+              showSenderName: true,
+            ),
+          ]),
+
           const SizedBox(height: 24),
-          
+
           // Section 3: Tin nhắn dài
-          _buildSection(
-            context,
-            'Tin nhắn dài',
-            [
-              ChatBubble(
-                message: "Đây là một tin nhắn rất dài để kiểm tra xem component có xử lý tốt các tin nhắn dài hay không. Tin nhắn này sẽ được wrap tự động và hiển thị đẹp mắt trong bong bóng chat.",
-                isFromMe: true,
-                timestamp: now,
-              ),
-            ],
-          ),
-          
+          _buildSection(context, 'Tin nhắn dài', [
+            ChatBubble(
+              message:
+                  "Đây là một tin nhắn rất dài để kiểm tra xem component có xử lý tốt các tin nhắn dài hay không. Tin nhắn này sẽ được wrap tự động và hiển thị đẹp mắt trong bong bóng chat.",
+              isFromMe: true,
+              timestamp: now,
+            ),
+          ]),
+
           const SizedBox(height: 24),
-          
+
           // Section 4: Tin nhắn với màu tùy chỉnh
-          _buildSection(
-            context,
-            'Tin nhắn với màu tùy chỉnh',
-            [
-              ChatBubble(
-                message: "Tin nhắn với màu xanh lá",
-                isFromMe: true,
-                timestamp: now,
-                bubbleColor: Colors.green,
-              ),
-              ChatBubble(
-                message: "Tin nhắn với màu cam",
-                isFromMe: false,
-                timestamp: now,
-                bubbleColor: Colors.orange,
-                textColor: Colors.white,
-              ),
-            ],
-          ),
-          
+          _buildSection(context, 'Tin nhắn với màu tùy chỉnh', [
+            ChatBubble(
+              message: "Tin nhắn với màu xanh lá",
+              isFromMe: true,
+              timestamp: now,
+              bubbleColor: Colors.green,
+            ),
+            ChatBubble(
+              message: "Tin nhắn với màu cam",
+              isFromMe: false,
+              timestamp: now,
+              bubbleColor: Colors.orange,
+              textColor: Colors.white,
+            ),
+          ]),
+
           const SizedBox(height: 24),
-          
+
           // Section 5: Tin nhắn không có timestamp
-          _buildSection(
-            context,
-            'Tin nhắn không có timestamp',
-            [
-              ChatBubble(
-                message: "Tin nhắn không hiển thị thời gian",
-                isFromMe: true,
-                showTimestamp: false,
-              ),
-            ],
-          ),
-          
+          _buildSection(context, 'Tin nhắn không có timestamp', [
+            ChatBubble(
+              message: "Tin nhắn không hiển thị thời gian",
+              isFromMe: true,
+              showTimestamp: false,
+            ),
+          ]),
+
           const SizedBox(height: 24),
-          
+
           // Section 6: Tin nhắn với onTap
-          _buildSection(
-            context,
-            'Tin nhắn có thể tap (thử tap vào tin nhắn)',
-            [
-              ChatBubble(
-                message: "Tap vào tin nhắn này để xem hiệu ứng",
-                isFromMe: true,
-                timestamp: now,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Bạn đã tap vào tin nhắn!'),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+          _buildSection(context, 'Tin nhắn có thể tap (thử tap vào tin nhắn)', [
+            ChatBubble(
+              message: "Tap vào tin nhắn này để xem hiệu ứng",
+              isFromMe: true,
+              timestamp: now,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Bạn đã tap vào tin nhắn!')),
+                );
+              },
+            ),
+          ]),
         ],
       ),
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, List<Widget> children) {
+  Widget _buildSection(
+    BuildContext context,
+    String title,
+    List<Widget> children,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

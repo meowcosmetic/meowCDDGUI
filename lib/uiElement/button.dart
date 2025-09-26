@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+enum ButtonType { primary, secondary, outline, ghost, destructive }
 
-enum ButtonType {
-  primary,
-  secondary,
-  outline,
-  ghost,
-  destructive,
-}
-
-enum ButtonSize {
-  small,
-  medium,
-  large,
-}
+enum ButtonSize { small, medium, large }
 
 class Button extends StatelessWidget {
   final String text;
@@ -43,7 +32,7 @@ class Button extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDisabled = disabled || isLoading;
-    
+
     return SizedBox(
       width: width,
       height: height ?? _getHeight(),
@@ -73,9 +62,7 @@ class Button extends StatelessWidget {
         backgroundColor: isDisabled ? AppColors.grey300 : AppColors.primary,
         foregroundColor: isDisabled ? AppColors.grey600 : AppColors.white,
         textStyle: _getTextStyle(),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: _getPadding(),
         elevation: 0,
         shadowColor: AppColors.transparent,
@@ -91,9 +78,7 @@ class Button extends StatelessWidget {
         backgroundColor: isDisabled ? AppColors.grey100 : AppColors.grey200,
         foregroundColor: isDisabled ? AppColors.grey600 : AppColors.textPrimary,
         textStyle: _getTextStyle(),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: _getPadding(),
         elevation: 0,
         shadowColor: AppColors.transparent,
@@ -112,9 +97,7 @@ class Button extends StatelessWidget {
           width: 1.5,
         ),
         textStyle: _getTextStyle(),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: _getPadding(),
       ),
       child: _buildButtonContent(),
@@ -127,9 +110,7 @@ class Button extends StatelessWidget {
       style: TextButton.styleFrom(
         foregroundColor: isDisabled ? AppColors.grey600 : AppColors.cardBorder,
         textStyle: _getTextStyle(),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: _getPadding(),
       ),
       child: _buildButtonContent(),
@@ -143,9 +124,7 @@ class Button extends StatelessWidget {
         backgroundColor: isDisabled ? AppColors.grey300 : AppColors.error,
         foregroundColor: isDisabled ? AppColors.grey600 : AppColors.white,
         textStyle: _getTextStyle(),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: _getPadding(),
         elevation: 0,
         shadowColor: AppColors.transparent,
@@ -174,10 +153,7 @@ class Button extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: _getIconSize(),
-          ),
+          Icon(icon, size: _getIconSize()),
           SizedBox(width: _getIconSpacing()),
           Text(text),
         ],
@@ -212,20 +188,11 @@ class Button extends StatelessWidget {
   TextStyle _getTextStyle() {
     switch (size) {
       case ButtonSize.small:
-        return const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        );
+        return const TextStyle(fontSize: 12, fontWeight: FontWeight.w500);
       case ButtonSize.medium:
-        return const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        );
+        return const TextStyle(fontSize: 14, fontWeight: FontWeight.w600);
       case ButtonSize.large:
-        return const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        );
+        return const TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
     }
   }
 

@@ -33,7 +33,7 @@ class _PolicyViewState extends State<PolicyView> {
   bool _isError = false;
   PolicyData? _policyData;
   String _language = 'vi'; // Default language
-  
+
   static const String _kGuestMode = 'guest_mode_enabled';
   static const String _kGuestPolicyAccepted = 'guest_policy_accepted';
   static const String _kGuestPolicyAcceptedAt = 'guest_policy_accepted_at';
@@ -52,7 +52,7 @@ class _PolicyViewState extends State<PolicyView> {
       });
 
       final policy = await PolicyService.getPolicy();
-      
+
       if (mounted) {
         setState(() {
           _policyData = policy;
@@ -77,12 +77,15 @@ class _PolicyViewState extends State<PolicyView> {
   Future<void> _persistGuestAgreement() async {
     final prefs = await SharedPreferences.getInstance();
     final isGuest = prefs.getBool(_kGuestMode) ?? false;
-    
+
     if (isGuest) {
       await prefs.setBool(_kGuestPolicyAccepted, true);
-      await prefs.setString(_kGuestPolicyAcceptedAt, DateTime.now().toIso8601String());
+      await prefs.setString(
+        _kGuestPolicyAcceptedAt,
+        DateTime.now().toIso8601String(),
+      );
     }
-    
+
     // Nếu user đã đăng nhập và có policy data, gửi request mark policy
     final userToken = prefs.getString('user_token');
     if (userToken != null && userToken.isNotEmpty && _policyData != null) {
@@ -98,7 +101,7 @@ class _PolicyViewState extends State<PolicyView> {
           customerId: customerId,
           policyId: _policyData!.policyId,
         );
-        
+
         if (success) {
           // Marked as read
         } else {
@@ -114,7 +117,7 @@ class _PolicyViewState extends State<PolicyView> {
     if (dateString == null || dateString.isEmpty) {
       return '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
     }
-    
+
     try {
       final date = DateTime.parse(dateString);
       return '${date.day}/${date.month}/${date.year}';
@@ -129,7 +132,7 @@ class _PolicyViewState extends State<PolicyView> {
       // If policy screen is disabled by config, jump to main
       return const MainAppView();
     }
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FABUtility.buildSmartFAB(context),
@@ -138,10 +141,7 @@ class _PolicyViewState extends State<PolicyView> {
         foregroundColor: AppColors.white,
         title: Text(
           _policyData?.getTitle(_language) ?? 'Chính Sách & Điều Khoản',
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         elevation: 0,
         centerTitle: true,
@@ -157,9 +157,7 @@ class _PolicyViewState extends State<PolicyView> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const LoginViewHtml(),
-                ),
+                MaterialPageRoute(builder: (context) => const LoginViewHtml()),
               );
             },
             tooltip: 'Test HTML Form',
@@ -167,246 +165,249 @@ class _PolicyViewState extends State<PolicyView> {
         ],
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : _isError
-              ? _buildErrorWidget()
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header Section
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.shadow,
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            const Icon(
-                              Icons.security,
-                              size: 48,
-                              color: AppColors.white,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              _policyData?.getTitle(_language) ?? 'Chính Sách Bảo Mật & Sử Dụng',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.white,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Ứng dụng hỗ trợ can thiệp rối loạn phát triển tại nhà',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: AppColors.white.withValues(alpha: 0.9),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-            
-            const SizedBox(height: 24),
-            
-            // Policy Sections from API
-            if (_policyData != null) ...[
-              ...(_policyData!.sections
-                  .toList()
-                  ..sort((a, b) => a.order.compareTo(b.order)))
-                  .map((section) => _buildPolicySectionFromAPI(section))
-                  .toList(),
-            ] else ...[
-              // Fallback sections if API data is not available
-              _buildPolicySection(
-                icon: Icons.privacy_tip,
-                title: '1. Chính Sách Bảo Mật Thông Tin',
-                content: [
-                  'Tất cả thông tin cá nhân của trẻ và gia đình được mã hóa và bảo vệ nghiêm ngặt',
-                  'Chúng tôi không chia sẻ thông tin với bên thứ ba mà không có sự đồng ý rõ ràng',
-                  'Dữ liệu được lưu trữ an toàn trên máy chủ được bảo vệ',
-                  'Phụ huynh có quyền truy cập, chỉnh sửa hoặc xóa thông tin của con mình',
-                  'Ứng dụng tuân thủ các quy định về bảo vệ dữ liệu cá nhân',
-                ],
-              ),
-            ],
-            
-            const SizedBox(height: 24),
-            
-            // Contact Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(16),
-                 border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-              ),
+          ? _buildErrorWidget()
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.contact_support,
-                    size: 32,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Liên Hệ Hỗ Trợ',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                  // Header Section
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadow,
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Email: support@autismcare.vn\nHotline: 1900-xxxx\nThời gian: 24/7',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Agreement Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadowLight,
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-                border: Border.all(color: AppColors.borderLight),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _hasAgreed,
-                        onChanged: (value) {
-                          setState(() {
-                            _hasAgreed = value ?? false;
-                          });
-                        },
-                        activeColor: AppColors.primary,
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Tôi đã đọc và đồng ý với tất cả chính sách và điều khoản sử dụng',
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.security,
+                          size: 48,
+                          color: AppColors.white,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _policyData?.getTitle(_language) ??
+                              'Chính Sách Bảo Mật & Sử Dụng',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Ứng dụng hỗ trợ can thiệp rối loạn phát triển tại nhà',
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
+                            color: AppColors.white.withValues(alpha: 0.9),
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
+
+                  const SizedBox(height: 24),
+
+                  // Policy Sections from API
+                  if (_policyData != null) ...[
+                    ...(_policyData!.sections.toList()
+                          ..sort((a, b) => a.order.compareTo(b.order)))
+                        .map((section) => _buildPolicySectionFromAPI(section))
+                        .toList(),
+                  ] else ...[
+                    // Fallback sections if API data is not available
+                    _buildPolicySection(
+                      icon: Icons.privacy_tip,
+                      title: '1. Chính Sách Bảo Mật Thông Tin',
+                      content: [
+                        'Tất cả thông tin cá nhân của trẻ và gia đình được mã hóa và bảo vệ nghiêm ngặt',
+                        'Chúng tôi không chia sẻ thông tin với bên thứ ba mà không có sự đồng ý rõ ràng',
+                        'Dữ liệu được lưu trữ an toàn trên máy chủ được bảo vệ',
+                        'Phụ huynh có quyền truy cập, chỉnh sửa hoặc xóa thông tin của con mình',
+                        'Ứng dụng tuân thủ các quy định về bảo vệ dữ liệu cá nhân',
+                      ],
+                    ),
+                  ],
+
+                  const SizedBox(height: 24),
+
+                  // Contact Section
+                  Container(
                     width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _hasAgreed ? () async {
-                        await _persistGuestAgreement();
-                        if (!mounted) return;
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MainAppView(),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.contact_support,
+                          size: 32,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Liên Hệ Hỗ Trợ',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
                           ),
-                        );
-                      } : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
                         ),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        'Đồng Ý & Tiếp Tục',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Email: support@autismcare.vn\nHotline: 1900-xxxx\nThời gian: 24/7',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
+                      ],
                     ),
                   ),
+
+                  const SizedBox(height: 24),
+
+                  // Agreement Section
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowLight,
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _hasAgreed,
+                              onChanged: (value) {
+                                setState(() {
+                                  _hasAgreed = value ?? false;
+                                });
+                              },
+                              activeColor: AppColors.primary,
+                            ),
+                            Expanded(
+                              child: Text(
+                                'Tôi đã đọc và đồng ý với tất cả chính sách và điều khoản sử dụng',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: _hasAgreed
+                                ? () async {
+                                    await _persistGuestAgreement();
+                                    if (!mounted) return;
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MainAppView(),
+                                      ),
+                                    );
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                            ),
+                            child: Text(
+                              'Đồng Ý & Tiếp Tục',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Last Updated
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.grey100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Phiên bản: ${_policyData?.version ?? 1}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Cập nhật lần cuối: ${_formatDate(_policyData?.metadata.updatedAt)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
-            
-            const SizedBox(height: 24),
-            
-            // Last Updated
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.grey100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Phiên bản: ${_policyData?.version ?? 1}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Cập nhật lần cuối: ${_formatDate(_policyData?.metadata.updatedAt)}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
     );
   }
-  
+
   Widget _buildErrorWidget() {
     return Center(
       child: Padding(
@@ -414,11 +415,7 @@ class _PolicyViewState extends State<PolicyView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
               'Không thể tải chính sách',
@@ -432,10 +429,7 @@ class _PolicyViewState extends State<PolicyView> {
             const SizedBox(height: 8),
             Text(
               'Vui lòng kiểm tra kết nối mạng và thử lại',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -446,7 +440,10 @@ class _PolicyViewState extends State<PolicyView> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -462,14 +459,10 @@ class _PolicyViewState extends State<PolicyView> {
     final icon = _getSectionIcon(section.sectionType);
     final title = '${section.order}. ${section.getTitle(_language)}';
     final content = section.getContentList(_language);
-    
+
     return Column(
       children: [
-        _buildPolicySection(
-          icon: icon,
-          title: title,
-          content: content,
-        ),
+        _buildPolicySection(icon: icon, title: title, content: content),
         const SizedBox(height: 20),
       ],
     );
@@ -525,11 +518,7 @@ class _PolicyViewState extends State<PolicyView> {
                   color: AppColors.primaryLight,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: AppColors.primary,
-                  size: 24,
-                ),
+                child: Icon(icon, color: AppColors.primary, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -545,34 +534,38 @@ class _PolicyViewState extends State<PolicyView> {
             ],
           ),
           const SizedBox(height: 16),
-          ...content.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 6),
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
+          ...content
+              .map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          item,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    item,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )).toList(),
+              )
+              .toList(),
         ],
       ),
     );
@@ -598,25 +591,14 @@ class _MainAppViewState extends State<MainAppView> {
   ];
 
   final List<BottomNavigationBarItem> _bottomNavItems = [
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.home),
-      label: 'Trang Chủ',
-    ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.store),
-      label: 'Cửa Hàng',
-    ),
+    const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang Chủ'),
+    const BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Cửa Hàng'),
     const BottomNavigationBarItem(
       icon: Icon(Icons.volunteer_activism),
       label: 'Đóng Góp',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.person),
-      label: 'Hồ Sơ',
-    ),
+    const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ Sơ'),
   ];
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -628,10 +610,7 @@ class _MainAppViewState extends State<MainAppView> {
         foregroundColor: AppColors.white,
         title: const Text(
           'Hỗ Trợ Trẻ Tự Kỷ',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         elevation: 0,
         centerTitle: true,
@@ -664,7 +643,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories = AppConfig.getEnabledCategories();
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -688,11 +667,7 @@ class HomePage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.psychology,
-                    size: 48,
-                    color: AppColors.white,
-                  ),
+                  Icon(Icons.psychology, size: 48, color: AppColors.white),
                   const SizedBox(height: 12),
                   Text(
                     'Chào mừng trở lại!',
@@ -706,10 +681,10 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Hãy chọn danh mục bạn muốn sử dụng',
-                     style: TextStyle(
-                       fontSize: 16,
-                       color: AppColors.white.withValues(alpha: 0.9),
-                     ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.white.withValues(alpha: 0.9),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -717,7 +692,7 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
           ],
-          
+
           // Categories Grid
           Text(
             'Danh Mục Chính',
@@ -728,7 +703,7 @@ class HomePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -744,9 +719,9 @@ class HomePage extends StatelessWidget {
               return _buildCategoryCard(context, category);
             },
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Quick Stats Section
           if (AppConfig.showProgressTips) ...[
             Container(
@@ -755,7 +730,9 @@ class HomePage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.primaryLight,
                 borderRadius: BorderRadius.circular(16),
-                 border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -782,13 +759,25 @@ class HomePage extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildStatItem('Trẻ đang theo dõi', '5', Icons.child_care),
+                        child: _buildStatItem(
+                          'Trẻ đang theo dõi',
+                          '5',
+                          Icons.child_care,
+                        ),
                       ),
                       Expanded(
-                        child: _buildStatItem('Bài test đã làm', '12', Icons.quiz),
+                        child: _buildStatItem(
+                          'Bài test đã làm',
+                          '12',
+                          Icons.quiz,
+                        ),
                       ),
                       Expanded(
-                        child: _buildStatItem('Tài liệu đã đọc', '8', Icons.book),
+                        child: _buildStatItem(
+                          'Tài liệu đã đọc',
+                          '8',
+                          Icons.book,
+                        ),
                       ),
                     ],
                   ),
@@ -796,41 +785,34 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ],
-          
+
           const SizedBox(height: 32),
         ],
       ),
     );
   }
-  
+
   Widget _buildCategoryCard(BuildContext context, DashboardCategory category) {
     return GestureDetector(
       onTap: () {
-        print('🎯 Category tapped: ${category.id} - ${category.title}'); // Debug log
         // Navigate to category page
         switch (category.id) {
           case 'library':
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const LibraryView(),
-              ),
+              MaterialPageRoute(builder: (context) => const LibraryView()),
             );
             break;
           case 'tests':
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const TestView(),
-              ),
+              MaterialPageRoute(builder: (context) => const TestView()),
             );
             break;
           case 'children':
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const ChildrenListView(),
-              ),
+              MaterialPageRoute(builder: (context) => const ChildrenListView()),
             );
             break;
           case 'collaborators':
@@ -852,43 +834,31 @@ class HomePage extends StatelessWidget {
           case 'store':
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const StoreView(),
-              ),
+              MaterialPageRoute(builder: (context) => const StoreView()),
             );
             break;
           case 'donation':
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const DonationView(),
-              ),
+              MaterialPageRoute(builder: (context) => const DonationView()),
             );
             break;
           case 'interventions':
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const GoalsView(),
-              ),
+              MaterialPageRoute(builder: (context) => const GoalsView()),
             );
             break;
           case 'intervention-domains':
-            print('🎯 Navigating to DomainsView...'); // Debug log
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const DomainsView(),
-              ),
+              MaterialPageRoute(builder: (context) => const DomainsView()),
             );
             break;
           case 'intervention-methods':
-            print('🎯 Navigating to MethodGroupsView...'); // Debug log
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const MethodGroupsView(),
-              ),
+              MaterialPageRoute(builder: (context) => const MethodGroupsView()),
             );
             break;
           default:
@@ -942,10 +912,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               category.subtitle,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -955,15 +922,11 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildStatItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: AppColors.primary,
-          size: 20,
-        ),
+        Icon(icon, color: AppColors.primary, size: 20),
         const SizedBox(height: 4),
         Text(
           value,
@@ -975,16 +938,13 @@ class HomePage extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           textAlign: TextAlign.center,
         ),
       ],
     );
   }
-  
+
   IconData _getIconData(String iconName) {
     switch (iconName) {
       case 'library_books':
@@ -1027,11 +987,7 @@ class ActivitiesPage extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Icon(
-                  Icons.psychology,
-                  size: 48,
-                  color: AppColors.white,
-                ),
+                Icon(Icons.psychology, size: 48, color: AppColors.white),
                 const SizedBox(height: 12),
                 Text(
                   'Hoạt Động Can Thiệp',
@@ -1053,9 +1009,9 @@ class ActivitiesPage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Activity Categories
           Text(
             'Danh Mục Hoạt Động',
@@ -1066,18 +1022,34 @@ class ActivitiesPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
-          _buildActivityCard('Giao Tiếp', 'Phát triển kỹ năng giao tiếp', Icons.chat),
-          _buildActivityCard('Vận Động', 'Cải thiện khả năng vận động', Icons.directions_run),
-          _buildActivityCard('Nhận Thức', 'Tăng cường nhận thức', Icons.psychology),
-          _buildActivityCard('Xã Hội', 'Kỹ năng tương tác xã hội', Icons.people),
+
+          _buildActivityCard(
+            'Giao Tiếp',
+            'Phát triển kỹ năng giao tiếp',
+            Icons.chat,
+          ),
+          _buildActivityCard(
+            'Vận Động',
+            'Cải thiện khả năng vận động',
+            Icons.directions_run,
+          ),
+          _buildActivityCard(
+            'Nhận Thức',
+            'Tăng cường nhận thức',
+            Icons.psychology,
+          ),
+          _buildActivityCard(
+            'Xã Hội',
+            'Kỹ năng tương tác xã hội',
+            Icons.people,
+          ),
           _buildActivityCard('Cảm Xúc', 'Quản lý cảm xúc', Icons.favorite),
           _buildActivityCard('Tự Lập', 'Kỹ năng tự phục vụ', Icons.person),
         ],
       ),
     );
   }
-  
+
   Widget _buildActivityCard(String title, String description, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1101,11 +1073,7 @@ class ActivitiesPage extends StatelessWidget {
               color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primary,
-              size: 24,
-            ),
+            child: Icon(icon, color: AppColors.primary, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1131,11 +1099,7 @@ class ActivitiesPage extends StatelessWidget {
               ],
             ),
           ),
-          Icon(
-            Icons.arrow_forward_ios,
-            color: AppColors.grey400,
-            size: 16,
-          ),
+          Icon(Icons.arrow_forward_ios, color: AppColors.grey400, size: 16),
         ],
       ),
     );
@@ -1162,11 +1126,7 @@ class ProgressPage extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Icon(
-                  Icons.trending_up,
-                  size: 48,
-                  color: AppColors.white,
-                ),
+                Icon(Icons.trending_up, size: 48, color: AppColors.white),
                 const SizedBox(height: 12),
                 Text(
                   'Theo Dõi Tiến Độ',
@@ -1188,9 +1148,9 @@ class ProgressPage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Progress Overview
           Text(
             'Tổng Quan Tiến Độ',
@@ -1201,7 +1161,7 @@ class ProgressPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Expanded(
@@ -1209,17 +1169,27 @@ class ProgressPage extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildProgressCard('Vận Động', '60%', 0.60, Icons.directions_run),
+                child: _buildProgressCard(
+                  'Vận Động',
+                  '60%',
+                  0.60,
+                  Icons.directions_run,
+                ),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           Row(
             children: [
               Expanded(
-                child: _buildProgressCard('Nhận Thức', '85%', 0.85, Icons.psychology),
+                child: _buildProgressCard(
+                  'Nhận Thức',
+                  '85%',
+                  0.85,
+                  Icons.psychology,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1227,9 +1197,9 @@ class ProgressPage extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Recent Activities
           Text(
             'Hoạt Động Gần Đây',
@@ -1240,17 +1210,38 @@ class ProgressPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
-          _buildActivityItem('Hoàn thành bài tập giao tiếp', '2 giờ trước', Icons.check_circle),
-          _buildActivityItem('Làm bài test nhận thức', '1 ngày trước', Icons.quiz),
-          _buildActivityItem('Tham gia hoạt động nhóm', '2 ngày trước', Icons.group),
-          _buildActivityItem('Cập nhật hồ sơ tiến độ', '3 ngày trước', Icons.edit),
+
+          _buildActivityItem(
+            'Hoàn thành bài tập giao tiếp',
+            '2 giờ trước',
+            Icons.check_circle,
+          ),
+          _buildActivityItem(
+            'Làm bài test nhận thức',
+            '1 ngày trước',
+            Icons.quiz,
+          ),
+          _buildActivityItem(
+            'Tham gia hoạt động nhóm',
+            '2 ngày trước',
+            Icons.group,
+          ),
+          _buildActivityItem(
+            'Cập nhật hồ sơ tiến độ',
+            '3 ngày trước',
+            Icons.edit,
+          ),
         ],
       ),
     );
   }
-  
-  Widget _buildProgressCard(String title, String percentage, double progress, IconData icon) {
+
+  Widget _buildProgressCard(
+    String title,
+    String percentage,
+    double progress,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1268,11 +1259,7 @@ class ProgressPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              Icon(icon, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -1305,7 +1292,7 @@ class ProgressPage extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildActivityItem(String title, String time, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -1317,11 +1304,7 @@ class ProgressPage extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: AppColors.primary,
-            size: 20,
-          ),
+          Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -1374,11 +1357,7 @@ class ProfilePage extends StatelessWidget {
                 CircleAvatar(
                   radius: 40,
                   backgroundColor: AppColors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 40,
-                    color: AppColors.primary,
-                  ),
+                  child: Icon(Icons.person, size: 40, color: AppColors.primary),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -1400,9 +1379,9 @@ class ProfilePage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Profile Options
           Text(
             'Thông Tin Cá Nhân',
@@ -1413,14 +1392,14 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           _buildProfileOption('Thông tin cá nhân', Icons.person_outline),
           _buildProfileOption('Thay đổi mật khẩu', Icons.lock_outline),
           _buildProfileOption('Thông báo', Icons.notifications_outlined),
           _buildProfileOption('Bảo mật', Icons.security),
-          
+
           const SizedBox(height: 24),
-          
+
           Text(
             'Cài Đặt Ứng Dụng',
             style: TextStyle(
@@ -1430,14 +1409,14 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           _buildProfileOption('Ngôn ngữ', Icons.language),
           _buildProfileOption('Chủ đề', Icons.palette),
           _buildProfileOption('Đồng bộ dữ liệu', Icons.sync),
           _buildProfileOption('Xuất dữ liệu', Icons.download),
-          
+
           const SizedBox(height: 24),
-          
+
           Text(
             'Hỗ Trợ & Liên Hệ',
             style: TextStyle(
@@ -1447,14 +1426,14 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           _buildProfileOption('Trợ giúp', Icons.help_outline),
           _buildProfileOption('Liên hệ hỗ trợ', Icons.support_agent),
           _buildProfileOption('Đánh giá ứng dụng', Icons.star_outline),
           _buildProfileOption('Chính sách bảo mật', Icons.privacy_tip),
-          
+
           const SizedBox(height: 24),
-          
+
           // Logout Button
           SizedBox(
             width: double.infinity,
@@ -1470,20 +1449,17 @@ class ProfilePage extends StatelessWidget {
               ),
               child: Text(
                 'Đăng Xuất',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ),
-          
+
           const SizedBox(height: 32),
         ],
       ),
     );
   }
-  
+
   Widget _buildProfileOption(String title, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -1501,11 +1477,7 @@ class ProfilePage extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: AppColors.primary,
-            size: 24,
-          ),
+          Icon(icon, color: AppColors.primary, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
@@ -1517,11 +1489,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
           ),
-          Icon(
-            Icons.arrow_forward_ios,
-            color: AppColors.grey400,
-            size: 16,
-          ),
+          Icon(Icons.arrow_forward_ios, color: AppColors.grey400, size: 16),
         ],
       ),
     );
@@ -1576,11 +1544,11 @@ class ProfilePage extends StatelessWidget {
       try {
         await MessagingService.instance.disconnect();
       } catch (_) {}
-      
+
       // Clear SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
-      
+
       // Show success message
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1591,13 +1559,10 @@ class ProfilePage extends StatelessWidget {
           ),
         );
       }
-      
+
       // Navigate back to auth gate
       if (context.mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/',
-          (route) => false,
-        );
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       }
     } catch (e) {
       if (context.mounted) {

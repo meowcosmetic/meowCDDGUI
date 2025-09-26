@@ -25,7 +25,9 @@ class Review {
       userName: json['userName'] ?? '',
       rating: (json['rating'] ?? 0.0).toDouble(),
       comment: json['comment'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        json['createdAt'] ?? DateTime.now().toIso8601String(),
+      ),
       isVerified: json['isVerified'] ?? false,
     );
   }
@@ -49,7 +51,8 @@ class LibraryItem {
   final String title;
   final String description;
   final String category;
-  final String domain; // Lĩnh vực: giao tiếp, vận động, nhận thức, xã hội, cảm xúc
+  final String
+  domain; // Lĩnh vực: giao tiếp, vận động, nhận thức, xã hội, cảm xúc
   final String fileUrl;
   final String thumbnailUrl;
   final String author;
@@ -104,7 +107,9 @@ class LibraryItem {
       fileUrl: json['fileUrl'] ?? '',
       thumbnailUrl: json['thumbnailUrl'] ?? '',
       author: json['author'] ?? '',
-      publishDate: DateTime.parse(json['publishDate'] ?? DateTime.now().toIso8601String()),
+      publishDate: DateTime.parse(
+        json['publishDate'] ?? DateTime.now().toIso8601String(),
+      ),
       viewCount: json['viewCount'] ?? 0,
       rating: (json['rating'] ?? 0.0).toDouble(),
       ratingCount: json['ratingCount'] ?? 0,
@@ -116,9 +121,11 @@ class LibraryItem {
       isFree: json['isFree'] ?? true,
       targetAge: json['targetAge'] ?? '3-6',
       difficulty: json['difficulty'] ?? 'beginner',
-      reviews: (json['reviews'] as List<dynamic>?)
-          ?.map((review) => Review.fromJson(review))
-          .toList() ?? [],
+      reviews:
+          (json['reviews'] as List<dynamic>?)
+              ?.map((review) => Review.fromJson(review))
+              .toList() ??
+          [],
       content: json['content'] ?? '',
     );
   }
@@ -302,7 +309,8 @@ class SampleLibraryItems {
       LibraryItem(
         id: '1',
         title: 'Hướng Dẫn Can Thiệp Sớm Cho Trẻ Tự Kỷ',
-        description: 'Tài liệu hướng dẫn chi tiết các phương pháp can thiệp sớm cho trẻ rối loạn phổ tự kỷ từ 2-6 tuổi.',
+        description:
+            'Tài liệu hướng dẫn chi tiết các phương pháp can thiệp sớm cho trẻ rối loạn phổ tự kỷ từ 2-6 tuổi.',
         category: 'Hướng dẫn',
         domain: 'communication',
         fileUrl: '',
@@ -331,12 +339,14 @@ class SampleLibraryItems {
             isVerified: true,
           ),
         ],
-        content: '# Hướng Dẫn Can Thiệp Sớm\n\n## Giới thiệu\nCan thiệp sớm là yếu tố quan trọng nhất trong việc hỗ trợ trẻ rối loạn phổ tự kỷ phát triển toàn diện.\n\n## Các nguyên tắc cơ bản\n\n### 1. Can thiệp sớm\n- Bắt đầu càng sớm càng tốt, tốt nhất là trước 3 tuổi\n- Can thiệp liên tục và nhất quán\n- Tập trung vào các kỹ năng cơ bản\n\n### 2. Phương pháp ABA\n- Phân tích hành vi ứng dụng\n- Sử dụng các kỹ thuật củng cố tích cực\n- Theo dõi tiến độ thường xuyên',
+        content:
+            '# Hướng Dẫn Can Thiệp Sớm\n\n## Giới thiệu\nCan thiệp sớm là yếu tố quan trọng nhất trong việc hỗ trợ trẻ rối loạn phổ tự kỷ phát triển toàn diện.\n\n## Các nguyên tắc cơ bản\n\n### 1. Can thiệp sớm\n- Bắt đầu càng sớm càng tốt, tốt nhất là trước 3 tuổi\n- Can thiệp liên tục và nhất quán\n- Tập trung vào các kỹ năng cơ bản\n\n### 2. Phương pháp ABA\n- Phân tích hành vi ứng dụng\n- Sử dụng các kỹ thuật củng cố tích cực\n- Theo dõi tiến độ thường xuyên',
       ),
       LibraryItem(
         id: '2',
         title: 'Bài Tập Giao Tiếp Cho Trẻ Tự Kỷ',
-        description: 'Bộ bài tập thực hành giao tiếp với hình ảnh minh họa và hướng dẫn chi tiết.',
+        description:
+            'Bộ bài tập thực hành giao tiếp với hình ảnh minh họa và hướng dẫn chi tiết.',
         category: 'Bài tập',
         domain: 'communication',
         fileUrl: '',
@@ -365,12 +375,14 @@ class SampleLibraryItems {
             isVerified: true,
           ),
         ],
-        content: '# Bài Tập Giao Tiếp\n\n## Bài tập 1: Nhận diện cảm xúc\n\n### Mục tiêu\nTrẻ có thể nhận diện và gọi tên các cảm xúc cơ bản.\n\n### Cách thực hiện\n1. Cho trẻ xem hình ảnh khuôn mặt\n2. Hỏi "Bạn này đang cảm thấy gì?"\n3. Hướng dẫn trẻ trả lời: vui, buồn, giận, sợ\n4. Lặp lại nhiều lần với các hình ảnh khác nhau',
+        content:
+            '# Bài Tập Giao Tiếp\n\n## Bài tập 1: Nhận diện cảm xúc\n\n### Mục tiêu\nTrẻ có thể nhận diện và gọi tên các cảm xúc cơ bản.\n\n### Cách thực hiện\n1. Cho trẻ xem hình ảnh khuôn mặt\n2. Hỏi "Bạn này đang cảm thấy gì?"\n3. Hướng dẫn trẻ trả lời: vui, buồn, giận, sợ\n4. Lặp lại nhiều lần với các hình ảnh khác nhau',
       ),
       LibraryItem(
         id: '3',
         title: 'Video Hướng Dẫn Vận Động Tinh',
-        description: 'Video minh họa các bài tập vận động tinh giúp trẻ phát triển kỹ năng cầm bút và vẽ.',
+        description:
+            'Video minh họa các bài tập vận động tinh giúp trẻ phát triển kỹ năng cầm bút và vẽ.',
         category: 'Video',
         domain: 'motor',
         fileUrl: '',
@@ -399,12 +411,14 @@ class SampleLibraryItems {
             isVerified: true,
           ),
         ],
-        content: '# Video Hướng Dẫn Vận Động Tinh\n\n## Nội dung video\n\n### Phần 1: Khởi động (5 phút)\n- Các bài tập khởi động tay và ngón tay\n- Massage và thư giãn cơ bắp\n- Chuẩn bị tư thế ngồi đúng\n\n### Phần 2: Cầm bút đúng cách (10 phút)\n- Hướng dẫn cách cầm bút chì\n- Tư thế ngồi và vị trí tay\n- Các bài tập luyện cơ tay',
+        content:
+            '# Video Hướng Dẫn Vận Động Tinh\n\n## Nội dung video\n\n### Phần 1: Khởi động (5 phút)\n- Các bài tập khởi động tay và ngón tay\n- Massage và thư giãn cơ bắp\n- Chuẩn bị tư thế ngồi đúng\n\n### Phần 2: Cầm bút đúng cách (10 phút)\n- Hướng dẫn cách cầm bút chì\n- Tư thế ngồi và vị trí tay\n- Các bài tập luyện cơ tay',
       ),
       LibraryItem(
         id: '4',
         title: 'Audio Bài Hát Giao Tiếp',
-        description: 'Bộ sưu tập bài hát và âm thanh giúp trẻ học giao tiếp và phát âm.',
+        description:
+            'Bộ sưu tập bài hát và âm thanh giúp trẻ học giao tiếp và phát âm.',
         category: 'Audio',
         domain: 'communication',
         fileUrl: '',
@@ -433,12 +447,14 @@ class SampleLibraryItems {
             isVerified: true,
           ),
         ],
-        content: '# Audio Bài Hát Giao Tiếp\n\n## Danh sách bài hát\n\n### 1. Chào hỏi (2:30)\n**Lời bài hát:**\n"Chào bạn, chào bạn\nChúng ta cùng chơi\nChào bạn, chào bạn\nRất vui gặp bạn"\n\n### 2. Đếm số (3:15)\n**Lời bài hát:**\n"Một, hai, ba, bốn, năm\nSáu, bảy, tám, chín, mười\nĐếm số thật vui\nCùng đếm nào bạn ơi"',
+        content:
+            '# Audio Bài Hát Giao Tiếp\n\n## Danh sách bài hát\n\n### 1. Chào hỏi (2:30)\n**Lời bài hát:**\n"Chào bạn, chào bạn\nChúng ta cùng chơi\nChào bạn, chào bạn\nRất vui gặp bạn"\n\n### 2. Đếm số (3:15)\n**Lời bài hát:**\n"Một, hai, ba, bốn, năm\nSáu, bảy, tám, chín, mười\nĐếm số thật vui\nCùng đếm nào bạn ơi"',
       ),
       LibraryItem(
         id: '5',
         title: 'Tài Liệu Đánh Giá Trẻ Tự Kỷ',
-        description: 'Bộ công cụ đánh giá và theo dõi tiến độ phát triển của trẻ rối loạn phổ tự kỷ.',
+        description:
+            'Bộ công cụ đánh giá và theo dõi tiến độ phát triển của trẻ rối loạn phổ tự kỷ.',
         category: 'Đánh giá',
         domain: 'cognitive',
         fileUrl: '',
@@ -467,12 +483,14 @@ class SampleLibraryItems {
             isVerified: true,
           ),
         ],
-        content: '# Tài Liệu Đánh Giá Trẻ Tự Kỷ\n\n## Bảng đánh giá phát triển\n\n### Lĩnh vực Giao tiếp\n**Điểm tối đa: 20**\n- Phát âm rõ ràng: 0-5 điểm\n- Hiểu lời nói: 0-5 điểm\n- Sử dụng từ vựng: 0-5 điểm\n- Tương tác xã hội: 0-5 điểm\n\n### Lĩnh vực Vận động\n**Điểm tối đa: 20**\n- Vận động thô: 0-5 điểm\n- Vận động tinh: 0-5 điểm\n- Phối hợp tay mắt: 0-5 điểm\n- Cân bằng và định hướng: 0-5 điểm',
+        content:
+            '# Tài Liệu Đánh Giá Trẻ Tự Kỷ\n\n## Bảng đánh giá phát triển\n\n### Lĩnh vực Giao tiếp\n**Điểm tối đa: 20**\n- Phát âm rõ ràng: 0-5 điểm\n- Hiểu lời nói: 0-5 điểm\n- Sử dụng từ vựng: 0-5 điểm\n- Tương tác xã hội: 0-5 điểm\n\n### Lĩnh vực Vận động\n**Điểm tối đa: 20**\n- Vận động thô: 0-5 điểm\n- Vận động tinh: 0-5 điểm\n- Phối hợp tay mắt: 0-5 điểm\n- Cân bằng và định hướng: 0-5 điểm',
       ),
       LibraryItem(
         id: '6',
         title: 'Hình Ảnh Hỗ Trợ Giao Tiếp',
-        description: 'Bộ hình ảnh PECS (Picture Exchange Communication System) hỗ trợ giao tiếp cho trẻ tự kỷ.',
+        description:
+            'Bộ hình ảnh PECS (Picture Exchange Communication System) hỗ trợ giao tiếp cho trẻ tự kỷ.',
         category: 'Hình ảnh',
         domain: 'communication',
         fileUrl: '',
@@ -496,17 +514,20 @@ class SampleLibraryItems {
             userId: 'user6',
             userName: 'Phụ huynh F',
             rating: 4.9,
-            comment: 'Hình ảnh rõ ràng, dễ hiểu, con tôi học giao tiếp nhanh hơn.',
+            comment:
+                'Hình ảnh rõ ràng, dễ hiểu, con tôi học giao tiếp nhanh hơn.',
             createdAt: DateTime.now().subtract(const Duration(days: 2)),
             isVerified: true,
           ),
         ],
-        content: '# Hình Ảnh Hỗ Trợ Giao Tiếp (PECS)\n\n## Bộ hình ảnh cơ bản\n\n### 1. Nhu cầu cơ bản\n- [Hình] Tôi muốn ăn\n- [Hình] Tôi muốn uống\n- [Hình] Tôi muốn đi vệ sinh\n- [Hình] Tôi muốn nghỉ ngơi\n\n### 2. Cảm xúc\n- [Hình] Tôi vui\n- [Hình] Tôi buồn\n- [Hình] Tôi giận\n- [Hình] Tôi sợ\n\n## Cách sử dụng\n1. In hình ảnh và dán lên bảng\n2. Hướng dẫn trẻ chỉ hình khi cần\n3. Khuyến khích trẻ kết hợp nhiều hình\n4. Tăng dần độ phức tạp',
+        content:
+            '# Hình Ảnh Hỗ Trợ Giao Tiếp (PECS)\n\n## Bộ hình ảnh cơ bản\n\n### 1. Nhu cầu cơ bản\n- [Hình] Tôi muốn ăn\n- [Hình] Tôi muốn uống\n- [Hình] Tôi muốn đi vệ sinh\n- [Hình] Tôi muốn nghỉ ngơi\n\n### 2. Cảm xúc\n- [Hình] Tôi vui\n- [Hình] Tôi buồn\n- [Hình] Tôi giận\n- [Hình] Tôi sợ\n\n## Cách sử dụng\n1. In hình ảnh và dán lên bảng\n2. Hướng dẫn trẻ chỉ hình khi cần\n3. Khuyến khích trẻ kết hợp nhiều hình\n4. Tăng dần độ phức tạp',
       ),
       LibraryItem(
         id: '7',
         title: 'Sách Hướng Dẫn Phụ Huynh',
-        description: 'Sách điện tử hướng dẫn phụ huynh cách chăm sóc và hỗ trợ trẻ tự kỷ tại nhà.',
+        description:
+            'Sách điện tử hướng dẫn phụ huynh cách chăm sóc và hỗ trợ trẻ tự kỷ tại nhà.',
         category: 'Sách',
         domain: 'social',
         fileUrl: '',
@@ -530,17 +551,20 @@ class SampleLibraryItems {
             userId: 'user7',
             userName: 'Phụ huynh G',
             rating: 5.0,
-            comment: 'Sách rất hữu ích, giúp tôi hiểu rõ hơn về cách chăm sóc con.',
+            comment:
+                'Sách rất hữu ích, giúp tôi hiểu rõ hơn về cách chăm sóc con.',
             createdAt: DateTime.now().subtract(const Duration(days: 5)),
             isVerified: true,
           ),
         ],
-        content: '# Sách Hướng Dẫn Phụ Huynh\n\n## Chương 1: Hiểu về tự kỷ\n\n### Định nghĩa và đặc điểm\nRối loạn phổ tự kỷ (ASD) là một rối loạn phát triển thần kinh ảnh hưởng đến cách trẻ giao tiếp, tương tác xã hội và hành vi.\n\n### Dấu hiệu nhận biết\n- Chậm nói hoặc không nói\n- Khó khăn trong giao tiếp mắt\n- Không thích chơi với bạn\n- Có hành vi lặp lại\n- Nhạy cảm với âm thanh, ánh sáng\n\n## Chương 2: Tạo môi trường hỗ trợ\n\n### Môi trường vật lý\n- Tạo không gian yên tĩnh\n- Sắp xếp đồ đạc có tổ chức\n- Sử dụng lịch trình trực quan\n- Tạo góc học tập riêng',
+        content:
+            '# Sách Hướng Dẫn Phụ Huynh\n\n## Chương 1: Hiểu về tự kỷ\n\n### Định nghĩa và đặc điểm\nRối loạn phổ tự kỷ (ASD) là một rối loạn phát triển thần kinh ảnh hưởng đến cách trẻ giao tiếp, tương tác xã hội và hành vi.\n\n### Dấu hiệu nhận biết\n- Chậm nói hoặc không nói\n- Khó khăn trong giao tiếp mắt\n- Không thích chơi với bạn\n- Có hành vi lặp lại\n- Nhạy cảm với âm thanh, ánh sáng\n\n## Chương 2: Tạo môi trường hỗ trợ\n\n### Môi trường vật lý\n- Tạo không gian yên tĩnh\n- Sắp xếp đồ đạc có tổ chức\n- Sử dụng lịch trình trực quan\n- Tạo góc học tập riêng',
       ),
       LibraryItem(
         id: '8',
         title: 'Bài Tập Nhận Thức Nâng Cao',
-        description: 'Bộ bài tập nhận thức dành cho trẻ tự kỷ có khả năng học tập tốt.',
+        description:
+            'Bộ bài tập nhận thức dành cho trẻ tự kỷ có khả năng học tập tốt.',
         category: 'Bài tập',
         domain: 'cognitive',
         fileUrl: '',
@@ -569,7 +593,8 @@ class SampleLibraryItems {
             isVerified: true,
           ),
         ],
-        content: '# Bài Tập Nhận Thức Nâng Cao\n\n## Bài tập 1: Phân loại đối tượng\n\n### Mục tiêu\nTrẻ có thể phân loại đồ vật theo nhiều tiêu chí khác nhau.\n\n### Cách thực hiện\n1. Chuẩn bị các đồ vật khác nhau\n2. Yêu cầu trẻ phân loại theo màu sắc\n3. Sau đó phân loại theo hình dạng\n4. Cuối cùng phân loại theo chức năng\n\n## Bài tập 2: Giải quyết vấn đề\n\n### Mục tiêu\nTrẻ có thể tìm ra cách giải quyết các tình huống đơn giản.\n\n### Tình huống 1: Tìm đường\n"Bạn nhỏ muốn đến trường nhưng đường bị tắc, bạn ấy phải làm gì?"',
+        content:
+            '# Bài Tập Nhận Thức Nâng Cao\n\n## Bài tập 1: Phân loại đối tượng\n\n### Mục tiêu\nTrẻ có thể phân loại đồ vật theo nhiều tiêu chí khác nhau.\n\n### Cách thực hiện\n1. Chuẩn bị các đồ vật khác nhau\n2. Yêu cầu trẻ phân loại theo màu sắc\n3. Sau đó phân loại theo hình dạng\n4. Cuối cùng phân loại theo chức năng\n\n## Bài tập 2: Giải quyết vấn đề\n\n### Mục tiêu\nTrẻ có thể tìm ra cách giải quyết các tình huống đơn giản.\n\n### Tình huống 1: Tìm đường\n"Bạn nhỏ muốn đến trường nhưng đường bị tắc, bạn ấy phải làm gì?"',
       ),
     ];
   }
@@ -602,23 +627,11 @@ class SampleLibraryItems {
 
   /// Lấy danh sách target ages
   static List<String> getTargetAges() {
-    return [
-      'Tất cả',
-      '2-6',
-      '3-8',
-      '4-7',
-      '6-12',
-      'Phụ huynh',
-    ];
+    return ['Tất cả', '2-6', '3-8', '4-7', '6-12', 'Phụ huynh'];
   }
 
   /// Lấy danh sách difficulties
   static List<String> getDifficulties() {
-    return [
-      'Tất cả',
-      'beginner',
-      'intermediate',
-      'advanced',
-    ];
+    return ['Tất cả', 'beginner', 'intermediate', 'advanced'];
   }
 }

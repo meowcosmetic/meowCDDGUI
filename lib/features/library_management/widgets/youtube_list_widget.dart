@@ -48,7 +48,9 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
           list = [];
         }
         setState(() {
-          youtubeVideos = list.map((e) => (e as Map).cast<String, dynamic>()).toList();
+          youtubeVideos = list
+              .map((e) => (e as Map).cast<String, dynamic>())
+              .toList();
           isLoadingYoutube = false;
           hasLoadedYoutube = true;
         });
@@ -92,15 +94,22 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
         final v = youtubeVideos[index];
         final url = (v['url'] ?? '').toString();
         final id = (v['id'] ?? v['videoId'] ?? v['uuid'] ?? '').toString();
-        final titleMap = (v['title'] is Map) ? (v['title'] as Map).cast<String, dynamic>() : {};
-        final descMap = (v['description'] is Map) ? (v['description'] as Map).cast<String, dynamic>() : {};
-        final title = (titleMap['vi'] ?? titleMap['en'] ?? v['title'] ?? '').toString();
+        final titleMap = (v['title'] is Map)
+            ? (v['title'] as Map).cast<String, dynamic>()
+            : {};
+        final descMap = (v['description'] is Map)
+            ? (v['description'] as Map).cast<String, dynamic>()
+            : {};
+        final title = (titleMap['vi'] ?? titleMap['en'] ?? v['title'] ?? '')
+            .toString();
         final description = (descMap['vi'] ?? descMap['en'] ?? '').toString();
         final language = (v['language'] ?? '').toString();
         final contentRating = (v['contentRating'] ?? '').toString();
         final ageMin = (v['minAge'] ?? '').toString();
         final ageMax = (v['maxAge'] ?? '').toString();
-        final domains = (v['developmentalDomainIds'] is List) ? (v['developmentalDomainIds'] as List).cast<String>() : const <String>[];
+        final domains = (v['developmentalDomainIds'] is List)
+            ? (v['developmentalDomainIds'] as List).cast<String>()
+            : const <String>[];
         final publishedAt = (v['publishedAt'] ?? '').toString();
 
         final ytId = _extractYoutubeId(url);
@@ -113,7 +122,11 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
             color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
-              BoxShadow(color: AppColors.shadowLight, blurRadius: 8, offset: const Offset(0, 2)),
+              BoxShadow(
+                color: AppColors.shadowLight,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
             ],
             border: Border.all(color: AppColors.border),
           ),
@@ -135,7 +148,11 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
                           width: 160,
                           height: 90,
                           color: AppColors.grey200,
-                          child: const Icon(Icons.play_circle_fill, size: 40, color: AppColors.grey500),
+                          child: const Icon(
+                            Icons.play_circle_fill,
+                            size: 40,
+                            color: AppColors.grey500,
+                          ),
                         ),
                 ),
                 const SizedBox(width: 12),
@@ -145,7 +162,11 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
                     children: [
                       Text(
                         title.isEmpty ? 'Video $id' : title,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       if (description.isNotEmpty)
@@ -153,7 +174,10 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
                           description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -165,9 +189,15 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
                           if (contentRating.isNotEmpty)
                             _buildChip(Icons.shield, contentRating),
                           if (ageMin.isNotEmpty || ageMax.isNotEmpty)
-                            _buildChip(Icons.cake, '${ageMin.isEmpty ? '?' : ageMin} - ${ageMax.isEmpty ? '?' : ageMax} tháng'),
+                            _buildChip(
+                              Icons.cake,
+                              '${ageMin.isEmpty ? '?' : ageMin} - ${ageMax.isEmpty ? '?' : ageMax} tháng',
+                            ),
                           if (publishedAt.isNotEmpty)
-                            _buildChip(Icons.calendar_today, publishedAt.split('T').first),
+                            _buildChip(
+                              Icons.calendar_today,
+                              publishedAt.split('T').first,
+                            ),
                           if (domains.isNotEmpty)
                             _buildChip(Icons.category, domains.join(',')),
                         ],
@@ -224,7 +254,13 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
         children: [
           Icon(icon, size: 14, color: AppColors.textSecondary),
           const SizedBox(width: 6),
-          Text(text, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
         ],
       ),
     );
@@ -241,7 +277,9 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
       final v = uri.queryParameters['v'];
       if (v != null && v.isNotEmpty) return v;
       final segs = uri.pathSegments;
-      final idx = segs.indexWhere((s) => s == 'shorts' || s == 'embed' || s == 'v');
+      final idx = segs.indexWhere(
+        (s) => s == 'shorts' || s == 'embed' || s == 'v',
+      );
       if (idx >= 0 && idx + 1 < segs.length) return segs[idx + 1];
     }
     return null;
@@ -289,7 +327,10 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
         barrierColor: Colors.black87,
         builder: (_) => Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final maxW = constraints.maxWidth;
@@ -345,9 +386,11 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
     final viewType = 'yt-iframe-$ytId-${DateTime.now().millisecondsSinceEpoch}';
     ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
       final element = html.IFrameElement()
-        ..src = 'https://www.youtube.com/embed/$ytId?autoplay=1&modestbranding=1&rel=0'
+        ..src =
+            'https://www.youtube.com/embed/$ytId?autoplay=1&modestbranding=1&rel=0'
         ..style.border = '0'
-        ..allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+        ..allow =
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
         ..allowFullscreen = true;
       return element;
     });
@@ -422,9 +465,16 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.play_circle_outline, size: 64, color: Colors.red),
+              const Icon(
+                Icons.play_circle_outline,
+                size: 64,
+                color: Colors.red,
+              ),
               const SizedBox(height: 16),
-              const Text('Video sẽ mở trong tab mới', style: TextStyle(fontSize: 16)),
+              const Text(
+                'Video sẽ mở trong tab mới',
+                style: TextStyle(fontSize: 16),
+              ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -454,7 +504,11 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
     final uri = Uri.tryParse(url);
     if (uri == null) return;
     if (kIsWeb) {
-      await launchUrl(uri, webOnlyWindowName: '_blank', mode: LaunchMode.platformDefault);
+      await launchUrl(
+        uri,
+        webOnlyWindowName: '_blank',
+        mode: LaunchMode.platformDefault,
+      );
       return;
     }
     if (await canLaunchUrl(uri)) {
@@ -469,10 +523,16 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
         title: const Text('Xác nhận xóa video'),
         content: Text('Bạn có chắc muốn xóa "${title.isEmpty ? id : title}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Xóa'),
           ),
         ],
@@ -484,24 +544,40 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
       if (!mounted) return;
       if (resp.statusCode == 200 || resp.statusCode == 204) {
         setState(() {
-          youtubeVideos.removeWhere((e) => (e['id']?.toString() ?? e['videoId']?.toString() ?? e['uuid']?.toString() ?? '') == id);
+          youtubeVideos.removeWhere(
+            (e) =>
+                (e['id']?.toString() ??
+                    e['videoId']?.toString() ??
+                    e['uuid']?.toString() ??
+                    '') ==
+                id,
+          );
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Xóa video thành công'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('Xóa video thành công'),
+              backgroundColor: Colors.green,
+            ),
           );
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Lỗi xóa video: ${resp.statusCode} - ${resp.body}'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Lỗi xóa video: ${resp.statusCode} - ${resp.body}'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi xóa video: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Lỗi xóa video: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -518,7 +594,14 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
               children: const [
                 Icon(Icons.video_library, size: 64, color: AppColors.grey400),
                 SizedBox(height: 16),
-                Text('Chưa có video nào', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                Text(
+                  'Chưa có video nào',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
@@ -527,5 +610,3 @@ class _YoutubeListWidgetState extends State<YoutubeListWidget> {
     );
   }
 }
-
-

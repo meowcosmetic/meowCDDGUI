@@ -78,10 +78,14 @@ class LanguageDropdown extends StatelessWidget {
             child: DropdownButtonFormField<String>(
               value: value,
               decoration: const InputDecoration(border: InputBorder.none),
-              items: languageOptions.entries.map((entry) => DropdownMenuItem(
-                value: entry.key,
-                child: Text(entry.value),
-              )).toList(),
+              items: languageOptions.entries
+                  .map(
+                    (entry) => DropdownMenuItem(
+                      value: entry.key,
+                      child: Text(entry.value),
+                    ),
+                  )
+                  .toList(),
               onChanged: onChanged,
             ),
           ),

@@ -23,10 +23,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
         foregroundColor: AppColors.white,
         title: Text(
           'Lịch sử Tracking: ${child.name}',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         elevation: 0,
         centerTitle: true,
@@ -59,10 +56,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Hãy bắt đầu tracking để theo dõi tiến độ của trẻ',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -78,9 +72,9 @@ class ChildTrackingHistoryView extends StatelessWidget {
         children: [
           // Overview section
           _buildOverviewSection(),
-          
+
           const SizedBox(height: 20),
-          
+
           // History list
           Text(
             'Lịch sử tracking',
@@ -90,10 +84,12 @@ class ChildTrackingHistoryView extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          
+
           const SizedBox(height: 12),
-          
-          ...trackingHistory.map((tracking) => _buildTrackingCard(tracking)).toList(),
+
+          ...trackingHistory
+              .map((tracking) => _buildTrackingCard(tracking))
+              .toList(),
         ],
       ),
     );
@@ -113,15 +109,25 @@ class ChildTrackingHistoryView extends StatelessWidget {
       }
     }
 
-    double overallAverage = trackingHistory.map((t) => t.totalScore).reduce((a, b) => a + b) / trackingHistory.length;
-    
+    double overallAverage =
+        trackingHistory.map((t) => t.totalScore).reduce((a, b) => a + b) /
+        trackingHistory.length;
+
     double recentAverage = 0;
     double previousAverage = 0;
-    
+
     if (trackingHistory.length >= 2) {
-      recentAverage = trackingHistory.take(3).map((t) => t.totalScore).reduce((a, b) => a + b) /
+      recentAverage =
+          trackingHistory
+              .take(3)
+              .map((t) => t.totalScore)
+              .reduce((a, b) => a + b) /
           (trackingHistory.length >= 3 ? 3 : trackingHistory.length);
-      previousAverage = trackingHistory.skip(3).map((t) => t.totalScore).reduce((a, b) => a + b) /
+      previousAverage =
+          trackingHistory
+              .skip(3)
+              .map((t) => t.totalScore)
+              .reduce((a, b) => a + b) /
           (trackingHistory.length - 3);
     }
 
@@ -143,11 +149,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.analytics,
-                color: AppColors.primary,
-                size: 20,
-              ),
+              const Icon(Icons.analytics, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Tổng quan tracking',
@@ -159,9 +161,9 @@ class ChildTrackingHistoryView extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Stats grid
           Row(
             children: [
@@ -182,7 +184,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
               ),
             ],
           ),
-          
+
           if (trackingHistory.length >= 2) ...[
             const SizedBox(height: 12),
             Row(
@@ -192,7 +194,9 @@ class ChildTrackingHistoryView extends StatelessWidget {
                     'Gần đây',
                     '${recentAverage.toStringAsFixed(1)}',
                     Icons.trending_up,
-                    color: recentAverage > previousAverage ? AppColors.success : AppColors.error,
+                    color: recentAverage > previousAverage
+                        ? AppColors.success
+                        : AppColors.error,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -201,15 +205,17 @@ class ChildTrackingHistoryView extends StatelessWidget {
                     'Trước đó',
                     '${previousAverage.toStringAsFixed(1)}',
                     Icons.trending_down,
-                    color: previousAverage > recentAverage ? AppColors.success : AppColors.error,
+                    color: previousAverage > recentAverage
+                        ? AppColors.success
+                        : AppColors.error,
                   ),
                 ),
               ],
             ),
           ],
-          
+
           const SizedBox(height: 12),
-          
+
           Row(
             children: [
               Expanded(
@@ -234,7 +240,12 @@ class ChildTrackingHistoryView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, {Color? color}) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon, {
+    Color? color,
+  }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -244,11 +255,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color ?? AppColors.primary,
-            size: 20,
-          ),
+          Icon(icon, color: color ?? AppColors.primary, size: 20),
           const SizedBox(height: 4),
           Text(
             value,
@@ -260,10 +267,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
           ),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 12,
-              color: color ?? AppColors.primary,
-            ),
+            style: TextStyle(fontSize: 12, color: color ?? AppColors.primary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -300,11 +304,16 @@ class ChildTrackingHistoryView extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: _getScoreColor(tracking.totalScore).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: _getScoreColor(tracking.totalScore)),
+                    border: Border.all(
+                      color: _getScoreColor(tracking.totalScore),
+                    ),
                   ),
                   child: Text(
                     '${tracking.totalScore.toStringAsFixed(1)}/2.0',
@@ -326,7 +335,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Content
           Padding(
             padding: const EdgeInsets.all(16),
@@ -353,9 +362,9 @@ class ChildTrackingHistoryView extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Selected Goals
                 if (tracking.selectedGoals.isNotEmpty) ...[
                   const Text(
@@ -367,30 +376,34 @@ class ChildTrackingHistoryView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...tracking.selectedGoals.map((goal) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.flag,
-                          size: 16,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            goal.title,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                            ),
+                  ...tracking.selectedGoals
+                      .map(
+                        (goal) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.flag,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  goal.title,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  )).toList(),
+                      )
+                      .toList(),
                 ],
-                
+
                 // Notes
                 if (tracking.notes.isNotEmpty) ...[
                   const SizedBox(height: 12),
@@ -431,11 +444,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: AppColors.primary,
-              ),
+              Icon(icon, size: 16, color: AppColors.primary),
               const SizedBox(width: 4),
               Text(
                 label,
@@ -450,10 +459,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

@@ -42,9 +42,6 @@ class InterventionDomainModel {
 
   factory InterventionDomainModel.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔍 Parsing InterventionDomainModel from JSON: ${json.keys.toList()}'); // Debug log
-      print('🔍 Full JSON: $json'); // Debug log
-      
       // Safe conversion for displayedName
       Map<String, dynamic> displayedNameData = {};
       if (json['displayedName'] != null) {
@@ -53,14 +50,15 @@ class InterventionDomainModel {
         } else {
           // Handle case where displayedName might be a dynamic object
           try {
-            displayedNameData = Map<String, dynamic>.from(json['displayedName']);
+            displayedNameData = Map<String, dynamic>.from(
+              json['displayedName'],
+            );
           } catch (e) {
-            print('⚠️ Could not convert displayedName to Map: $e');
             displayedNameData = {'vi': '', 'en': ''};
           }
         }
       }
-      
+
       // Safe conversion for description
       Map<String, dynamic>? descriptionData;
       if (json['description'] != null) {
@@ -70,24 +68,23 @@ class InterventionDomainModel {
           try {
             descriptionData = Map<String, dynamic>.from(json['description']);
           } catch (e) {
-            print('⚠️ Could not convert description to Map: $e');
             descriptionData = null;
           }
         }
       }
-      
+
       return InterventionDomainModel(
         id: json['id']?.toString() ?? '',
         name: json['name']?.toString() ?? '',
         displayedName: LocalizedText.fromJson(displayedNameData),
-        description: descriptionData != null ? LocalizedText.fromJson(descriptionData) : null,
+        description: descriptionData != null
+            ? LocalizedText.fromJson(descriptionData)
+            : null,
         category: json['category']?.toString() ?? '',
         createdAt: json['createdAt']?.toString() ?? '',
         updatedAt: json['updatedAt']?.toString() ?? '',
       );
     } catch (e) {
-      print('❌ Error in InterventionDomainModel.fromJson: $e'); // Debug log
-      print('❌ JSON data: $json'); // Debug log
       throw Exception('Lỗi khi phân tích dữ liệu lĩnh vực can thiệp: $e');
     }
   }
@@ -114,46 +111,37 @@ class LocalizedText {
 
   factory LocalizedText.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔍 Parsing LocalizedText from JSON: ${json.keys.toList()}'); // Debug log
-      print('🔍 LocalizedText JSON: $json'); // Debug log
-      
       // Handle different possible key names
       String vi = '';
       String en = '';
-      
+
       // Try different possible keys
-      vi = json['vi']?.toString() ?? 
-           json['vietnamese']?.toString() ?? 
-           json['vietnam']?.toString() ?? 
-           json['vn']?.toString() ?? 
-           '';
-           
-      en = json['en']?.toString() ?? 
-           json['english']?.toString() ?? 
-           json['eng']?.toString() ?? 
-           '';
-      
+      vi =
+          json['vi']?.toString() ??
+          json['vietnamese']?.toString() ??
+          json['vietnam']?.toString() ??
+          json['vn']?.toString() ??
+          '';
+
+      en =
+          json['en']?.toString() ??
+          json['english']?.toString() ??
+          json['eng']?.toString() ??
+          '';
+
       return LocalizedText(vi: vi, en: en);
     } catch (e) {
-      print('❌ Error in LocalizedText.fromJson: $e'); // Debug log
-      print('❌ JSON data: $json'); // Debug log
       // Return default values instead of throwing
       return const LocalizedText(vi: '', en: '');
     }
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'vi': vi,
-      'en': en,
-    };
+    return {'vi': vi, 'en': en};
   }
 
   LocalizedText copyWith({String? vi, String? en}) {
-    return LocalizedText(
-      vi: vi ?? this.vi,
-      en: en ?? this.en,
-    );
+    return LocalizedText(vi: vi ?? this.vi, en: en ?? this.en);
   }
 }
 
@@ -183,15 +171,15 @@ class PaginatedDomains {
 
   factory PaginatedDomains.fromJson(Map<String, dynamic> json) {
     return PaginatedDomains(
-        content: (json['content'] as List<dynamic>? ?? [])
-            .map((e) {
-              if (e is Map<String, dynamic>) {
-                return InterventionDomainModel.fromJson(e);
-              } else {
-                throw Exception('Phần tử trong danh sách không phải là Map<String, dynamic>: ${e.runtimeType}');
-              }
-            })
-            .toList(),
+      content: (json['content'] as List<dynamic>? ?? []).map((e) {
+        if (e is Map<String, dynamic>) {
+          return InterventionDomainModel.fromJson(e);
+        } else {
+          throw Exception(
+            'Phần tử trong danh sách không phải là Map<String, dynamic>: ${e.runtimeType}',
+          );
+        }
+      }).toList(),
       pageNumber: (json['pageNumber'] ?? 0) as int,
       pageSize: (json['pageSize'] ?? 0) as int,
       totalElements: (json['totalElements'] ?? 0) as int,
@@ -203,4 +191,3 @@ class PaginatedDomains {
     );
   }
 }
-

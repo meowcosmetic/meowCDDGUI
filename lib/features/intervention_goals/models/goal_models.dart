@@ -41,8 +41,8 @@ class InterventionGoalModel {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       displayedName: LocalizedText.fromJson(json['displayedName'] ?? {}),
-      description: json['description'] != null 
-          ? LocalizedText.fromJson(json['description']) 
+      description: json['description'] != null
+          ? LocalizedText.fromJson(json['description'])
           : null,
       category: json['category'] ?? '',
       targets: (json['targets'] as List<dynamic>? ?? [])
@@ -121,8 +121,8 @@ class InterventionTargetModel {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       displayedName: LocalizedText.fromJson(json['displayedName'] ?? {}),
-      description: json['description'] != null 
-          ? LocalizedText.fromJson(json['description']) 
+      description: json['description'] != null
+          ? LocalizedText.fromJson(json['description'])
           : null,
       goalId: json['goalId'] ?? '',
       priority: json['priority'] ?? 1,
@@ -161,23 +161,14 @@ class LocalizedText {
   final String vi;
   final String en;
 
-  const LocalizedText({
-    required this.vi,
-    required this.en,
-  });
+  const LocalizedText({required this.vi, required this.en});
 
   Map<String, dynamic> toJson() {
-    return {
-      'vi': vi,
-      'en': en,
-    };
+    return {'vi': vi, 'en': en};
   }
 
   factory LocalizedText.fromJson(Map<String, dynamic> json) {
-    return LocalizedText(
-      vi: json['vi'] ?? '',
-      en: json['en'] ?? '',
-    );
+    return LocalizedText(vi: json['vi'] ?? '', en: json['en'] ?? '');
   }
 }
 
@@ -205,9 +196,11 @@ class PagedResponse<T> {
     T Function(Map<String, dynamic>) fromJsonT,
   ) {
     return PagedResponse<T>(
-      content: (json['content'] as List<dynamic>?)
-          ?.map((item) => fromJsonT(item))
-          .toList() ?? [],
+      content:
+          (json['content'] as List<dynamic>?)
+              ?.map((item) => fromJsonT(item))
+              .toList() ??
+          [],
       totalElements: json['totalElements'] ?? 0,
       totalPages: json['totalPages'] ?? 0,
       size: json['size'] ?? 0,

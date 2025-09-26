@@ -5,7 +5,7 @@ import '../view/multi_chat_view.dart';
 class FABUtility {
   static Widget buildSmartFAB(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Sử dụng FAB mở rộng cho màn hình lớn, FAB nhỏ cho mobile
     if (screenWidth > 600) {
       return Stack(
@@ -23,10 +23,7 @@ class FABUtility {
             icon: const Icon(Icons.chat_bubble, size: 24),
             label: const Text(
               'Nhắn tin với hệ thống',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             tooltip: 'Nhắn tin với hệ thống',
           ),
@@ -40,10 +37,7 @@ class FABUtility {
                 color: Colors.red,
                 borderRadius: BorderRadius.circular(10),
               ),
-              constraints: const BoxConstraints(
-                minWidth: 20,
-                minHeight: 20,
-              ),
+              constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
               child: const Text(
                 '1',
                 style: TextStyle(
@@ -83,10 +77,7 @@ class FABUtility {
                 color: Colors.red,
                 borderRadius: BorderRadius.circular(10),
               ),
-              constraints: const BoxConstraints(
-                minWidth: 20,
-                minHeight: 20,
-              ),
+              constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
               child: const Text(
                 '1',
                 style: TextStyle(

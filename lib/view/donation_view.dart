@@ -130,10 +130,7 @@ class _DonationViewState extends State<DonationView> {
                   const SizedBox(height: 8),
                   const Text(
                     'Đóng góp của bạn sẽ giúp chúng tôi phát triển ứng dụng tốt hơn và hỗ trợ nhiều gia đình hơn',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.white,
-                    ),
+                    style: TextStyle(fontSize: 16, color: AppColors.white),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -243,19 +240,24 @@ class _DonationViewState extends State<DonationView> {
               height: 56,
               child: ElevatedButton.icon(
                 onPressed: isProcessing ? null : _processDonation,
-                icon: isProcessing 
+                icon: isProcessing
                     ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.white,
+                          ),
                         ),
                       )
                     : const Icon(Icons.volunteer_activism, size: 24),
                 label: Text(
                   isProcessing ? 'Đang xử lý...' : 'Đóng Góp Ngay',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -276,7 +278,9 @@ class _DonationViewState extends State<DonationView> {
               decoration: BoxDecoration(
                 color: AppColors.primaryLight,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,7 +358,12 @@ class _DonationViewState extends State<DonationView> {
     );
   }
 
-  Widget _buildImpactItem(String title, String description, IconData icon, Color color) {
+  Widget _buildImpactItem(
+    String title,
+    String description,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -371,11 +380,7 @@ class _DonationViewState extends State<DonationView> {
               color: color,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.white,
-              size: 20,
-            ),
+            child: Icon(icon, color: AppColors.white, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -407,7 +412,7 @@ class _DonationViewState extends State<DonationView> {
 
   Widget _buildDonationTier(DonationTier tier) {
     final isSelected = selectedAmount == tier.amount.toString();
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -419,7 +424,9 @@ class _DonationViewState extends State<DonationView> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? tier.color.withValues(alpha: 0.1) : AppColors.white,
+          color: isSelected
+              ? tier.color.withValues(alpha: 0.1)
+              : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? tier.color : AppColors.border,
@@ -434,11 +441,7 @@ class _DonationViewState extends State<DonationView> {
                 color: tier.color,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                tier.icon,
-                color: AppColors.white,
-                size: 20,
-              ),
+              child: Icon(tier.icon, color: AppColors.white, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -479,7 +482,7 @@ class _DonationViewState extends State<DonationView> {
 
   Widget _buildPaymentMethod(PaymentMethod method) {
     final isSelected = selectedPaymentMethod == method.id;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -490,7 +493,9 @@ class _DonationViewState extends State<DonationView> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? method.color.withValues(alpha: 0.1) : AppColors.white,
+          color: isSelected
+              ? method.color.withValues(alpha: 0.1)
+              : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? method.color : AppColors.border,
@@ -505,11 +510,7 @@ class _DonationViewState extends State<DonationView> {
                 color: method.color,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                method.icon,
-                color: AppColors.white,
-                size: 20,
-              ),
+              child: Icon(method.icon, color: AppColors.white, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -523,11 +524,7 @@ class _DonationViewState extends State<DonationView> {
               ),
             ),
             if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: method.color,
-                size: 24,
-              ),
+              Icon(Icons.check_circle, color: method.color, size: 24),
           ],
         ),
       ),
@@ -535,10 +532,10 @@ class _DonationViewState extends State<DonationView> {
   }
 
   void _processDonation() {
-    final amount = selectedAmount == 'custom' 
+    final amount = selectedAmount == 'custom'
         ? (int.tryParse(customAmount) ?? 0)
         : int.parse(selectedAmount);
-    
+
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -558,7 +555,7 @@ class _DonationViewState extends State<DonationView> {
       setState(() {
         isProcessing = false;
       });
-      
+
       _showDonationSuccess(amount);
     });
   }

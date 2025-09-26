@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+enum PaginationType { numbers, dots, arrows, simple }
 
-enum PaginationType {
-  numbers,
-  dots,
-  arrows,
-  simple,
-}
-
-enum PaginationSize {
-  small,
-  medium,
-  large,
-}
+enum PaginationSize { small, medium, large }
 
 class Pagination extends StatelessWidget {
   final int currentPage;
@@ -61,19 +51,17 @@ class Pagination extends StatelessWidget {
   }
 
   Widget _buildInfo() {
-    if (totalItems == null || itemsPerPage == null) return const SizedBox.shrink();
+    if (totalItems == null || itemsPerPage == null)
+      return const SizedBox.shrink();
 
     final startItem = (currentPage - 1) * itemsPerPage! + 1;
-    final endItem = currentPage * itemsPerPage! > totalItems! 
-        ? totalItems! 
+    final endItem = currentPage * itemsPerPage! > totalItems!
+        ? totalItems!
         : currentPage * itemsPerPage!;
 
     return Text(
       'Hiển thị $startItem-$endItem của $totalItems kết quả',
-      style: TextStyle(
-        fontSize: _getInfoSize(),
-        color: AppColors.grey600,
-      ),
+      style: TextStyle(fontSize: _getInfoSize(), color: AppColors.grey600),
     );
   }
 
@@ -92,7 +80,7 @@ class Pagination extends StatelessWidget {
 
   Widget _buildNumbersPagination(Color activeColor, Color inactiveColor) {
     final pages = _getVisiblePages();
-    
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -160,7 +148,7 @@ class Pagination extends StatelessWidget {
       children: List.generate(totalPages, (index) {
         final page = index + 1;
         final isActive = page == currentPage;
-        
+
         return GestureDetector(
           onTap: () => onPageChanged?.call(page),
           child: Container(
@@ -312,11 +300,7 @@ class Pagination extends StatelessWidget {
               color: activeColor,
               borderRadius: BorderRadius.circular(_getBorderRadius()),
             ),
-            child: Icon(
-              icon,
-              size: _getIconSize(),
-              color: AppColors.white,
-            ),
+            child: Icon(icon, size: _getIconSize(), color: AppColors.white),
           ),
         ),
       ),
@@ -382,7 +366,11 @@ class Pagination extends StatelessWidget {
       // In the middle
       pages.add(1);
       pages.add(-1); // Ellipsis
-      for (int i = currentPage - halfVisible; i <= currentPage + halfVisible; i++) {
+      for (
+        int i = currentPage - halfVisible;
+        i <= currentPage + halfVisible;
+        i++
+      ) {
         pages.add(i);
       }
       pages.add(-1); // Ellipsis
@@ -634,4 +622,4 @@ class SimplePagination extends StatelessWidget {
       inactiveColor: inactiveColor,
     );
   }
-} 
+}

@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'loading.dart';
 import '../constants/app_colors.dart';
 
-
 class LoadingDemo extends StatelessWidget {
   final bool showAppBar;
-  
+
   const LoadingDemo({super.key, this.showAppBar = true});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: showAppBar ? AppBar(
-        title: const Text('Loading Components Demo'),
-        backgroundColor: AppColors.cardBorder,
-        foregroundColor: AppColors.white,
-      ) : null,
+      appBar: showAppBar
+          ? AppBar(
+              title: const Text('Loading Components Demo'),
+              backgroundColor: AppColors.cardBorder,
+              foregroundColor: AppColors.white,
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -152,39 +153,34 @@ class LoadingDemo extends StatelessWidget {
                 ),
               ],
             ),
-            _buildSection(
-              context,
-              'Pulse Loading',
-              'Loading dạng xung động',
-              [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const PulseLoading(size: LoadingSize.small),
-                    const PulseLoading(size: LoadingSize.medium),
-                    const PulseLoading(size: LoadingSize.large),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    PulseLoading(
-                      size: LoadingSize.medium,
-                      color: AppColors.teal,
-                      text: 'Searching...',
-                      showText: true,
-                    ),
-                    PulseLoading(
-                      size: LoadingSize.medium,
-                      color: AppColors.indigo,
-                      text: 'Analyzing...',
-                      showText: true,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            _buildSection(context, 'Pulse Loading', 'Loading dạng xung động', [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  const PulseLoading(size: LoadingSize.small),
+                  const PulseLoading(size: LoadingSize.medium),
+                  const PulseLoading(size: LoadingSize.large),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  PulseLoading(
+                    size: LoadingSize.medium,
+                    color: AppColors.teal,
+                    text: 'Searching...',
+                    showText: true,
+                  ),
+                  PulseLoading(
+                    size: LoadingSize.medium,
+                    color: AppColors.indigo,
+                    text: 'Analyzing...',
+                    showText: true,
+                  ),
+                ],
+              ),
+            ]),
             _buildSection(
               context,
               'Custom Loading',
@@ -268,16 +264,16 @@ class LoadingDemo extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.cardBorder,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.cardBorder),
           ),
           const SizedBox(height: 16),
           Container(
@@ -294,12 +290,10 @@ class LoadingDemo extends StatelessWidget {
                 ),
               ],
             ),
-            child: Column(
-              children: children,
-            ),
+            child: Column(children: children),
           ),
         ],
       ),
     );
   }
-} 
+}

@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             Button(text: 'title'),
-            MeowCard()
+            MeowCard(),
           ],
         ),
       ),

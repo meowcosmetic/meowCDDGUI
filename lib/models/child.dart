@@ -48,7 +48,9 @@ class Child {
       parentName: json['parentName'] ?? '',
       parentPhone: json['parentPhone'] ?? '',
       parentEmail: json['parentEmail'] ?? '',
-      joinDate: DateTime.parse(json['joinDate'] ?? DateTime.now().toIso8601String()),
+      joinDate: DateTime.parse(
+        json['joinDate'] ?? DateTime.now().toIso8601String(),
+      ),
       status: json['status'] ?? 'active',
       progress: Map<String, double>.from(json['progress'] ?? {}),
       notes: List<String>.from(json['notes'] ?? []),
@@ -222,12 +224,15 @@ class ChildData {
       isPremature: json['isPremature'] as bool? ?? false,
       gestationalWeek: json['gestationalWeek'] as int?,
       birthWeightGrams: json['birthWeightGrams'] as int?,
-      specialMedicalConditions: json['specialMedicalConditions'] as String? ?? '',
-      developmentalDisorderDiagnosis: json['developmentalDisorderDiagnosis'] as String? ?? 'NOT_EVALUATED',
+      specialMedicalConditions:
+          json['specialMedicalConditions'] as String? ?? '',
+      developmentalDisorderDiagnosis:
+          json['developmentalDisorderDiagnosis'] as String? ?? 'NOT_EVALUATED',
       hasEarlyIntervention: json['hasEarlyIntervention'] as bool? ?? false,
       earlyInterventionDetails: json['earlyInterventionDetails'] as String?,
       primaryLanguage: json['primaryLanguage'] as String? ?? 'Tiếng Việt',
-      familyDevelopmentalIssues: json['familyDevelopmentalIssues'] as String? ?? 'NO',
+      familyDevelopmentalIssues:
+          json['familyDevelopmentalIssues'] as String? ?? 'NO',
       height: json['height'] as double?,
       weight: json['weight'] as double?,
       bloodType: json['bloodType'] as String? ?? 'A+',
@@ -292,12 +297,16 @@ class ChildData {
       isPremature: isPremature ?? this.isPremature,
       gestationalWeek: gestationalWeek ?? this.gestationalWeek,
       birthWeightGrams: birthWeightGrams ?? this.birthWeightGrams,
-      specialMedicalConditions: specialMedicalConditions ?? this.specialMedicalConditions,
-      developmentalDisorderDiagnosis: developmentalDisorderDiagnosis ?? this.developmentalDisorderDiagnosis,
+      specialMedicalConditions:
+          specialMedicalConditions ?? this.specialMedicalConditions,
+      developmentalDisorderDiagnosis:
+          developmentalDisorderDiagnosis ?? this.developmentalDisorderDiagnosis,
       hasEarlyIntervention: hasEarlyIntervention ?? this.hasEarlyIntervention,
-      earlyInterventionDetails: earlyInterventionDetails ?? this.earlyInterventionDetails,
+      earlyInterventionDetails:
+          earlyInterventionDetails ?? this.earlyInterventionDetails,
       primaryLanguage: primaryLanguage ?? this.primaryLanguage,
-      familyDevelopmentalIssues: familyDevelopmentalIssues ?? this.familyDevelopmentalIssues,
+      familyDevelopmentalIssues:
+          familyDevelopmentalIssues ?? this.familyDevelopmentalIssues,
       height: height ?? this.height,
       weight: weight ?? this.weight,
       bloodType: bloodType ?? this.bloodType,
@@ -315,9 +324,9 @@ class ChildData {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is ChildData && 
-           other.fullName == fullName && 
-           other.dateOfBirth == dateOfBirth;
+    return other is ChildData &&
+        other.fullName == fullName &&
+        other.dateOfBirth == dateOfBirth;
   }
 
   @override

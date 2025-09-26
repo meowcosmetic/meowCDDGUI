@@ -57,11 +57,21 @@ class _DomainsViewState extends State<DomainsView> {
 
   Future<void> _createOrEditDomain({InterventionDomainModel? domain}) async {
     final nameController = TextEditingController(text: domain?.name ?? '');
-    final displayedNameViController = TextEditingController(text: domain?.displayedName.vi ?? '');
-    final displayedNameEnController = TextEditingController(text: domain?.displayedName.en ?? '');
-    final descViController = TextEditingController(text: domain?.description?.vi ?? '');
-    final descEnController = TextEditingController(text: domain?.description?.en ?? '');
-    final categoryController = TextEditingController(text: domain?.category ?? '');
+    final displayedNameViController = TextEditingController(
+      text: domain?.displayedName.vi ?? '',
+    );
+    final displayedNameEnController = TextEditingController(
+      text: domain?.displayedName.en ?? '',
+    );
+    final descViController = TextEditingController(
+      text: domain?.description?.vi ?? '',
+    );
+    final descEnController = TextEditingController(
+      text: domain?.description?.en ?? '',
+    );
+    final categoryController = TextEditingController(
+      text: domain?.category ?? '',
+    );
     final isEdit = domain != null;
 
     final result = await showDialog<InterventionDomainModel>(
@@ -124,7 +134,8 @@ class _DomainsViewState extends State<DomainsView> {
                           decoration: const InputDecoration(
                             labelText: 'Mô tả (VI) - Có thể dùng HTML',
                             border: OutlineInputBorder(),
-                            hintText: 'Ví dụ: <p>Mô tả <strong>in đậm</strong></p>\n<ul><li>Điểm 1</li><li>Điểm 2</li></ul>',
+                            hintText:
+                                'Ví dụ: <p>Mô tả <strong>in đậm</strong></p>\n<ul><li>Điểm 1</li><li>Điểm 2</li></ul>',
                           ),
                           maxLines: 4,
                         ),
@@ -134,7 +145,8 @@ class _DomainsViewState extends State<DomainsView> {
                           decoration: const InputDecoration(
                             labelText: 'Mô tả (EN) - Có thể dùng HTML',
                             border: OutlineInputBorder(),
-                            hintText: 'Example: <p>Description with <strong>bold</strong> text</p>\n<ul><li>Point 1</li><li>Point 2</li></ul>',
+                            hintText:
+                                'Example: <p>Description with <strong>bold</strong> text</p>\n<ul><li>Point 1</li><li>Point 2</li></ul>',
                           ),
                           maxLines: 4,
                         ),
@@ -153,17 +165,26 @@ class _DomainsViewState extends State<DomainsView> {
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () {
-                        if (nameController.text.trim().isEmpty || 
-                            displayedNameViController.text.trim().isEmpty || 
+                        if (nameController.text.trim().isEmpty ||
+                            displayedNameViController.text.trim().isEmpty ||
                             displayedNameEnController.text.trim().isEmpty ||
-                            categoryController.text.trim().isEmpty) return;
+                            categoryController.text.trim().isEmpty)
+                          return;
                         final payload = InterventionDomainModel(
                           id: isEdit ? domain!.id : '',
                           name: nameController.text.trim(),
-                          displayedName: LocalizedText(vi: displayedNameViController.text.trim(), en: displayedNameEnController.text.trim()),
-                          description: (descViController.text.trim().isEmpty && descEnController.text.trim().isEmpty)
+                          displayedName: LocalizedText(
+                            vi: displayedNameViController.text.trim(),
+                            en: displayedNameEnController.text.trim(),
+                          ),
+                          description:
+                              (descViController.text.trim().isEmpty &&
+                                  descEnController.text.trim().isEmpty)
                               ? null
-                              : LocalizedText(vi: descViController.text.trim(), en: descEnController.text.trim()),
+                              : LocalizedText(
+                                  vi: descViController.text.trim(),
+                                  en: descEnController.text.trim(),
+                                ),
                           category: categoryController.text.trim(),
                           createdAt: isEdit ? domain!.createdAt : '',
                           updatedAt: isEdit ? domain!.updatedAt : '',
@@ -187,22 +208,40 @@ class _DomainsViewState extends State<DomainsView> {
         final updated = await _service.updateDomain(
           domainId: domain!.id,
           name: nameController.text.trim(),
-          displayedName: LocalizedText(vi: displayedNameViController.text.trim(), en: displayedNameEnController.text.trim()),
-          description: (descViController.text.trim().isEmpty && descEnController.text.trim().isEmpty)
+          displayedName: LocalizedText(
+            vi: displayedNameViController.text.trim(),
+            en: displayedNameEnController.text.trim(),
+          ),
+          description:
+              (descViController.text.trim().isEmpty &&
+                  descEnController.text.trim().isEmpty)
               ? null
-              : LocalizedText(vi: descViController.text.trim(), en: descEnController.text.trim()),
+              : LocalizedText(
+                  vi: descViController.text.trim(),
+                  en: descEnController.text.trim(),
+                ),
           category: categoryController.text.trim(),
         );
         setState(() {
-          _domains = _domains.map((d) => d.id == domain.id ? updated : d).toList();
+          _domains = _domains
+              .map((d) => d.id == domain.id ? updated : d)
+              .toList();
         });
       } else {
         final created = await _service.createDomain(
           name: nameController.text.trim(),
-          displayedName: LocalizedText(vi: displayedNameViController.text.trim(), en: displayedNameEnController.text.trim()),
-          description: (descViController.text.trim().isEmpty && descEnController.text.trim().isEmpty)
+          displayedName: LocalizedText(
+            vi: displayedNameViController.text.trim(),
+            en: displayedNameEnController.text.trim(),
+          ),
+          description:
+              (descViController.text.trim().isEmpty &&
+                  descEnController.text.trim().isEmpty)
               ? null
-              : LocalizedText(vi: descViController.text.trim(), en: descEnController.text.trim()),
+              : LocalizedText(
+                  vi: descViController.text.trim(),
+                  en: descEnController.text.trim(),
+                ),
           category: categoryController.text.trim(),
         );
         setState(() {
@@ -211,7 +250,9 @@ class _DomainsViewState extends State<DomainsView> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
     }
   }
 
@@ -222,8 +263,14 @@ class _DomainsViewState extends State<DomainsView> {
         title: const Text('Xóa lĩnh vực'),
         content: Text('Bạn có chắc muốn xóa "${domain.displayedName.vi}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Xóa')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Xóa'),
+          ),
         ],
       ),
     );
@@ -235,7 +282,9 @@ class _DomainsViewState extends State<DomainsView> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
     }
   }
 
@@ -258,139 +307,160 @@ class _DomainsViewState extends State<DomainsView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _hasError
-              ? Center(child: Text('Lỗi: $_errorMessage'))
-              : _domains.isEmpty
-                  ? const Center(child: Text('Chưa có lĩnh vực nào'))
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _domains.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final domain = _domains[index];
-                        final domainTitle = domain.displayedName.vi.isNotEmpty ? domain.displayedName.vi : domain.displayedName.en;
-                        final domainDesc = domain.description == null
-                            ? null
-                            : (domain.description!.vi.isNotEmpty ? domain.description!.vi : domain.description!.en);
+          ? Center(child: Text('Lỗi: $_errorMessage'))
+          : _domains.isEmpty
+          ? const Center(child: Text('Chưa có lĩnh vực nào'))
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: _domains.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final domain = _domains[index];
+                final domainTitle = domain.displayedName.vi.isNotEmpty
+                    ? domain.displayedName.vi
+                    : domain.displayedName.en;
+                final domainDesc = domain.description == null
+                    ? null
+                    : (domain.description!.vi.isNotEmpty
+                          ? domain.description!.vi
+                          : domain.description!.en);
 
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.borderLight),
-                          ),
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                domainTitle,
-                                style: TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
+                return Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.borderLight),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        domainTitle,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      if (domainDesc != null) ...[
+                        const SizedBox(height: 6),
+                        Html(
+                          data: domainDesc,
+                          style: {
+                            "body": Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                              fontSize: FontSize(13),
+                              color: AppColors.textSecondary,
+                              lineHeight: LineHeight(1.3),
+                            ),
+                            "p": Style(margin: Margins.only(bottom: 6)),
+                            "strong": Style(fontWeight: FontWeight.bold),
+                            "em": Style(fontStyle: FontStyle.italic),
+                            "ul": Style(
+                              margin: Margins.only(left: 16, bottom: 6),
+                            ),
+                            "ol": Style(
+                              margin: Margins.only(left: 16, bottom: 6),
+                            ),
+                            "li": Style(margin: Margins.only(bottom: 2)),
+                            "h1": Style(
+                              fontSize: FontSize(16),
+                              fontWeight: FontWeight.bold,
+                              margin: Margins.only(bottom: 8),
+                              color: AppColors.textPrimary,
+                            ),
+                            "h2": Style(
+                              fontSize: FontSize(15),
+                              fontWeight: FontWeight.bold,
+                              margin: Margins.only(bottom: 6),
+                              color: AppColors.textPrimary,
+                            ),
+                            "h3": Style(
+                              fontSize: FontSize(14),
+                              fontWeight: FontWeight.bold,
+                              margin: Margins.only(bottom: 4),
+                              color: AppColors.textPrimary,
+                            ),
+                            "blockquote": Style(
+                              margin: Margins.only(
+                                left: 16,
+                                right: 16,
+                                bottom: 6,
+                              ),
+                              padding: HtmlPaddings.only(
+                                left: 8,
+                                top: 4,
+                                bottom: 4,
+                              ),
+                              border: Border(
+                                left: BorderSide(
+                                  color: AppColors.primary,
+                                  width: 3,
                                 ),
                               ),
-                              if (domainDesc != null) ...[
-                                const SizedBox(height: 6),
-                                Html(
-                                  data: domainDesc,
-                                  style: {
-                                    "body": Style(
-                                      margin: Margins.zero,
-                                      padding: HtmlPaddings.zero,
-                                      fontSize: FontSize(13),
-                                      color: AppColors.textSecondary,
-                                      lineHeight: LineHeight(1.3),
-                                    ),
-                                    "p": Style(
-                                      margin: Margins.only(bottom: 6),
-                                    ),
-                                    "strong": Style(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    "em": Style(
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                    "ul": Style(
-                                      margin: Margins.only(left: 16, bottom: 6),
-                                    ),
-                                    "ol": Style(
-                                      margin: Margins.only(left: 16, bottom: 6),
-                                    ),
-                                    "li": Style(
-                                      margin: Margins.only(bottom: 2),
-                                    ),
-                                    "h1": Style(
-                                      fontSize: FontSize(16),
-                                      fontWeight: FontWeight.bold,
-                                      margin: Margins.only(bottom: 8),
-                                      color: AppColors.textPrimary,
-                                    ),
-                                    "h2": Style(
-                                      fontSize: FontSize(15),
-                                      fontWeight: FontWeight.bold,
-                                      margin: Margins.only(bottom: 6),
-                                      color: AppColors.textPrimary,
-                                    ),
-                                    "h3": Style(
-                                      fontSize: FontSize(14),
-                                      fontWeight: FontWeight.bold,
-                                      margin: Margins.only(bottom: 4),
-                                      color: AppColors.textPrimary,
-                                    ),
-                                    "blockquote": Style(
-                                      margin: Margins.only(left: 16, right: 16, bottom: 6),
-                                      padding: HtmlPaddings.only(left: 8, top: 4, bottom: 4),
-                                      border: Border(
-                                        left: BorderSide(
-                                          color: AppColors.primary,
-                                          width: 3,
-                                        ),
-                                      ),
-                                      backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
-                                    ),
-                                  },
+                              backgroundColor: AppColors.primaryLight
+                                  .withValues(alpha: 0.3),
+                            ),
+                          },
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        'Tạo: ${_formatDate(domain.createdAt)}',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (AppConfig.enableInterventionDomains)
+                        Row(
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: () =>
+                                  _createOrEditDomain(domain: domain),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                side: BorderSide(color: AppColors.primary),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 8,
                                 ),
-                              ],
-                              const SizedBox(height: 8),
-                              Text(
-                                'Tạo: ${_formatDate(domain.createdAt)}',
-                                style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                                textStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                              const SizedBox(height: 10),
-                              if (AppConfig.enableInterventionDomains)
-                                Row(
-                                  children: [
-                                    OutlinedButton.icon(
-                                      onPressed: () => _createOrEditDomain(domain: domain),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: AppColors.primary,
-                                        side: BorderSide(color: AppColors.primary),
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                                      ),
-                                      icon: const Icon(Icons.edit, size: 18),
-                                      label: const Text('Sửa'),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    OutlinedButton.icon(
-                                      onPressed: () => _deleteDomain(domain),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: AppColors.error,
-                                        side: BorderSide(color: AppColors.error),
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                                      ),
-                                      icon: const Icon(Icons.delete_forever, size: 18),
-                                      label: const Text('Xóa'),
-                                    ),
-                                  ],
+                              icon: const Icon(Icons.edit, size: 18),
+                              label: const Text('Sửa'),
+                            ),
+                            const SizedBox(width: 8),
+                            OutlinedButton.icon(
+                              onPressed: () => _deleteDomain(domain),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.error,
+                                side: BorderSide(color: AppColors.error),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 8,
                                 ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                                textStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              icon: const Icon(Icons.delete_forever, size: 18),
+                              label: const Text('Xóa'),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 

@@ -47,10 +47,13 @@ class ChildTracking {
       scores: Map<String, int>.from(json['scores']),
       notes: json['notes'] ?? '',
       emotionLevel: EmotionLevel.values[json['emotionLevel'] ?? 0],
-      participationLevel: ParticipationLevel.values[json['participationLevel'] ?? 0],
-      selectedGoals: (json['selectedGoals'] as List?)
-          ?.map((goal) => InterventionGoal.fromJson(goal))
-          .toList() ?? [],
+      participationLevel:
+          ParticipationLevel.values[json['participationLevel'] ?? 0],
+      selectedGoals:
+          (json['selectedGoals'] as List?)
+              ?.map((goal) => InterventionGoal.fromJson(goal))
+              .toList() ??
+          [],
     );
   }
 }
@@ -155,11 +158,7 @@ class InterventionQuestion {
   }
 }
 
-enum QuestionType {
-  yesNo,
-  supportLevel,
-  environment,
-}
+enum QuestionType { yesNo, supportLevel, environment }
 
 class TrackingData {
   static const List<InterventionGoal> interventionGoals = [
@@ -183,12 +182,13 @@ class TrackingData {
             'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
             'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
             'Hỗ trợ bằng lời',
-            'Không cần hỗ trợ'
+            'Không cần hỗ trợ',
           ],
         ),
         InterventionQuestion(
           id: 'goal_1_lv3',
-          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          question:
+              'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
           type: QuestionType.environment,
           options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
         ),
@@ -214,12 +214,13 @@ class TrackingData {
             'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
             'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
             'Hỗ trợ bằng lời',
-            'Không cần hỗ trợ'
+            'Không cần hỗ trợ',
           ],
         ),
         InterventionQuestion(
           id: 'goal_2_lv3',
-          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          question:
+              'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
           type: QuestionType.environment,
           options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
         ),
@@ -245,12 +246,13 @@ class TrackingData {
             'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
             'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
             'Hỗ trợ bằng lời',
-            'Không cần hỗ trợ'
+            'Không cần hỗ trợ',
           ],
         ),
         InterventionQuestion(
           id: 'goal_3_lv3',
-          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          question:
+              'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
           type: QuestionType.environment,
           options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
         ),
@@ -259,7 +261,8 @@ class TrackingData {
     InterventionGoal(
       id: 'goal_4',
       title: 'Kỹ năng vận động tinh',
-      description: 'Trẻ có thể thực hiện các hoạt động cần sự khéo léo của bàn tay',
+      description:
+          'Trẻ có thể thực hiện các hoạt động cần sự khéo léo của bàn tay',
       questions: [
         InterventionQuestion(
           id: 'goal_4_lv1',
@@ -276,12 +279,13 @@ class TrackingData {
             'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
             'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
             'Hỗ trợ bằng lời',
-            'Không cần hỗ trợ'
+            'Không cần hỗ trợ',
           ],
         ),
         InterventionQuestion(
           id: 'goal_4_lv3',
-          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          question:
+              'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
           type: QuestionType.environment,
           options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
         ),
@@ -290,7 +294,8 @@ class TrackingData {
     InterventionGoal(
       id: 'goal_5',
       title: 'Kỹ năng nhận thức',
-      description: 'Trẻ có thể hiểu và thực hiện các nhiệm vụ nhận thức đơn giản',
+      description:
+          'Trẻ có thể hiểu và thực hiện các nhiệm vụ nhận thức đơn giản',
       questions: [
         InterventionQuestion(
           id: 'goal_5_lv1',
@@ -307,12 +312,13 @@ class TrackingData {
             'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
             'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
             'Hỗ trợ bằng lời',
-            'Không cần hỗ trợ'
+            'Không cần hỗ trợ',
           ],
         ),
         InterventionQuestion(
           id: 'goal_5_lv3',
-          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          question:
+              'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
           type: QuestionType.environment,
           options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
         ),
@@ -338,12 +344,13 @@ class TrackingData {
             'Hỗ trợ bằng nhiều (cầm tay, nhắc liên tục)',
             'Hỗ trợ bằng cử chỉ (chỉ tay, gợi ý)',
             'Hỗ trợ bằng lời',
-            'Không cần hỗ trợ'
+            'Không cần hỗ trợ',
           ],
         ),
         InterventionQuestion(
           id: 'goal_6_lv3',
-          question: 'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
+          question:
+              'Con bạn có làm được điều đó ở nhiều môi trường khác nhau không?',
           type: QuestionType.environment,
           options: ['Chỉ ở nhà', 'Ở nhà và trường học', 'Ở mọi nơi'],
         ),
@@ -360,7 +367,8 @@ class TrackingData {
         TrackingQuestion(
           id: 'comm_1',
           category: 'Giao tiếp',
-          question: 'Hôm nay trẻ có chủ động nói hoặc ra hiệu để giao tiếp không?',
+          question:
+              'Hôm nay trẻ có chủ động nói hoặc ra hiệu để giao tiếp không?',
           options: ['Không', 'Chỉ khi được nhắc', 'Chủ động'],
           scores: [0, 1, 2],
         ),
@@ -420,7 +428,8 @@ class TrackingData {
         TrackingQuestion(
           id: 'cognitive_1',
           category: 'Kỹ năng nhận thức',
-          question: 'Trẻ có hoàn thành nhiệm vụ đơn giản (xếp hình, ghép tranh) không?',
+          question:
+              'Trẻ có hoàn thành nhiệm vụ đơn giản (xếp hình, ghép tranh) không?',
           options: ['Không', 'Có hỗ trợ', 'Tự làm'],
           scores: [0, 1, 2],
         ),

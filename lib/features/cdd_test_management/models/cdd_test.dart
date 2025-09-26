@@ -77,7 +77,9 @@ class CDDTest {
         try {
           final decoded = jsonDecode(value);
           if (decoded is Map<String, dynamic>) {
-            return decoded.map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''));
+            return decoded.map(
+              (k, v) => MapEntry(k.toString(), v?.toString() ?? ''),
+            );
           }
         } catch (_) {}
       }
@@ -98,21 +100,32 @@ class CDDTest {
 
     // Resolve maps possibly provided as *Json string fields
     final names = _parseStringMap(json['names'] ?? json['namesJson']);
-    final descriptions = _parseStringMap(json['descriptions'] ?? json['descriptionsJson']);
-    final instructions = _parseStringMap(json['instructions'] ?? json['instructionsJson']);
+    final descriptions = _parseStringMap(
+      json['descriptions'] ?? json['descriptionsJson'],
+    );
+    final instructions = _parseStringMap(
+      json['instructions'] ?? json['instructionsJson'],
+    );
     final notes = _parseStringMap(json['notes'] ?? json['notesJson']);
 
     // Questions may come as a JSON string array under questionsJson
-    final questionsSource = _parseList(json['questions'] ?? json['questionsJson']);
+    final questionsSource = _parseList(
+      json['questions'] ?? json['questionsJson'],
+    );
     final parsedQuestions = questionsSource
-        .map((q) => q is Map<String, dynamic> ? q : (q is Map ? Map<String, dynamic>.from(q) : null))
+        .map(
+          (q) => q is Map<String, dynamic>
+              ? q
+              : (q is Map ? Map<String, dynamic>.from(q) : null),
+        )
         .where((q) => q != null)
         .cast<Map<String, dynamic>>()
         .map((q) => CDDQuestion.fromJson(q))
         .toList();
 
     // scoringCriteria may come as object or JSON string
-    dynamic scoringCriteriaValue = json['scoringCriteria'] ?? json['scoringCriteriaJson'];
+    dynamic scoringCriteriaValue =
+        json['scoringCriteria'] ?? json['scoringCriteriaJson'];
     if (scoringCriteriaValue is String && scoringCriteriaValue.isNotEmpty) {
       try {
         scoringCriteriaValue = jsonDecode(scoringCriteriaValue);
@@ -122,9 +135,9 @@ class CDDTest {
     }
 
     // requiredMaterials may come as array or JSON string
-    final requiredMaterials = _parseList(json['requiredMaterials'] ?? json['requiredMaterialsJson'])
-        .map((e) => e.toString())
-        .toList();
+    final requiredMaterials = _parseList(
+      json['requiredMaterials'] ?? json['requiredMaterialsJson'],
+    ).map((e) => e.toString()).toList();
 
     return CDDTest(
       id: json['id']?.toString(),
@@ -139,21 +152,30 @@ class CDDTest {
       version: json['version'] ?? '1.0',
       estimatedDuration: json['estimatedDuration'] ?? 15,
       administrationType: json['administrationType'] ?? 'PARENT_REPORT',
-      requiredQualifications: json['requiredQualifications'] ?? 'NO_QUALIFICATION_REQUIRED',
+      requiredQualifications:
+          json['requiredQualifications'] ?? 'NO_QUALIFICATION_REQUIRED',
       requiredMaterials: requiredMaterials,
       notes: notes,
       questions: parsedQuestions,
       scoringCriteria: CDDScoringCriteria.fromJson(
-        scoringCriteriaValue is Map<String, dynamic> ? scoringCriteriaValue : {},
+        scoringCriteriaValue is Map<String, dynamic>
+            ? scoringCriteriaValue
+            : {},
       ),
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'].toString()) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'].toString())
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'].toString())
+          : null,
     );
   }
 
   String getName(String language) => names[language] ?? names['vi'] ?? '';
-  String getDescription(String language) => descriptions[language] ?? descriptions['vi'] ?? '';
-  String getInstructions(String language) => instructions[language] ?? instructions['vi'] ?? '';
+  String getDescription(String language) =>
+      descriptions[language] ?? descriptions['vi'] ?? '';
+  String getInstructions(String language) =>
+      instructions[language] ?? instructions['vi'] ?? '';
   String getNotes(String language) => notes[language] ?? notes['vi'] ?? '';
 }
 
@@ -204,9 +226,11 @@ class CDDQuestion {
     );
   }
 
-  String getQuestionText(String language) => questionTexts[language] ?? questionTexts['vi'] ?? '';
+  String getQuestionText(String language) =>
+      questionTexts[language] ?? questionTexts['vi'] ?? '';
   String getHint(String language) => hints[language] ?? hints['vi'] ?? '';
-  String getExplanation(String language) => explanations[language] ?? explanations['vi'] ?? '';
+  String getExplanation(String language) =>
+      explanations[language] ?? explanations['vi'] ?? '';
 }
 
 class CDDScoringCriteria {
@@ -229,7 +253,9 @@ class CDDScoringCriteria {
       'totalQuestions': totalQuestions,
       'yesScore': yesScore,
       'noScore': noScore,
-      'scoreRanges': scoreRanges.map((key, value) => MapEntry(key, value.toJson())),
+      'scoreRanges': scoreRanges.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      ),
       'interpretation': interpretation,
     };
   }
@@ -239,7 +265,8 @@ class CDDScoringCriteria {
       totalQuestions: json['totalQuestions'] ?? 0,
       yesScore: json['yesScore'] ?? 1,
       noScore: json['noScore'] ?? 0,
-      scoreRanges: (json['scoreRanges'] as Map<String, dynamic>?)?.map(
+      scoreRanges:
+          (json['scoreRanges'] as Map<String, dynamic>?)?.map(
             (key, value) => MapEntry(key, CDDScoreRange.fromJson(value)),
           ) ??
           {},
@@ -283,7 +310,8 @@ class CDDScoreRange {
     );
   }
 
-  String getDescription(String language) => descriptions[language] ?? descriptions['vi'] ?? '';
+  String getDescription(String language) =>
+      descriptions[language] ?? descriptions['vi'] ?? '';
 }
 
 // Enums
@@ -305,7 +333,8 @@ class CDDRequiredQualifications {
   static const String NO_QUALIFICATION_REQUIRED = 'NO_QUALIFICATION_REQUIRED';
   static const String PSYCHOLOGIST_REQUIRED = 'PSYCHOLOGIST_REQUIRED';
   static const String PEDIATRICIAN_REQUIRED = 'PEDIATRICIAN_REQUIRED';
-  static const String DEVELOPMENTAL_SPECIALIST_REQUIRED = 'DEVELOPMENTAL_SPECIALIST_REQUIRED';
+  static const String DEVELOPMENTAL_SPECIALIST_REQUIRED =
+      'DEVELOPMENTAL_SPECIALIST_REQUIRED';
   static const String THERAPIST_REQUIRED = 'THERAPIST_REQUIRED';
   static const String NURSE_REQUIRED = 'NURSE_REQUIRED';
   static const String TEACHER_REQUIRED = 'TEACHER_REQUIRED';

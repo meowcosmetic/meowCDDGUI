@@ -37,10 +37,12 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
       Iterable<Collaborator> list = all;
       final query = q.trim().toLowerCase();
       if (query.isNotEmpty) {
-        list = list.where((c) =>
-            c.name.toLowerCase().contains(query) ||
-            c.title.toLowerCase().contains(query) ||
-            c.description.toLowerCase().contains(query));
+        list = list.where(
+          (c) =>
+              c.name.toLowerCase().contains(query) ||
+              c.title.toLowerCase().contains(query) ||
+              c.description.toLowerCase().contains(query),
+        );
       }
       if (city != 'Tất cả') {
         list = list.where((c) => c.city == city);
@@ -49,7 +51,11 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
         list = list.where((c) => c.specialties.contains(spec));
       }
       if (ratingFilter != 'Tất cả') {
-        final min = ratingFilter == '4.5+' ? 4.5 : ratingFilter == '4.0+' ? 4.0 : 3.0;
+        final min = ratingFilter == '4.5+'
+            ? 4.5
+            : ratingFilter == '4.0+'
+            ? 4.0
+            : 3.0;
         list = list.where((c) => c.rating >= min);
       }
       filtered = list.toList();
@@ -67,10 +73,7 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
         centerTitle: true,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.tune),
-            onPressed: _showFilters,
-          ),
+          IconButton(icon: const Icon(Icons.tune), onPressed: _showFilters),
         ],
       ),
       body: Column(
@@ -104,13 +107,21 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _chip('TP', city == 'Tất cả', () { city = 'Tất cả'; _applyFilters(); }),
-                  ...SampleCollaborators.cities().where((c) => c != 'Tất cả').map((c) =>
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: _chip(c, city == c, () { city = c; _applyFilters(); }),
-                    ),
-                  ),
+                  _chip('TP', city == 'Tất cả', () {
+                    city = 'Tất cả';
+                    _applyFilters();
+                  }),
+                  ...SampleCollaborators.cities()
+                      .where((c) => c != 'Tất cả')
+                      .map(
+                        (c) => Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: _chip(c, city == c, () {
+                            city = c;
+                            _applyFilters();
+                          }),
+                        ),
+                      ),
                 ],
               ),
             ),
@@ -120,12 +131,12 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : filtered.isEmpty
-                    ? _empty()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: filtered.length,
-                        itemBuilder: (_, i) => _card(filtered[i]),
-                      ),
+                ? _empty()
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filtered.length,
+                    itemBuilder: (_, i) => _card(filtered[i]),
+                  ),
           ),
         ],
       ),
@@ -140,7 +151,9 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.grey100,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? AppColors.primary : AppColors.border),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
         ),
         child: Text(
           label,
@@ -178,8 +191,13 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                 CircleAvatar(
                   radius: 24,
                   backgroundColor: AppColors.primaryLight,
-                  child: Text(c.name.split(' ').last.characters.first.toUpperCase(),
-                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    c.name.split(' ').last.characters.first.toUpperCase(),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -189,16 +207,21 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                       Row(
                         children: [
                           Expanded(
-                            child: Text(c.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                )),
+                            child: Text(
+                              c.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
                           ),
                           if (c.isVerified)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.green.withValues(alpha: 0.1),
                                 border: Border.all(color: Colors.green),
@@ -207,28 +230,63 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.verified, size: 14, color: Colors.green),
+                                  Icon(
+                                    Icons.verified,
+                                    size: 14,
+                                    color: Colors.green,
+                                  ),
                                   SizedBox(width: 4),
-                                  Text('Đã xác minh', style: TextStyle(fontSize: 11, color: Colors.green)),
+                                  Text(
+                                    'Đã xác minh',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.green,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
                         ],
                       ),
                       const SizedBox(height: 2),
-                      Text(c.title, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                      Text(
+                        c.title,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                       const SizedBox(height: 6),
                       Row(
                         children: [
                           Icon(Icons.star, size: 14, color: c.getRatingColor()),
                           const SizedBox(width: 4),
-                          Text('${c.rating} (${c.reviews})', style: const TextStyle(fontSize: 12)),
+                          Text(
+                            '${c.rating} (${c.reviews})',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                           const SizedBox(width: 12),
-                          const Icon(Icons.place, size: 14, color: AppColors.textSecondary),
+                          const Icon(
+                            Icons.place,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
-                          Text(c.city, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          Text(
+                            c.city,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                           const Spacer(),
-                          Text(c.getPriceText(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          Text(
+                            c.getPriceText(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -240,15 +298,25 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: c.specialties.map((s) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.grey100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.borderLight),
-                ),
-                child: Text(c.getSpecialtyText(s), style: const TextStyle(fontSize: 11)),
-              )).toList(),
+              children: c.specialties
+                  .map(
+                    (s) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.borderLight),
+                      ),
+                      child: Text(
+                        c.getSpecialtyText(s),
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
             const SizedBox(height: 12),
             Row(
@@ -257,9 +325,9 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       // Placeholder for call action
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Gọi ${c.phone}')),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Gọi ${c.phone}')));
                     },
                     icon: const Icon(Icons.call),
                     label: const Text('Gọi'),
@@ -384,11 +452,26 @@ class _FilterSheetState extends State<_FilterSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _section('Thành phố', SampleCollaborators.cities(), city, (v) => setState(() => city = v)),
+                  _section(
+                    'Thành phố',
+                    SampleCollaborators.cities(),
+                    city,
+                    (v) => setState(() => city = v),
+                  ),
                   const SizedBox(height: 24),
-                  _section('Chuyên môn', SampleCollaborators.specialties(), spec, (v) => setState(() => spec = v)),
+                  _section(
+                    'Chuyên môn',
+                    SampleCollaborators.specialties(),
+                    spec,
+                    (v) => setState(() => spec = v),
+                  ),
                   const SizedBox(height: 24),
-                  _section('Đánh giá', SampleCollaborators.ratings(), rating, (v) => setState(() => rating = v)),
+                  _section(
+                    'Đánh giá',
+                    SampleCollaborators.ratings(),
+                    rating,
+                    (v) => setState(() => rating = v),
+                  ),
                 ],
               ),
             ),
@@ -406,22 +489,32 @@ class _FilterSheetState extends State<_FilterSheet> {
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text('Áp dụng'),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  Widget _section(String title, List<String> options, String selected, ValueChanged<String> onChanged) {
+  Widget _section(
+    String title,
+    List<String> options,
+    String selected,
+    ValueChanged<String> onChanged,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -431,15 +524,23 @@ class _FilterSheetState extends State<_FilterSheet> {
             return GestureDetector(
               onTap: () => onChanged(opt),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: s ? AppColors.primary : AppColors.grey100,
-                  border: Border.all(color: s ? AppColors.primary : AppColors.border),
+                  border: Border.all(
+                    color: s ? AppColors.primary : AppColors.border,
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   opt,
-                  style: TextStyle(color: s ? AppColors.white : AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    color: s ? AppColors.white : AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             );

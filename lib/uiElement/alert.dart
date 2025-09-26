@@ -1,18 +1,9 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-enum AlertType {
-  success,
-  error,
-  warning,
-  info,
-}
+enum AlertType { success, error, warning, info }
 
-enum AlertSize {
-  small,
-  medium,
-  large,
-}
+enum AlertSize { small, medium, large }
 
 class Alert extends StatelessWidget {
   final String title;
@@ -50,17 +41,14 @@ class Alert extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = _getColors(theme);
-    
+
     return Container(
       width: width,
       padding: padding ?? _getPadding(),
       decoration: BoxDecoration(
         color: backgroundColor ?? colors['background'],
         borderRadius: BorderRadius.circular(_getBorderRadius()),
-        border: Border.all(
-          color: borderColor ?? colors['border']!,
-          width: 1,
-        ),
+        border: Border.all(color: borderColor ?? colors['border']!, width: 1),
         boxShadow: [
           BoxShadow(
             color: colors['shadow']!,
@@ -124,10 +112,12 @@ class Alert extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: actions!
-                        .map((action) => Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: action,
-                            ))
+                        .map(
+                          (action) => Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: action,
+                          ),
+                        )
                         .toList(),
                   ),
                 ],
@@ -477,4 +467,4 @@ class InfoAlert extends StatelessWidget {
       padding: padding,
     );
   }
-} 
+}

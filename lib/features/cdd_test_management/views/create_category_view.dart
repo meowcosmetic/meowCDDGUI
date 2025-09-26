@@ -28,12 +28,10 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
       return;
     }
 
-    final displayedName = <String, Object>{
-      'vi': nameVi,
-      'en': nameEn,
-    };
+    final displayedName = <String, Object>{'vi': nameVi, 'en': nameEn};
 
-    final Map<String, Object>? description = (descVi?.isNotEmpty == true || descEn?.isNotEmpty == true)
+    final Map<String, Object>? description =
+        (descVi?.isNotEmpty == true || descEn?.isNotEmpty == true)
         ? {
             if (descVi != null && descVi.isNotEmpty) 'vi': descVi,
             if (descEn != null && descEn.isNotEmpty) 'en': descEn,
@@ -49,9 +47,9 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
     if (!mounted) return;
 
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tạo category thành công')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Tạo category thành công')));
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -129,13 +127,8 @@ class _CreateCategoryViewState extends State<CreateCategoryView> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: DynamicForm(
-          config: _formConfig(),
-          onSubmit: _handleSubmit,
-        ),
+        child: DynamicForm(config: _formConfig(), onSubmit: _handleSubmit),
       ),
     );
   }
 }
-
-

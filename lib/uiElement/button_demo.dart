@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'button.dart';
 import '../constants/app_colors.dart';
 
-
 class ButtonDemo extends StatefulWidget {
   final bool showAppBar;
-  
+
   const ButtonDemo({super.key, this.showAppBar = true});
 
   @override
@@ -24,11 +23,13 @@ class _ButtonDemoState extends State<ButtonDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.showAppBar ? AppBar(
-        title: const Text('Button Demo'),
-        backgroundColor: AppColors.cardBorder,
-        foregroundColor: AppColors.white,
-      ) : null,
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('Button Demo'),
+              backgroundColor: AppColors.cardBorder,
+              foregroundColor: AppColors.white,
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -59,7 +60,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 onPressed: () => _showSnackBar('Primary with Icon pressed'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Secondary Buttons', [
               SecondaryButton(
@@ -86,7 +87,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 onPressed: () => _showSnackBar('Secondary with Icon pressed'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Outline Buttons', [
               OutlineButton(
@@ -113,7 +114,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 onPressed: () => _showSnackBar('Outline with Icon pressed'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Ghost Buttons', [
               GhostButton(
@@ -140,7 +141,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 onPressed: () => _showSnackBar('Ghost with Icon pressed'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Destructive Buttons', [
               DestructiveButton(
@@ -167,7 +168,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 onPressed: () => _showSnackBar('Delete with Icon pressed'),
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Loading States', [
               PrimaryButton(
@@ -188,7 +189,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 onPressed: _toggleLoading,
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Disabled States', [
               PrimaryButton(
@@ -221,7 +222,7 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 onPressed: () {},
               ),
             ]),
-            
+
             const SizedBox(height: 24),
             _buildSection('Custom Width', [
               PrimaryButton(
@@ -246,14 +247,14 @@ class _ButtonDemoState extends State<ButtonDemo> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-                 Text(
-           title,
-           style: const TextStyle(
-             fontSize: 18,
-             fontWeight: FontWeight.bold,
-             color: AppColors.primary,
-           ),
-         ),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+        ),
         const SizedBox(height: 12),
         ...children,
       ],
@@ -269,4 +270,4 @@ class _ButtonDemoState extends State<ButtonDemo> {
       ),
     );
   }
-} 
+}

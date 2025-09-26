@@ -17,18 +17,24 @@ class MessagingService {
   static const String _defaultReceiverId = '6898206d72a4fe2d1d105e0e';
   StompClient? _client;
   String? _currentUserId;
-  String? _currentPeerUserId; // receiverId will be auto-updated from incoming messages
+  String?
+  _currentPeerUserId; // receiverId will be auto-updated from incoming messages
   String _currentConversationId = 'default';
 
-  final StreamController<String> _messageStreamController = StreamController.broadcast();
-  final StreamController<bool> _typingStreamController = StreamController.broadcast();
-  final StreamController<Conversation> _conversationStreamController = StreamController.broadcast();
+  final StreamController<String> _messageStreamController =
+      StreamController.broadcast();
+  final StreamController<bool> _typingStreamController =
+      StreamController.broadcast();
+  final StreamController<Conversation> _conversationStreamController =
+      StreamController.broadcast();
   final Map<String, Conversation> _conversations = {};
-  final Map<String, Map<String, String>> _profileCache = {}; // customerId -> {name, avatar}
+  final Map<String, Map<String, String>> _profileCache =
+      {}; // customerId -> {name, avatar}
 
   Stream<String> get messages => _messageStreamController.stream;
   Stream<bool> get typing => _typingStreamController.stream;
-  Stream<Conversation> get conversations => _conversationStreamController.stream;
+  Stream<Conversation> get conversations =>
+      _conversationStreamController.stream;
   List<Conversation> get conversationList => _conversations.values.toList();
 
   bool get isConnected => _client?.connected == true;
@@ -104,41 +110,44 @@ class MessagingService {
       callback: (StompFrame frame) {
         final body = frame.body ?? '';
         // Try to capture senderId to set current peer for replies
-         try {
-           final decoded = jsonDecode(body);
-           if (decoded is Map && decoded['senderId'] is String) {
-             final sender = decoded['senderId'] as String;
-             if (sender.isNotEmpty && sender != _currentUserId) {
-               _currentPeerUserId = sender;
-               
-               // Update or create conversation
-               final conversationId = decoded['conversationId'] ?? 'default';
-               final conversation = _conversations[conversationId] ?? Conversation(
-                 id: conversationId,
-                 peerUserId: sender,
-                 peerName: _profileCache[sender]?['name'] ?? 'Người dùng $sender',
-               );
-               
-               final updatedConversation = conversation.copyWith(
-                 lastMessage: decoded['content'] ?? '',
-                 lastMessageTime: DateTime.now(),
-                 hasUnreadMessages: conversationId != _currentConversationId,
-               );
-               
-               _conversations[conversationId] = updatedConversation;
-               _conversationStreamController.add(updatedConversation);
-               
-               // Only forward messages that are not sent by current user
-               _messageStreamController.add(body);
-               return;
-             }
-           }
-           // If message is from current user, ignore to avoid echo
-           return;
-         } catch (_) {
-           // If parsing fails, forward as-is
-           _messageStreamController.add(body);
-         }
+        try {
+          final decoded = jsonDecode(body);
+          if (decoded is Map && decoded['senderId'] is String) {
+            final sender = decoded['senderId'] as String;
+            if (sender.isNotEmpty && sender != _currentUserId) {
+              _currentPeerUserId = sender;
+
+              // Update or create conversation
+              final conversationId = decoded['conversationId'] ?? 'default';
+              final conversation =
+                  _conversations[conversationId] ??
+                  Conversation(
+                    id: conversationId,
+                    peerUserId: sender,
+                    peerName:
+                        _profileCache[sender]?['name'] ?? 'Người dùng $sender',
+                  );
+
+              final updatedConversation = conversation.copyWith(
+                lastMessage: decoded['content'] ?? '',
+                lastMessageTime: DateTime.now(),
+                hasUnreadMessages: conversationId != _currentConversationId,
+              );
+
+              _conversations[conversationId] = updatedConversation;
+              _conversationStreamController.add(updatedConversation);
+
+              // Only forward messages that are not sent by current user
+              _messageStreamController.add(body);
+              return;
+            }
+          }
+          // If message is from current user, ignore to avoid echo
+          return;
+        } catch (_) {
+          // If parsing fails, forward as-is
+          _messageStreamController.add(body);
+        }
       },
     );
 
@@ -189,24 +198,23 @@ class MessagingService {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
 
-    _client!.send(
-      destination: '/app/chat.sendMessage',
-      body: jsonEncode(body),
-    );
+    _client!.send(destination: '/app/chat.sendMessage', body: jsonEncode(body));
 
     // Update conversation with sent message
-    final conversation = _conversations[convId] ?? Conversation(
-      id: convId,
-      peerUserId: receiverId,
-      peerName: 'Người dùng $receiverId',
-    );
-    
+    final conversation =
+        _conversations[convId] ??
+        Conversation(
+          id: convId,
+          peerUserId: receiverId,
+          peerName: 'Người dùng $receiverId',
+        );
+
     final updatedConversation = conversation.copyWith(
       lastMessage: content,
       lastMessageTime: DateTime.now(),
       hasUnreadMessages: false,
     );
-    
+
     _conversations[convId] = updatedConversation;
     _conversationStreamController.add(updatedConversation);
   }
@@ -247,7 +255,9 @@ class MessagingService {
     if (conversation != null) {
       _currentPeerUserId = conversation.peerUserId;
       // Mark as read
-      final updatedConversation = conversation.copyWith(hasUnreadMessages: false);
+      final updatedConversation = conversation.copyWith(
+        hasUnreadMessages: false,
+      );
       _conversations[conversationId] = updatedConversation;
       _conversationStreamController.add(updatedConversation);
     }
@@ -258,7 +268,10 @@ class MessagingService {
     final conversation = Conversation(
       id: conversationId,
       peerUserId: peerUserId,
-      peerName: peerName ?? _profileCache[peerUserId]?['name'] ?? 'Người dùng $peerUserId',
+      peerName:
+          peerName ??
+          _profileCache[peerUserId]?['name'] ??
+          'Người dùng $peerUserId',
     );
     _conversations[conversationId] = conversation;
     _conversationStreamController.add(conversation);
@@ -268,7 +281,10 @@ class MessagingService {
   // Enrich conversations with profile info via bulk API
   Future<void> enrichProfiles() async {
     try {
-      final userIds = _conversations.values.map((c) => c.peerUserId).toSet().toList();
+      final userIds = _conversations.values
+          .map((c) => c.peerUserId)
+          .toSet()
+          .toList();
       if (userIds.isEmpty) return;
       final api = ApiService();
       final resp = await api.fetchCustomerProfilesBulk(userIds);
@@ -312,6 +328,3 @@ class MessagingService {
     _currentUserId = null;
   }
 }
-
-
-

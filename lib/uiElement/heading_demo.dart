@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'heading.dart';
 import '../constants/app_colors.dart';
 
-
 class HeadingDemo extends StatelessWidget {
   final bool showAppBar;
-  
+
   const HeadingDemo({super.key, this.showAppBar = true});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: showAppBar ? AppBar(
-        title: const Text('Heading Components Demo'),
-        backgroundColor: AppColors.cardBorder,
-        foregroundColor: AppColors.white,
-      ) : null,
+      appBar: showAppBar
+          ? AppBar(
+              title: const Text('Heading Components Demo'),
+              backgroundColor: AppColors.cardBorder,
+              foregroundColor: AppColors.white,
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -48,7 +49,9 @@ class HeadingDemo extends StatelessWidget {
                 const SizedBox(height: 16),
                 const SectionTitle(text: 'Section Title - Tiêu đề phần'),
                 const SizedBox(height: 16),
-                const SubsectionTitle(text: 'Subsection Title - Tiêu đề mục con'),
+                const SubsectionTitle(
+                  text: 'Subsection Title - Tiêu đề mục con',
+                ),
               ],
             ),
             _buildSection(
@@ -56,20 +59,14 @@ class HeadingDemo extends StatelessWidget {
               'Kích thước khác nhau',
               'Các kích thước heading từ nhỏ đến lớn',
               [
-                H1(
-                  text: 'Heading với kích thước nhỏ',
-                  size: HeadingSize.small,
-                ),
+                H1(text: 'Heading với kích thước nhỏ', size: HeadingSize.small),
                 const SizedBox(height: 16),
                 H1(
                   text: 'Heading với kích thước vừa',
                   size: HeadingSize.medium,
                 ),
                 const SizedBox(height: 16),
-                H1(
-                  text: 'Heading với kích thước lớn',
-                  size: HeadingSize.large,
-                ),
+                H1(text: 'Heading với kích thước lớn', size: HeadingSize.large),
                 const SizedBox(height: 16),
                 H1(
                   text: 'Heading với kích thước rất lớn',
@@ -82,30 +79,21 @@ class HeadingDemo extends StatelessWidget {
               'Trọng lượng font khác nhau',
               'Các trọng lượng font từ nhẹ đến đậm',
               [
-                H2(
-                  text: 'Heading với font nhẹ',
-                  weight: HeadingWeight.light,
-                ),
+                H2(text: 'Heading với font nhẹ', weight: HeadingWeight.light),
                 const SizedBox(height: 16),
                 H2(
                   text: 'Heading với font bình thường',
                   weight: HeadingWeight.normal,
                 ),
                 const SizedBox(height: 16),
-                H2(
-                  text: 'Heading với font vừa',
-                  weight: HeadingWeight.medium,
-                ),
+                H2(text: 'Heading với font vừa', weight: HeadingWeight.medium),
                 const SizedBox(height: 16),
                 H2(
                   text: 'Heading với font bán đậm',
                   weight: HeadingWeight.semibold,
                 ),
                 const SizedBox(height: 16),
-                H2(
-                  text: 'Heading với font đậm',
-                  weight: HeadingWeight.bold,
-                ),
+                H2(text: 'Heading với font đậm', weight: HeadingWeight.bold),
                 const SizedBox(height: 16),
                 H2(
                   text: 'Heading với font rất đậm',
@@ -118,10 +106,7 @@ class HeadingDemo extends StatelessWidget {
               'Heading với icon',
               'Heading có thể có icon ở đầu',
               [
-                H2(
-                  text: 'Heading với icon',
-                  icon: Icons.star,
-                ),
+                H2(text: 'Heading với icon', icon: Icons.star),
                 const SizedBox(height: 16),
                 H3(
                   text: 'Heading với icon khác',
@@ -144,7 +129,10 @@ class HeadingDemo extends StatelessWidget {
                 H2(
                   text: 'Heading với badge',
                   trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.cardBorder,
                       borderRadius: BorderRadius.circular(12),
@@ -196,7 +184,9 @@ class HeadingDemo extends StatelessWidget {
                   icon: Icons.touch_app,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Heading với icon đã được nhấn!')),
+                      const SnackBar(
+                        content: Text('Heading với icon đã được nhấn!'),
+                      ),
                     );
                   },
                 ),
@@ -207,20 +197,11 @@ class HeadingDemo extends StatelessWidget {
               'Heading với style đặc biệt',
               'Heading với underline, italic và màu sắc tùy chỉnh',
               [
-                H2(
-                  text: 'Heading với gạch chân',
-                  underline: true,
-                ),
+                H2(text: 'Heading với gạch chân', underline: true),
                 const SizedBox(height: 16),
-                H3(
-                  text: 'Heading với chữ nghiêng',
-                  italic: true,
-                ),
+                H3(text: 'Heading với chữ nghiêng', italic: true),
                 const SizedBox(height: 16),
-                H4(
-                  text: 'Heading với màu tùy chỉnh',
-                  color: AppColors.purple,
-                ),
+                H4(text: 'Heading với màu tùy chỉnh', color: AppColors.purple),
                 const SizedBox(height: 16),
                 H5(
                   text: 'Heading với gạch chân và màu đỏ',
@@ -239,15 +220,9 @@ class HeadingDemo extends StatelessWidget {
                   textAlign: TextAlign.left,
                 ),
                 const SizedBox(height: 16),
-                H2(
-                  text: 'Heading căn giữa',
-                  textAlign: TextAlign.center,
-                ),
+                H2(text: 'Heading căn giữa', textAlign: TextAlign.center),
                 const SizedBox(height: 16),
-                H2(
-                  text: 'Heading căn phải',
-                  textAlign: TextAlign.right,
-                ),
+                H2(text: 'Heading căn phải', textAlign: TextAlign.right),
               ],
             ),
             _buildSection(
@@ -281,7 +256,8 @@ class HeadingDemo extends StatelessWidget {
               'Heading với giới hạn số dòng và xử lý overflow',
               [
                 H2(
-                  text: 'Heading này rất dài và sẽ bị cắt nếu vượt quá số dòng cho phép. Đây là một ví dụ về heading dài.',
+                  text:
+                      'Heading này rất dài và sẽ bị cắt nếu vượt quá số dòng cho phép. Đây là một ví dụ về heading dài.',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -298,15 +274,9 @@ class HeadingDemo extends StatelessWidget {
               'Ví dụ thực tế',
               'Cách sử dụng heading trong thực tế',
               [
-                const PageTitle(
-                  text: 'Dashboard',
-                  icon: Icons.dashboard,
-                ),
+                const PageTitle(text: 'Dashboard', icon: Icons.dashboard),
                 const SizedBox(height: 16),
-                const SectionTitle(
-                  text: 'Thống kê',
-                  icon: Icons.analytics,
-                ),
+                const SectionTitle(text: 'Thống kê', icon: Icons.analytics),
                 const SizedBox(height: 16),
                 const SubsectionTitle(
                   text: 'Doanh thu tháng này',
@@ -344,16 +314,16 @@ class HeadingDemo extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.cardBorder,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.cardBorder),
           ),
           const SizedBox(height: 16),
           Container(
@@ -363,12 +333,10 @@ class HeadingDemo extends StatelessWidget {
               border: Border.all(color: AppColors.cardBorder),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Column(
-              children: children,
-            ),
+            child: Column(children: children),
           ),
         ],
       ),
     );
   }
-} 
+}

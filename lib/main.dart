@@ -4,7 +4,6 @@ import 'view/login_view.dart';
 import 'view/register_view.dart';
 import './constants/app_colors.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -29,6 +28,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-

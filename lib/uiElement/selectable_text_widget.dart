@@ -22,8 +22,9 @@ class SelectableTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shouldEnableSelection = enableSelection ?? AppConfig.enableTextSelection;
-    
+    final shouldEnableSelection =
+        enableSelection ?? AppConfig.enableTextSelection;
+
     if (shouldEnableSelection) {
       return SelectableText(
         text,

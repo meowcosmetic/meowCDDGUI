@@ -47,13 +47,15 @@ class PolicyService {
         '$_baseUrl/policy/get?serviceName=$serviceName&policyType=$policyType',
       );
 
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
@@ -98,9 +100,11 @@ class PolicyService {
       final jsonData = json.encode(policy.toJson());
 
       await prefs.setString(_policyCacheKey, jsonData);
-      await prefs.setString(_policyCacheTimeKey, DateTime.now().toIso8601String());
-    } catch (e) {
-    }
+      await prefs.setString(
+        _policyCacheTimeKey,
+        DateTime.now().toIso8601String(),
+      );
+    } catch (e) {}
   }
 
   static Future<void> _clearCache() async {
@@ -108,8 +112,7 @@ class PolicyService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_policyCacheKey);
       await prefs.remove(_policyCacheTimeKey);
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   static Future<PolicyData?> refreshPolicy({
@@ -153,19 +156,21 @@ class PolicyService {
   }) async {
     try {
       final url = Uri.parse('$_baseUrl/policy/read/mark');
-      
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: json.encode({
-          'customerId': customerId,
-          'policyId': policyId,
-          'id': customerId,
-        }),
-      ).timeout(const Duration(seconds: 10));
+
+      final response = await http
+          .post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: json.encode({
+              'customerId': customerId,
+              'policyId': policyId,
+              'id': customerId,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return true;
@@ -193,14 +198,13 @@ class PolicyService {
     String policyType = 'terms',
   }) async {
     try {
-      final url = Uri.parse('$_baseUrl/policy/read/hasByType?customerId=$customerId&serviceName=$serviceName&policyType=$policyType&currentVersion=true');
+      final url = Uri.parse(
+        '$_baseUrl/policy/read/hasByType?customerId=$customerId&serviceName=$serviceName&policyType=$policyType&currentVersion=true',
+      );
 
-      final response = await http.get(
-        url,
-        headers: {
-          'Accept': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(url, headers: {'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         try {
@@ -208,7 +212,8 @@ class PolicyService {
           if (responseData is bool) {
             return responseData;
           } else if (responseData is Map<String, dynamic>) {
-            return responseData['hasRead'] == true || responseData['read'] == true;
+            return responseData['hasRead'] == true ||
+                responseData['read'] == true;
           }
           return false;
         } catch (e) {
@@ -247,7 +252,6 @@ class PolicyService {
 
       final hasRead = await hasUserReadPolicy(customerId: customerId);
       return !hasRead;
-
     } catch (e) {
       return true;
     }

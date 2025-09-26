@@ -36,17 +36,17 @@ class _AuthGateState extends State<AuthGate> {
     final isGuest = prefs.getBool(_kGuestMode) ?? false;
     final accepted = prefs.getBool(_kGuestPolicyAccepted) ?? false;
     final userToken = prefs.getString('user_token');
-    
+
     setState(() {
       _isGuest = isGuest;
       _guestPolicyAccepted = accepted;
       _isLoading = false;
     });
-    
+
     // Nếu user đã đăng nhập, kiểm tra có cần hiển thị policy không
     if (userToken != null && userToken.isNotEmpty) {
       if (!mounted) return;
-      
+
       if (AppConfig.showPolicyScreen) {
         // Kiểm tra xem user đã đọc policy chưa
         final shouldShowPolicy = await PolicyService.shouldShowPolicyScreen();
@@ -86,9 +86,7 @@ class _AuthGateState extends State<AuthGate> {
       return const PolicyView();
     }
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     // If guest and already accepted policy previously, go straight to main app
@@ -119,7 +117,11 @@ class _AuthGateState extends State<AuthGate> {
                       color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.psychology, color: AppColors.primary, size: 28),
+                    child: const Icon(
+                      Icons.psychology,
+                      color: AppColors.primary,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Text(
@@ -144,10 +146,7 @@ class _AuthGateState extends State<AuthGate> {
               const SizedBox(height: 8),
               Text(
                 'Đăng nhập để đồng bộ dữ liệu giữa các thiết bị, hoặc tiếp tục với chế độ Khách.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
               const Spacer(),
               SizedBox(
@@ -160,7 +159,9 @@ class _AuthGateState extends State<AuthGate> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   icon: const Icon(Icons.login),
                   label: const Text('Đăng nhập'),
@@ -177,12 +178,14 @@ class _AuthGateState extends State<AuthGate> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: BorderSide(color: AppColors.primary),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   icon: const Icon(Icons.person_add_alt_1),
                   label: const Text('Đăng ký'),
-                  ),
                 ),
+              ),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -191,7 +194,10 @@ class _AuthGateState extends State<AuthGate> {
                   onPressed: () async {
                     // Quick action: save dummy dev user for testing in debug/dev mode
                     final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString(_kCurrentUser, dummyDevUser.toJsonString());
+                    await prefs.setString(
+                      _kCurrentUser,
+                      dummyDevUser.toJsonString(),
+                    );
                     // Không tạo dummy customer_id - để văng ra lỗi khi không có sub
                     await _setGuestMode(true);
                     if (!mounted) return;
@@ -202,7 +208,9 @@ class _AuthGateState extends State<AuthGate> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: BorderSide(color: AppColors.primary),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   icon: const Icon(Icons.person_outline),
                   label: const Text('Tiếp tục với Khách'),
@@ -221,19 +229,21 @@ class _AuthGateState extends State<AuthGate> {
     final raw = prefs.getString(_kCurrentUser);
     if (raw == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Chưa có tài khoản. Vui lòng Đăng ký trước.')),
+        const SnackBar(
+          content: Text('Chưa có tài khoản. Vui lòng Đăng ký trước.'),
+        ),
       );
       return;
     }
     if (!mounted) return;
     if (AppConfig.showPolicyScreen) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const PolicyView()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const PolicyView()));
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainAppView()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const MainAppView()));
     }
   }
 }

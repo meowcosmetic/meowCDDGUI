@@ -37,7 +37,7 @@ class InterventionPost {
     return InterventionPost(
       id: json['id'],
       title: json['title'] ?? '',
-      content: json['content'] is Map<String, dynamic> 
+      content: json['content'] is Map<String, dynamic>
           ? json['content'] as Map<String, dynamic>
           : jsonDecode(json['content'] ?? '{}'),
       postType: PostType.values.firstWhere(
@@ -66,7 +66,8 @@ class InterventionPost {
       if (difficultyLevel != null) 'difficultyLevel': difficultyLevel,
       if (targetAgeMinMonths != null) 'targetAgeMinMonths': targetAgeMinMonths,
       if (targetAgeMaxMonths != null) 'targetAgeMaxMonths': targetAgeMaxMonths,
-      if (estimatedDurationMinutes != null) 'estimatedDurationMinutes': estimatedDurationMinutes,
+      if (estimatedDurationMinutes != null)
+        'estimatedDurationMinutes': estimatedDurationMinutes,
       if (tags != null) 'tags': tags,
       'isPublished': isPublished,
       if (author != null) 'author': author,
@@ -100,7 +101,8 @@ class InterventionPost {
       difficultyLevel: difficultyLevel ?? this.difficultyLevel,
       targetAgeMinMonths: targetAgeMinMonths ?? this.targetAgeMinMonths,
       targetAgeMaxMonths: targetAgeMaxMonths ?? this.targetAgeMaxMonths,
-      estimatedDurationMinutes: estimatedDurationMinutes ?? this.estimatedDurationMinutes,
+      estimatedDurationMinutes:
+          estimatedDurationMinutes ?? this.estimatedDurationMinutes,
       tags: tags ?? this.tags,
       isPublished: isPublished ?? this.isPublished,
       author: author ?? this.author,
@@ -112,13 +114,13 @@ class InterventionPost {
 }
 
 enum PostType {
-  INTERVENTION_METHOD,    // Phương pháp can thiệp
-  CHECKLIST,             // Checklist
-  GUIDELINE,             // Hướng dẫn
-  EXAMPLE,               // Ví dụ cụ thể
-  TIP,                   // Mẹo thực hành
-  TROUBLESHOOTING,       // Xử lý tình huống
-  CONCLUSION             // Kết luận
+  INTERVENTION_METHOD, // Phương pháp can thiệp
+  CHECKLIST, // Checklist
+  GUIDELINE, // Hướng dẫn
+  EXAMPLE, // Ví dụ cụ thể
+  TIP, // Mẹo thực hành
+  TROUBLESHOOTING, // Xử lý tình huống
+  CONCLUSION, // Kết luận
 }
 
 extension PostTypeExtension on PostType {

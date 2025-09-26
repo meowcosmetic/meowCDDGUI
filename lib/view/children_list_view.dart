@@ -35,29 +35,31 @@ class _ChildrenListViewState extends State<ChildrenListView> {
 
       // Đảm bảo UserSession đã được khởi tạo
       await UserSession.initFromPrefs();
-      
+
       final parentId = UserSession.userId;
-      
+
       if (parentId == null || parentId.isEmpty) {
         throw Exception('User ID not found. Please login first.');
       }
 
       final apiService = ApiService();
       final response = await apiService.getChildrenByParentId(parentId);
-      
-      
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> childrenData = jsonDecode(response.body);
-        final List<ChildData> loadedChildren = childrenData.map((json) => ChildData.fromJson(json)).toList();
-        
+        final List<ChildData> loadedChildren = childrenData
+            .map((json) => ChildData.fromJson(json))
+            .toList();
+
         setState(() {
           children = loadedChildren;
           filteredChildren = loadedChildren;
           isLoading = false;
         });
       } else {
-        throw Exception('Failed to load children: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to load children: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       setState(() {
@@ -65,7 +67,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
         filteredChildren = [];
         isLoading = false;
       });
-      
+
       // Hiển thị lỗi cho user
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -81,11 +83,15 @@ class _ChildrenListViewState extends State<ChildrenListView> {
   void _filterChildren() {
     setState(() {
       filteredChildren = children.where((child) {
-        final matchesSearch = child.fullName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            child.developmentalDisorderDiagnosis.toLowerCase().contains(searchQuery.toLowerCase());
-        
-        final matchesStatus = selectedStatus == 'all' || child.status == selectedStatus;
-        
+        final matchesSearch =
+            child.fullName.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            child.developmentalDisorderDiagnosis.toLowerCase().contains(
+              searchQuery.toLowerCase(),
+            );
+
+        final matchesStatus =
+            selectedStatus == 'all' || child.status == selectedStatus;
+
         return matchesSearch && matchesStatus;
       }).toList();
     });
@@ -100,10 +106,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
         foregroundColor: AppColors.white,
         title: const Text(
           'Danh Sách Trẻ',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
         elevation: 0,
         centerTitle: true,
@@ -152,7 +155,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Status Filter
                 Row(
                   children: [
@@ -186,7 +189,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
               ],
             ),
           ),
-          
+
           // Statistics Section
           Container(
             width: double.infinity,
@@ -195,36 +198,44 @@ class _ChildrenListViewState extends State<ChildrenListView> {
             child: Row(
               children: [
                 Expanded(
-                  child: _buildStatCard('Tổng số', '${children.length}', Icons.people),
+                  child: _buildStatCard(
+                    'Tổng số',
+                    '${children.length}',
+                    Icons.people,
+                  ),
                 ),
                 Expanded(
-                  child: _buildStatCard('Đang điều trị', 
-                    '${children.where((c) => c.status == 'active').length}', 
-                    Icons.medical_services),
+                  child: _buildStatCard(
+                    'Đang điều trị',
+                    '${children.where((c) => c.status == 'active').length}',
+                    Icons.medical_services,
+                  ),
                 ),
                 Expanded(
-                  child: _buildStatCard('Hoàn thành', 
-                    '${children.where((c) => c.status == 'completed').length}', 
-                    Icons.check_circle),
+                  child: _buildStatCard(
+                    'Hoàn thành',
+                    '${children.where((c) => c.status == 'completed').length}',
+                    Icons.check_circle,
+                  ),
                 ),
               ],
             ),
           ),
-          
+
           // Children List
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : filteredChildren.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: filteredChildren.length,
-                        itemBuilder: (context, index) {
-                          final child = filteredChildren[index];
-                          return _buildChildCard(child);
-                        },
-                      ),
+                ? _buildEmptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredChildren.length,
+                    itemBuilder: (context, index) {
+                      final child = filteredChildren[index];
+                      return _buildChildCard(child);
+                    },
+                  ),
           ),
         ],
       ),
@@ -279,11 +290,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: AppColors.primary,
-            size: 20,
-          ),
+          Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(height: 4),
           Text(
             value,
@@ -295,10 +302,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
           ),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -344,7 +348,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  
+
                   // Basic Info
                   Expanded(
                     child: Column(
@@ -377,14 +381,21 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                       ],
                     ),
                   ),
-                  
+
                   // Status Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: Color(_getStatusColor(child.status)).withValues(alpha: 0.1),
+                      color: Color(
+                        _getStatusColor(child.status),
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Color(_getStatusColor(child.status))),
+                      border: Border.all(
+                        color: Color(_getStatusColor(child.status)),
+                      ),
                     ),
                     child: Text(
                       _getStatusText(child.status),
@@ -397,9 +408,9 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Diagnosis
               Container(
                 padding: const EdgeInsets.all(8),
@@ -427,9 +438,9 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Progress Bar
               Row(
                 children: [
@@ -443,11 +454,18 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                   ),
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: Color(_getStatusColor(child.status)).withValues(alpha: 0.1),
+                        color: Color(
+                          _getStatusColor(child.status),
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color(_getStatusColor(child.status))),
+                        border: Border.all(
+                          color: Color(_getStatusColor(child.status)),
+                        ),
                       ),
                       child: Text(
                         _getStatusText(child.status),
@@ -462,9 +480,9 @@ class _ChildrenListViewState extends State<ChildrenListView> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Action Buttons
               Row(
                 children: [
@@ -511,11 +529,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.child_care,
-            size: 64,
-            color: AppColors.grey400,
-          ),
+          Icon(Icons.child_care, size: 64, color: AppColors.grey400),
           const SizedBox(height: 16),
           Text(
             'Không tìm thấy trẻ nào',
@@ -528,10 +542,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
           const SizedBox(height: 8),
           Text(
             'Thử thay đổi bộ lọc hoặc thêm trẻ mới',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -562,7 +573,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       gender: _getGenderText(childData.gender),
       diagnosis: _getDiagnosisText(childData.developmentalDisorderDiagnosis),
       parentName: 'Chưa cập nhật',
-      parentPhone: 'Chưa cập nhật', 
+      parentPhone: 'Chưa cập nhật',
       parentEmail: 'Chưa cập nhật',
       joinDate: DateTime.now(),
       status: childData.status.toLowerCase(),
@@ -574,7 +585,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       },
       notes: [
         'Chiều cao: ${childData.height ?? 'N/A'}cm',
-        'Cân nặng: ${childData.weight ?? 'N/A'}kg', 
+        'Cân nặng: ${childData.weight ?? 'N/A'}kg',
         'Nhóm máu: ${childData.bloodType}',
         'Dị ứng: ${childData.allergies.isEmpty ? 'Không có' : childData.allergies}',
       ],
@@ -582,12 +593,10 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       school: 'Chưa cập nhật',
       therapist: 'Chưa cập nhật',
     );
-    
+
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => ChildDetailView(child: child),
-      ),
+      MaterialPageRoute(builder: (context) => ChildDetailView(child: child)),
     );
   }
 
@@ -599,14 +608,16 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       builder: (context) => const AddChildSheet(),
     ).then((formData) async {
       if (formData == null) return;
-      
+
       // Reload danh sách trẻ từ API sau khi thêm thành công
       await _loadChildren();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã thêm trẻ thành công: ${formData['fullName'] ?? 'Trẻ mới'}'),
+            content: Text(
+              'Đã thêm trẻ thành công: ${formData['fullName'] ?? 'Trẻ mới'}',
+            ),
             backgroundColor: AppColors.success,
           ),
         );
@@ -630,7 +641,8 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       final birthDate = DateTime.parse(dateOfBirth);
       final now = DateTime.now();
       int age = now.year - birthDate.year;
-      if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+      if (now.month < birthDate.month ||
+          (now.month == birthDate.month && now.day < birthDate.day)) {
         age--;
       }
       return age;
@@ -693,6 +705,3 @@ class _ChildrenListViewState extends State<ChildrenListView> {
     }
   }
 }
-
-
-

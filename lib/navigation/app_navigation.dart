@@ -13,7 +13,6 @@ import '../constants/app_colors.dart';
 import '../uiElement/chat_dialog.dart';
 import '../uiElement/fab_utility.dart';
 
-
 class AppNavigation extends StatefulWidget {
   const AppNavigation({super.key});
 
@@ -26,11 +25,7 @@ class _AppNavigationState extends State<AppNavigation> {
   final PageController _pageController = PageController();
 
   final List<NavigationItem> _navigationItems = [
-    NavigationItem(
-      title: 'Bài Test',
-      icon: Icons.quiz,
-      page: const TestView(),
-    ),
+    NavigationItem(title: 'Bài Test', icon: Icons.quiz, page: const TestView()),
     NavigationItem(
       title: 'Chính Sách',
       icon: Icons.security,
@@ -95,8 +90,6 @@ class _AppNavigationState extends State<AppNavigation> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -150,9 +143,7 @@ class _AppNavigationState extends State<AppNavigation> {
       child: Column(
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-            ),
+            decoration: const BoxDecoration(color: AppColors.primary),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -177,10 +168,7 @@ class _AppNavigationState extends State<AppNavigation> {
                 const SizedBox(height: 4),
                 Text(
                   'Ứng dụng can thiệp tại nhà',
-                  style: TextStyle(
-                    color: AppColors.grey300,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: AppColors.grey300, fontSize: 14),
                 ),
               ],
             ),
@@ -195,13 +183,19 @@ class _AppNavigationState extends State<AppNavigation> {
                   return ListTile(
                     leading: Icon(
                       item.icon,
-                      color: _currentIndex == index ? AppColors.cardBorder : AppColors.grey600,
+                      color: _currentIndex == index
+                          ? AppColors.cardBorder
+                          : AppColors.grey600,
                     ),
                     title: Text(
                       item.title,
                       style: TextStyle(
-                        fontWeight: _currentIndex == index ? FontWeight.bold : FontWeight.normal,
-                        color: _currentIndex == index ? AppColors.cardBorder : AppColors.grey800,
+                        fontWeight: _currentIndex == index
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: _currentIndex == index
+                            ? AppColors.cardBorder
+                            : AppColors.grey800,
                       ),
                     ),
                     selected: _currentIndex == index,
@@ -235,10 +229,7 @@ class _AppNavigationState extends State<AppNavigation> {
             padding: const EdgeInsets.all(16),
             child: Text(
               'Version 1.0.0',
-              style: TextStyle(
-                color: AppColors.grey600,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: AppColors.grey600, fontSize: 12),
             ),
           ),
         ],
@@ -287,9 +278,7 @@ class _AppNavigationState extends State<AppNavigation> {
         title: const Text('Settings'),
         content: const Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Settings will be implemented here.'),
-          ],
+          children: [Text('Settings will be implemented here.')],
         ),
         actions: [
           TextButton(
@@ -409,4 +398,4 @@ class HeadingDemoWrapper extends StatelessWidget {
       floatingActionButton: FABUtility.buildSmartFAB(context),
     );
   }
-} 
+}

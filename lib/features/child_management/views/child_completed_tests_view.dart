@@ -7,7 +7,11 @@ class ChildCompletedTestsView extends StatelessWidget {
   final Child child;
   final List<TestResult> results;
 
-  const ChildCompletedTestsView({super.key, required this.child, required this.results});
+  const ChildCompletedTestsView({
+    super.key,
+    required this.child,
+    required this.results,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -87,48 +91,65 @@ class ChildCompletedTestsView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                                     Text(
-                     'Bài test: ${result.testId}',
-                     style: const TextStyle(
-                       fontSize: 16,
-                       fontWeight: FontWeight.bold,
-                       color: AppColors.textPrimary,
-                     ),
-                   ),
-                   if (result.notes?.isNotEmpty == true) ...[
-                     const SizedBox(height: 4),
-                     Text(
-                       result.notes ?? '',
-                       style: const TextStyle(
-                         fontSize: 12,
-                         color: AppColors.textSecondary,
-                         fontStyle: FontStyle.italic,
-                       ),
-                       maxLines: 2,
-                       overflow: TextOverflow.ellipsis,
-                     ),
-                   ],
+                  Text(
+                    'Bài test: ${result.testId}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  if (result.notes?.isNotEmpty == true) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      result.notes ?? '',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.score, size: 14, color: AppColors.textSecondary),
+                      const Icon(
+                        Icons.score,
+                        size: 14,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(width: 4),
-                                             Text(
-                         'Điểm: ${result.score}/${result.totalQuestions} (${result.answeredQuestions}/${result.totalQuestions} câu đúng)',
-                         style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                       ),
+                      Text(
+                        'Điểm: ${result.score}/${result.totalQuestions} (${result.answeredQuestions}/${result.totalQuestions} câu đúng)',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                       const SizedBox(width: 16),
-                      const Icon(Icons.timer, size: 14, color: AppColors.textSecondary),
+                      const Icon(
+                        Icons.timer,
+                        size: 14,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${result.timeSpent}s',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: result.getResultColor().withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -145,7 +166,10 @@ class ChildCompletedTestsView extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     'Hoàn thành lúc: ${_formatDateTime(result.completedAt)}',
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -162,5 +186,3 @@ class ChildCompletedTestsView extends StatelessWidget {
 
   String _two(int n) => n.toString().padLeft(2, '0');
 }
-
-

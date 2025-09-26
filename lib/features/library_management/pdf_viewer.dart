@@ -36,7 +36,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   void initState() {
     super.initState();
     _initializePdf();
-    
+
     // Register web PDF viewer
     if (kIsWeb) {
       _registerWebPdfViewer();
@@ -49,16 +49,16 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   // Create blob URL for PDF
   String _createPdfBlobUrl() {
     if (_pdfBytes == null) return '';
-    
+
     try {
       final blob = html.Blob([_pdfBytes!], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Clean up blob URL after a delay
       Future.delayed(const Duration(seconds: 30), () {
         html.Url.revokeObjectUrl(url);
       });
-      
+
       return url;
     } catch (e) {
       print('DEBUG: Error creating PDF blob URL: $e');
@@ -66,36 +66,30 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     }
   }
 
-    Future<void> _initializePdf() async {
+  Future<void> _initializePdf() async {
     try {
       setState(() {
         _isLoading = true;
         _errorMessage = null;
       });
 
-      
-      
       // Validate base64 data
       if (widget.base64Data.isEmpty) {
         throw Exception('Dữ liệu Base64 trống');
       }
-      
+
       // Additional Base64 validation
-      
-      
+
       if (!_isValidBase64(widget.base64Data)) {
         throw Exception('Dữ liệu Base64 không hợp lệ');
       }
 
       // Decode base64 to bytes
       final Uint8List bytes = base64Decode(widget.base64Data);
-      
-      
+
       // Additional debug: Check first and last bytes
-      if (bytes.isNotEmpty) {
-        
-      }
-      
+      if (bytes.isNotEmpty) {}
+
       // Validate PDF file
       if (!_isValidPdf(bytes)) {
         throw Exception('Dữ liệu không phải file PDF hợp lệ');
@@ -103,11 +97,10 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
 
       // Extract PDF info
       _pdfVersion = _extractPdfVersion(bytes);
-      
 
       // Check file size for potential issues
-      if (bytes.length > 10 * 1024 * 1024) { // 10MB
-        
+      if (bytes.length > 10 * 1024 * 1024) {
+        // 10MB
       }
 
       // Try to test PDF loading first
@@ -117,10 +110,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         _pdfBytes = bytes;
         _isLoading = false;
       });
-
     } catch (e, stackTrace) {
-      
-      
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -133,16 +123,15 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       print('DEBUG: Bytes too short to be PDF');
       return false;
     }
-    
+
     // Check PDF signature (PDF files start with %PDF)
     final pdfSignature = String.fromCharCodes(bytes.take(4));
-    
-    
+
     if (!pdfSignature.startsWith('%PDF')) {
       print('DEBUG: Not a valid PDF file');
       return false;
     }
-    
+
     return true;
   }
 
@@ -154,33 +143,24 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           return line.trim();
         }
       }
-    } catch (e) {
-      
-    }
+    } catch (e) {}
     return 'Unknown';
   }
 
   // Test PDF loading with better error handling
   Future<bool> _testPdfLoading(Uint8List bytes) async {
     try {
-      
-      
       // Try to create a temporary PDF viewer to test loading
       // This is a workaround to catch errors before the main viewer
       final testViewer = SfPdfViewer.memory(
         bytes,
-        onDocumentLoadFailed: (details) {
-          
-        },
-        onDocumentLoaded: (details) {
-          
-        },
+        onDocumentLoadFailed: (details) {},
+        onDocumentLoaded: (details) {},
       );
-      
+
       // If we reach here, the viewer was created successfully
       return true;
     } catch (e) {
-      
       return false;
     }
   }
@@ -188,10 +168,10 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   // Try alternative PDF loading methods
   Future<void> _tryAlternativeLoading() async {
     if (_pdfBytes == null) return;
-    
+
     print('DEBUG: Trying alternative PDF loading methods...');
     print('DEBUG: Platform: ${kIsWeb ? 'Web' : 'Mobile/Desktop'}');
-    
+
     try {
       // Method 1: Try with minimal options
       print('DEBUG: Method 1: Minimal options');
@@ -211,7 +191,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           });
         },
       );
-      
+
       // Method 2: Try with different memory approach
       if (kIsWeb) {
         print('DEBUG: Method 2: Web-specific approach');
@@ -231,7 +211,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           print('DEBUG: Test chunk approach failed: $e');
         }
       }
-      
+
       // Method 3: Try with different PDF viewer options
       print('DEBUG: Method 3: Different viewer options');
       final optionViewer = SfPdfViewer.memory(
@@ -250,7 +230,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           });
         },
       );
-      
+
       // Method 4: Try with delay (sometimes helps on web)
       if (kIsWeb) {
         print('DEBUG: Method 4: Delayed loading');
@@ -272,13 +252,12 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           print('DEBUG: Delayed approach failed: $e');
         }
       }
-      
+
       // Method 5: Try to bypass Syncfusion completely on web
       if (kIsWeb) {
         print('DEBUG: Method 5: Bypass Syncfusion, use native viewer');
         _tryNativePdfViewer();
       }
-      
     } catch (e) {
       print('DEBUG: Alternative loading methods failed: $e');
     }
@@ -287,70 +266,70 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   // Validate Base64 string
   bool _isValidBase64(String str) {
     if (str.isEmpty) return false;
-    
+
     // Check if string contains only valid Base64 characters
     final validChars = RegExp(r'^[A-Za-z0-9+/]*={0,2}$');
     if (!validChars.hasMatch(str)) {
       print('DEBUG: Base64 contains invalid characters');
       return false;
     }
-    
+
     // Check padding
     final paddingCount = '='.allMatches(str).length;
     if (paddingCount > 2) {
       print('DEBUG: Base64 has invalid padding');
       return false;
     }
-    
+
     // Check length (should be multiple of 4)
     if (str.length % 4 != 0) {
       print('DEBUG: Base64 length is not multiple of 4');
       return false;
     }
-    
+
     return true;
   }
 
   // Download PDF as file
   void _downloadPdf() {
     if (_pdfBytes == null) return;
-    
+
     try {
       // Create blob URL for download
       final blob = html.Blob([_pdfBytes!]);
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Create download link
       final anchor = html.AnchorElement(href: url)
         ..setAttribute('download', '${widget.title}.pdf')
         ..click();
-      
+
       // Clean up
       html.Url.revokeObjectUrl(url);
-      
+
       print('DEBUG: PDF download initiated');
     } catch (e) {
       print('DEBUG: Error downloading PDF: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi tải PDF: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi khi tải PDF: $e')));
     }
   }
 
   // Open PDF in new tab
   void _openPdfInNewTab() {
     if (_pdfBytes == null) return;
-    
+
     try {
       // Create blob URL with proper MIME type for PDF
       final blob = html.Blob([_pdfBytes!], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Open in new tab - browser should use built-in PDF viewer
       html.window.open(url, '_blank');
-      
+
       print('DEBUG: PDF opened in new tab with proper MIME type');
-      
+
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -358,35 +337,34 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           backgroundColor: Colors.green,
         ),
       );
-      
+
       // Clean up blob URL after a delay
       Future.delayed(const Duration(seconds: 5), () {
         html.Url.revokeObjectUrl(url);
       });
-      
     } catch (e) {
       print('DEBUG: Error opening PDF in new tab: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi mở PDF: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi khi mở PDF: $e')));
     }
   }
 
   // Try to use browser's native PDF viewer
   void _tryNativePdfViewer() {
     if (_pdfBytes == null) return;
-    
+
     try {
       print('DEBUG: Trying native PDF viewer...');
-      
+
       // Create blob URL with proper MIME type
       final blob = html.Blob([_pdfBytes!], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Method 1: Try to open in new tab with PDF viewer
       print('DEBUG: Method 1: Opening in new tab with PDF viewer');
       html.window.open(url, '_blank');
-      
+
       // Method 2: Try to embed with object tag (better PDF support)
       print('DEBUG: Method 2: Trying object tag embedding');
       try {
@@ -395,10 +373,10 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           ..type = 'application/pdf'
           ..style.width = '100%'
           ..style.height = '600px';
-        
-                 // Add fallback content using textContent instead of innerHTML
-         object.text = 'PDF không thể hiển thị. Nhấn vào đây để mở PDF';
-        
+
+        // Add fallback content using textContent instead of innerHTML
+        object.text = 'PDF không thể hiển thị. Nhấn vào đây để mở PDF';
+
         // Try to find a container to embed
         final container = html.document.getElementById('pdf-container');
         if (container != null) {
@@ -411,12 +389,11 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       } catch (e) {
         print('DEBUG: Object tag failed: $e, using new tab');
       }
-      
+
       // Clean up blob URL after a delay
       Future.delayed(const Duration(seconds: 10), () {
         html.Url.revokeObjectUrl(url);
       });
-      
     } catch (e) {
       print('DEBUG: Native PDF viewer failed: $e');
       // Fallback to new tab
@@ -427,23 +404,23 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   // Try to use browser's built-in PDF viewer with embed tag
   void _tryEmbedPdfViewer() {
     if (_pdfBytes == null) return;
-    
+
     try {
       print('DEBUG: Trying embed PDF viewer...');
-      
+
       // Force rebuild with embedded viewer to show PDF directly
       setState(() {
         _errorMessage = null;
       });
-        
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
           content: Text('Đang tải lại PDF viewer...'),
           backgroundColor: Colors.blue,
         ),
       );
-      
+
       // Force a rebuild after a short delay to ensure the PDF viewer is recreated
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
@@ -452,7 +429,6 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           });
         }
       });
-      
     } catch (e) {
       print('DEBUG: Embed PDF viewer failed: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -470,18 +446,26 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     print('DEBUG: Platform: ${kIsWeb ? 'Web' : 'Mobile/Desktop'}');
     print('DEBUG: Flutter version: ${html.window.navigator.userAgent}');
     print('DEBUG: PDF file size: ${(_pdfBytes?.length ?? 0) / 1024} KB');
-    print('DEBUG: PDF signature: ${_pdfBytes != null ? String.fromCharCodes(_pdfBytes!.take(8)) : 'N/A'}');
+    print(
+      'DEBUG: PDF signature: ${_pdfBytes != null ? String.fromCharCodes(_pdfBytes!.take(8)) : 'N/A'}',
+    );
     print('DEBUG: === END COMPATIBILITY CHECK ===');
-    
+
     // Additional web-specific checks
     if (kIsWeb) {
       print('DEBUG: === WEB-SPECIFIC CHECKS ===');
       print('DEBUG: Browser: ${html.window.navigator.userAgent}');
-      print('DEBUG: Screen size: ${html.window.screen?.width}x${html.window.screen?.height}');
-      print('DEBUG: Available memory: ${html.window.navigator.deviceMemory ?? 'Unknown'} GB');
-      print('DEBUG: Hardware concurrency: ${html.window.navigator.hardwareConcurrency ?? 'Unknown'}');
+      print(
+        'DEBUG: Screen size: ${html.window.screen?.width}x${html.window.screen?.height}',
+      );
+      print(
+        'DEBUG: Available memory: ${html.window.navigator.deviceMemory ?? 'Unknown'} GB',
+      );
+      print(
+        'DEBUG: Hardware concurrency: ${html.window.navigator.hardwareConcurrency ?? 'Unknown'}',
+      );
       print('DEBUG: === END WEB CHECKS ===');
-      
+
       // Show recommendations
       print('DEBUG: === RECOMMENDATIONS ===');
       print('DEBUG: 1. Try Native Viewer (bypasses Syncfusion)');
@@ -551,7 +535,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     return _buildPdfViewer(_pdfBytes!);
   }
 
-    Widget _buildPdfViewer(Uint8List bytes) {
+  Widget _buildPdfViewer(Uint8List bytes) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -569,9 +553,9 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           children: [
             // PDF Viewer - Use Embed Viewer on Web, Syncfusion on Mobile/Desktop
             Expanded(
-              child: kIsWeb 
-                ? _buildWebPdfViewer(bytes)
-                : _buildMobilePdfViewer(bytes),
+              child: kIsWeb
+                  ? _buildWebPdfViewer(bytes)
+                  : _buildMobilePdfViewer(bytes),
             ),
           ],
         ),
@@ -596,18 +580,17 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         return _buildSimpleWebPdfViewer(bytes);
       } catch (e) {
         print('Iframe approach failed: $e, trying object approach');
-        
+
         // Try object tag as second option
         try {
           return _buildObjectTagPdfViewer(bytes);
         } catch (e) {
           print('Object tag approach failed: $e, using direct DOM approach');
-          
+
           // Last resort: Create PDF viewer directly in DOM
           return _buildDirectWebPdfViewer(bytes);
         }
       }
-      
     } catch (e) {
       print('Error creating web PDF embed: $e');
       // Fallback to simple display
@@ -621,10 +604,11 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       // Create blob URL for PDF
       final blob = html.Blob([bytes], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Create a container div for the PDF viewer
-      final containerId = 'pdf-container-${DateTime.now().millisecondsSinceEpoch}';
-      
+      final containerId =
+          'pdf-container-${DateTime.now().millisecondsSinceEpoch}';
+
       // Schedule the DOM manipulation for the next frame
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
@@ -638,14 +622,14 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
               ..style.backgroundColor = '#f5f5f5'
               ..style.border = 'none'
               ..style.overflow = 'hidden';
-            
+
             // Add to body temporarily
             html.document.body?.children.add(container);
           }
-          
+
           // Clear existing content
           container.children.clear();
-          
+
           // Create iframe for PDF viewing
           final iframe = html.IFrameElement()
             ..src = url
@@ -654,23 +638,22 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             ..style.border = 'none'
             ..style.overflow = 'hidden'
             ..allowFullscreen = true;
-          
+
           // Add iframe to container
           container.children.add(iframe);
-          
+
           // Clean up blob URL after a delay
           Future.delayed(const Duration(seconds: 30), () {
             html.Url.revokeObjectUrl(url);
             // Remove container from DOM
             container?.remove();
           });
-          
         } catch (e) {
           print('Error in direct DOM manipulation: $e');
           html.Url.revokeObjectUrl(url);
         }
       });
-      
+
       // Return a container that will contain the PDF iframe
       return Container(
         width: double.infinity,
@@ -686,16 +669,17 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
               width: double.infinity,
               height: double.infinity,
               color: Colors.grey.shade100,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             ),
             // Overlay with PDF info
             Positioned(
               top: 16,
               left: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(16),
@@ -710,10 +694,10 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
                       color: Colors.blue.shade700,
                     ),
                     const SizedBox(width: 6),
-                  Text(
+                    Text(
                       'PDF đang được tải...',
-                    style: TextStyle(
-                      fontSize: 12,
+                      style: TextStyle(
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: Colors.blue.shade700,
                       ),
@@ -725,7 +709,6 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           ],
         ),
       );
-      
     } catch (e) {
       print('Error in direct web PDF viewer: $e');
       return _buildWebPdfFallback(bytes);
@@ -738,12 +721,12 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       // Create blob URL for PDF
       final blob = html.Blob([bytes], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Clean up blob URL after a delay
       Future.delayed(const Duration(seconds: 30), () {
         html.Url.revokeObjectUrl(url);
       });
-      
+
       // Use a simple approach: create a container with iframe
       // This approach works better with newer Flutter versions
       return Container(
@@ -758,7 +741,6 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           child: _buildIframeWidget(url),
         ),
       );
-      
     } catch (e) {
       print('Error in simple web PDF viewer: $e');
       return _buildWebPdfFallback(bytes);
@@ -770,19 +752,16 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     try {
       final iframeId = 'iframe-${DateTime.now().millisecondsSinceEpoch}';
 
-      ui_web.platformViewRegistry.registerViewFactory(
-        iframeId,
-        (int viewId) {
-          final iframe = html.IFrameElement()
-            ..src = url
-            ..style.width = '100%'
-            ..style.height = '100%'
-            ..style.border = 'none'
-            ..style.overflow = 'hidden'
-            ..allowFullscreen = true;
-          return iframe;
-        },
-      );
+      ui_web.platformViewRegistry.registerViewFactory(iframeId, (int viewId) {
+        final iframe = html.IFrameElement()
+          ..src = url
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..style.border = 'none'
+          ..style.overflow = 'hidden'
+          ..allowFullscreen = true;
+        return iframe;
+      });
 
       return HtmlElementView(viewType: iframeId);
     } catch (e) {
@@ -804,7 +783,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           ..style.border = 'none'
           ..style.overflow = 'hidden'
           ..allowFullscreen = true;
-        
+
         // Try to find a container to embed
         final container = html.document.getElementById('pdf-iframe-container');
         if (container != null) {
@@ -816,7 +795,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             ..id = 'pdf-iframe-container'
             ..style.width = '100%'
             ..style.height = '100%';
-          
+
           newContainer.children.add(iframe);
           html.document.body?.children.add(newContainer);
         }
@@ -824,7 +803,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         print('Error in direct iframe manipulation: $e');
       }
     });
-    
+
     // Return a container that will contain the PDF iframe
     return Container(
       width: double.infinity,
@@ -840,9 +819,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             width: double.infinity,
             height: double.infinity,
             color: Colors.grey.shade100,
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           ),
           // Overlay with PDF info
           Positioned(
@@ -887,12 +864,12 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       // Create blob URL for PDF
       final blob = html.Blob([bytes], 'application/pdf');
       final url = html.Url.createObjectUrlFromBlob(blob);
-      
+
       // Clean up blob URL after a delay
       Future.delayed(const Duration(seconds: 30), () {
         html.Url.revokeObjectUrl(url);
       });
-      
+
       // Use object tag which is more compatible with PDFs
       return Container(
         width: double.infinity,
@@ -906,7 +883,6 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           child: _buildObjectWidget(url),
         ),
       );
-      
     } catch (e) {
       print('Error in object tag PDF viewer: $e');
       return _buildWebPdfFallback(bytes);
@@ -918,19 +894,16 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     try {
       final objectId = 'object-${DateTime.now().millisecondsSinceEpoch}';
 
-      ui_web.platformViewRegistry.registerViewFactory(
-        objectId,
-        (int viewId) {
-          final object = html.ObjectElement()
-            ..data = url
-            ..type = 'application/pdf'
-            ..style.width = '100%'
-            ..style.height = '100%'
-            ..style.border = 'none';
-          object.text = 'PDF không thể hiển thị. Nhấn vào đây để mở PDF';
-          return object;
-        },
-      );
+      ui_web.platformViewRegistry.registerViewFactory(objectId, (int viewId) {
+        final object = html.ObjectElement()
+          ..data = url
+          ..type = 'application/pdf'
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..style.border = 'none';
+        object.text = 'PDF không thể hiển thị. Nhấn vào đây để mở PDF';
+        return object;
+      });
 
       return HtmlElementView(viewType: objectId);
     } catch (e) {
@@ -951,10 +924,10 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           ..style.width = '100%'
           ..style.height = '100%'
           ..style.border = 'none';
-        
+
         // Add fallback content
         object.text = 'PDF không thể hiển thị. Nhấn vào đây để mở PDF';
-        
+
         // Try to find a container to embed
         final container = html.document.getElementById('pdf-object-container');
         if (container != null) {
@@ -966,7 +939,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             ..id = 'pdf-object-container'
             ..style.width = '100%'
             ..style.height = '100%';
-          
+
           newContainer.children.add(object);
           html.document.body?.children.add(newContainer);
         }
@@ -974,7 +947,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         print('Error in direct object manipulation: $e');
       }
     });
-    
+
     // Return a container that will contain the PDF object
     return Container(
       width: double.infinity,
@@ -990,9 +963,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             width: double.infinity,
             height: double.infinity,
             color: Colors.grey.shade100,
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           ),
           // Overlay with PDF info
           Positioned(
@@ -1014,14 +985,14 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
                     color: Colors.blue.shade700,
                   ),
                   const SizedBox(width: 6),
-                    Text(
+                  Text(
                     'PDF đang được tải...',
-                      style: TextStyle(
-                        fontSize: 12,
+                    style: TextStyle(
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.blue.shade700,
-                      ),
                     ),
+                  ),
                 ],
               ),
             ),
@@ -1043,26 +1014,16 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.picture_as_pdf,
-            size: 64,
-            color: Colors.blue,
-          ),
+          Icon(Icons.picture_as_pdf, size: 64, color: Colors.blue),
           const SizedBox(height: 16),
           Text(
             'PDF Viewer (Web)',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
             widget.title,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -1084,10 +1045,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           const SizedBox(height: 16),
           Text(
             'PDF sẽ được hiển thị trực tiếp hoặc mở trong tab mới',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade500,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
             textAlign: TextAlign.center,
           ),
         ],
@@ -1108,29 +1066,29 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         print('Error: ${details.error}');
         print('Error Type: ${details.error.runtimeType}');
         print('Details: $details');
-         
+
         // Try to get more specific error information
         String errorMessage = 'Không thể tải PDF';
-         
+
         if (details.error is String) {
           errorMessage = 'Lỗi PDF: ${details.error}';
         } else if (details.error != null) {
           errorMessage = 'Lỗi PDF: ${details.error.toString()}';
         }
-         
+
         // Check if it's a common PDF error
-        if (details.error.toString().contains('corrupt') || 
+        if (details.error.toString().contains('corrupt') ||
             details.error.toString().contains('invalid') ||
             details.error.toString().contains('format')) {
           errorMessage = 'File PDF bị hỏng hoặc không đúng định dạng';
         } else if (details.error.toString().contains('memory') ||
-                 details.error.toString().contains('size')) {
+            details.error.toString().contains('size')) {
           errorMessage = 'File PDF quá lớn hoặc không đủ bộ nhớ';
         }
-         
+
         print('Final Error Message: $errorMessage');
         print('=== END DEBUG ===');
-         
+
         setState(() {
           _errorMessage = errorMessage;
         });
@@ -1157,11 +1115,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
               'Không thể hiển thị tài liệu PDF',
@@ -1181,7 +1135,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            
+
             // Debug information
             if (_pdfBytes != null) ...[
               Container(
@@ -1229,8 +1183,8 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
               ),
               const SizedBox(height: 16),
             ],
-            
-                                            // Web-specific fallback options
+
+            // Web-specific fallback options
             if (_pdfBytes != null && kIsWeb) ...[
               Container(
                 padding: const EdgeInsets.all(16),
@@ -1259,22 +1213,22 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
-                                         Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                       children: [
-                         ElevatedButton.icon(
-                           onPressed: () => _tryEmbedPdfViewer(),
-                           icon: const Icon(Icons.picture_as_pdf),
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => _tryEmbedPdfViewer(),
+                          icon: const Icon(Icons.picture_as_pdf),
                           label: const Text('Thử Embed Viewer'),
-                         ),
-                       ],
-                     ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
             ],
-            
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1290,7 +1244,3 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     );
   }
 }
-
-
-
-

@@ -27,9 +27,11 @@ class InterventionMethodGroupModel {
 
   factory InterventionMethodGroupModel.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔍 Parsing InterventionMethodGroupModel from JSON: ${json.keys.toList()}'); // Debug log
+      print(
+        '🔍 Parsing InterventionMethodGroupModel from JSON: ${json.keys.toList()}',
+      ); // Debug log
       print('🔍 InterventionMethodGroupModel JSON: $json'); // Debug log
-      
+
       // Handle displayedName - it might be a JSON string or an object
       LocalizedText displayedName;
       if (json['displayedName'] is String) {
@@ -40,7 +42,7 @@ class InterventionMethodGroupModel {
         // It's already an object
         displayedName = LocalizedText.fromJson(json['displayedName'] ?? {});
       }
-      
+
       // Handle description - it might be a JSON string or an object
       LocalizedText? description;
       if (json['description'] != null) {
@@ -53,7 +55,7 @@ class InterventionMethodGroupModel {
           description = LocalizedText.fromJson(json['description']);
         }
       }
-      
+
       return InterventionMethodGroupModel(
         id: json['id']?.toString() ?? '',
         code: json['code']?.toString() ?? '',
@@ -66,7 +68,9 @@ class InterventionMethodGroupModel {
         updatedAt: json['updatedAt']?.toString() ?? '',
       );
     } catch (e) {
-      print('❌ Error in InterventionMethodGroupModel.fromJson: $e'); // Debug log
+      print(
+        '❌ Error in InterventionMethodGroupModel.fromJson: $e',
+      ); // Debug log
       print('❌ JSON data: $json'); // Debug log
       rethrow;
     }
@@ -139,9 +143,11 @@ class InterventionMethodModel {
 
   factory InterventionMethodModel.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔍 Parsing InterventionMethodModel from JSON: ${json.keys.toList()}'); // Debug log
+      print(
+        '🔍 Parsing InterventionMethodModel from JSON: ${json.keys.toList()}',
+      ); // Debug log
       print('🔍 InterventionMethodModel JSON: $json'); // Debug log
-      
+
       // Handle displayedName - it might be a JSON string or an object
       LocalizedText displayedName;
       if (json['displayedName'] is String) {
@@ -152,7 +158,7 @@ class InterventionMethodModel {
         // It's already an object
         displayedName = LocalizedText.fromJson(json['displayedName'] ?? {});
       }
-      
+
       // Handle description - it might be a JSON string or an object
       LocalizedText? description;
       if (json['description'] != null) {
@@ -165,7 +171,7 @@ class InterventionMethodModel {
           description = LocalizedText.fromJson(json['description']);
         }
       }
-      
+
       return InterventionMethodModel(
         id: json['id']?.toString() ?? '',
         code: json['code']?.toString() ?? '',
@@ -253,14 +259,16 @@ class PaginatedMethodGroups {
 
   factory PaginatedMethodGroups.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔍 Parsing PaginatedMethodGroups from JSON: ${json.keys.toList()}'); // Debug log
+      print(
+        '🔍 Parsing PaginatedMethodGroups from JSON: ${json.keys.toList()}',
+      ); // Debug log
       print('🔍 PaginatedMethodGroups JSON: $json'); // Debug log
-      
+
       final List<dynamic> contentList = json['content'] ?? [];
       final List<InterventionMethodGroupModel> methodGroups = contentList
           .map((item) => InterventionMethodGroupModel.fromJson(item))
           .toList();
-      
+
       // Handle different pagination field names from API
       final int pageNumber = json['number'] ?? json['pageNumber'] ?? 0;
       final int pageSize = json['size'] ?? json['pageSize'] ?? 10;
@@ -268,11 +276,11 @@ class PaginatedMethodGroups {
       final int totalPages = json['totalPages'] ?? 0;
       final bool isFirst = json['first'] ?? true;
       final bool isLast = json['last'] ?? true;
-      
+
       // Calculate hasNext and hasPrevious based on available data
       final bool hasNext = !isLast && pageNumber < totalPages - 1;
       final bool hasPrevious = !isFirst && pageNumber > 0;
-      
+
       return PaginatedMethodGroups(
         content: methodGroups,
         pageNumber: pageNumber,
@@ -332,14 +340,16 @@ class PaginatedMethods {
 
   factory PaginatedMethods.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔍 Parsing PaginatedMethods from JSON: ${json.keys.toList()}'); // Debug log
+      print(
+        '🔍 Parsing PaginatedMethods from JSON: ${json.keys.toList()}',
+      ); // Debug log
       print('🔍 PaginatedMethods JSON: $json'); // Debug log
-      
+
       final List<dynamic> contentList = json['content'] ?? [];
       final List<InterventionMethodModel> methods = contentList
           .map((item) => InterventionMethodModel.fromJson(item))
           .toList();
-      
+
       // Handle different pagination field names from API
       final int pageNumber = json['number'] ?? json['pageNumber'] ?? 0;
       final int pageSize = json['size'] ?? json['pageSize'] ?? 10;
@@ -347,11 +357,11 @@ class PaginatedMethods {
       final int totalPages = json['totalPages'] ?? 0;
       final bool isFirst = json['first'] ?? true;
       final bool isLast = json['last'] ?? true;
-      
+
       // Calculate hasNext and hasPrevious based on available data
       final bool hasNext = !isLast && pageNumber < totalPages - 1;
       final bool hasPrevious = !isFirst && pageNumber > 0;
-      
+
       return PaginatedMethods(
         content: methods,
         pageNumber: pageNumber,
@@ -394,25 +404,29 @@ class LocalizedText {
 
   factory LocalizedText.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔍 Parsing LocalizedText from JSON: ${json.keys.toList()}'); // Debug log
+      print(
+        '🔍 Parsing LocalizedText from JSON: ${json.keys.toList()}',
+      ); // Debug log
       print('🔍 LocalizedText JSON: $json'); // Debug log
-      
+
       // Handle different possible key names
       String vi = '';
       String en = '';
-      
+
       // Try different possible keys
-      vi = json['vi']?.toString() ?? 
-           json['vietnamese']?.toString() ?? 
-           json['vietnam']?.toString() ?? 
-           json['vn']?.toString() ?? 
-           '';
-           
-      en = json['en']?.toString() ?? 
-           json['english']?.toString() ?? 
-           json['eng']?.toString() ?? 
-           '';
-      
+      vi =
+          json['vi']?.toString() ??
+          json['vietnamese']?.toString() ??
+          json['vietnam']?.toString() ??
+          json['vn']?.toString() ??
+          '';
+
+      en =
+          json['en']?.toString() ??
+          json['english']?.toString() ??
+          json['eng']?.toString() ??
+          '';
+
       return LocalizedText(vi: vi, en: en);
     } catch (e) {
       print('❌ Error in LocalizedText.fromJson: $e'); // Debug log
@@ -423,10 +437,7 @@ class LocalizedText {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'vi': vi,
-      'en': en,
-    };
+    return {'vi': vi, 'en': en};
   }
 
   @override

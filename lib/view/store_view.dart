@@ -26,10 +26,12 @@ class _StoreViewState extends State<StoreView> {
       StoreItem(
         id: '1',
         name: 'Bộ đồ chơi giao tiếp cho trẻ tự kỷ',
-        description: 'Bộ đồ chơi hỗ trợ phát triển kỹ năng giao tiếp và tương tác xã hội',
+        description:
+            'Bộ đồ chơi hỗ trợ phát triển kỹ năng giao tiếp và tương tác xã hội',
         price: 250000,
         originalPrice: 300000,
-        imageUrl: 'https://via.placeholder.com/200x200/4CAF50/FFFFFF?text=Toy+1',
+        imageUrl:
+            'https://via.placeholder.com/200x200/4CAF50/FFFFFF?text=Toy+1',
         category: 'Đồ chơi giáo dục',
         rating: 4.5,
         reviewCount: 128,
@@ -39,10 +41,12 @@ class _StoreViewState extends State<StoreView> {
       StoreItem(
         id: '2',
         name: 'Sách tương tác cảm ứng',
-        description: 'Sách có các nút cảm ứng phát âm thanh, giúp trẻ học từ vựng',
+        description:
+            'Sách có các nút cảm ứng phát âm thanh, giúp trẻ học từ vựng',
         price: 180000,
         originalPrice: 200000,
-        imageUrl: 'https://via.placeholder.com/200x200/2196F3/FFFFFF?text=Book+1',
+        imageUrl:
+            'https://via.placeholder.com/200x200/2196F3/FFFFFF?text=Book+1',
         category: 'Sách tương tác',
         rating: 4.8,
         reviewCount: 95,
@@ -52,10 +56,12 @@ class _StoreViewState extends State<StoreView> {
       StoreItem(
         id: '3',
         name: 'Bộ ghép hình phát triển tư duy',
-        description: 'Bộ ghép hình với nhiều mức độ khó khác nhau, phù hợp từng lứa tuổi',
+        description:
+            'Bộ ghép hình với nhiều mức độ khó khác nhau, phù hợp từng lứa tuổi',
         price: 120000,
         originalPrice: 150000,
-        imageUrl: 'https://via.placeholder.com/200x200/FF9800/FFFFFF?text=Puzzle+1',
+        imageUrl:
+            'https://via.placeholder.com/200x200/FF9800/FFFFFF?text=Puzzle+1',
         category: 'Đồ chơi giáo dục',
         rating: 4.3,
         reviewCount: 67,
@@ -68,7 +74,8 @@ class _StoreViewState extends State<StoreView> {
         description: 'Bộ dụng cụ hỗ trợ phát triển vận động tinh cho trẻ',
         price: 350000,
         originalPrice: 400000,
-        imageUrl: 'https://via.placeholder.com/200x200/9C27B0/FFFFFF?text=Tools+1',
+        imageUrl:
+            'https://via.placeholder.com/200x200/9C27B0/FFFFFF?text=Tools+1',
         category: 'Dụng cụ trị liệu',
         rating: 4.7,
         reviewCount: 43,
@@ -78,10 +85,12 @@ class _StoreViewState extends State<StoreView> {
       StoreItem(
         id: '5',
         name: 'Thẻ học từ vựng bằng hình ảnh',
-        description: 'Bộ thẻ học từ vựng với hình ảnh minh họa rõ ràng, dễ hiểu',
+        description:
+            'Bộ thẻ học từ vựng với hình ảnh minh họa rõ ràng, dễ hiểu',
         price: 89000,
         originalPrice: 120000,
-        imageUrl: 'https://via.placeholder.com/200x200/F44336/FFFFFF?text=Cards+1',
+        imageUrl:
+            'https://via.placeholder.com/200x200/F44336/FFFFFF?text=Cards+1',
         category: 'Tài liệu học tập',
         rating: 4.6,
         reviewCount: 156,
@@ -91,10 +100,12 @@ class _StoreViewState extends State<StoreView> {
       StoreItem(
         id: '6',
         name: 'Bộ đồ chơi cảm giác',
-        description: 'Bộ đồ chơi kích thích các giác quan, phù hợp cho trẻ tự kỷ',
+        description:
+            'Bộ đồ chơi kích thích các giác quan, phù hợp cho trẻ tự kỷ',
         price: 280000,
         originalPrice: 320000,
-        imageUrl: 'https://via.placeholder.com/200x200/00BCD4/FFFFFF?text=Sensory+1',
+        imageUrl:
+            'https://via.placeholder.com/200x200/00BCD4/FFFFFF?text=Sensory+1',
         category: 'Đồ chơi cảm giác',
         rating: 4.4,
         reviewCount: 89,
@@ -108,8 +119,10 @@ class _StoreViewState extends State<StoreView> {
   void _filterItems() {
     setState(() {
       filteredItems = items.where((item) {
-        final matchesCategory = selectedCategory == 'Tất cả' || item.category == selectedCategory;
-        final matchesSearch = searchQuery.isEmpty || 
+        final matchesCategory =
+            selectedCategory == 'Tất cả' || item.category == selectedCategory;
+        final matchesSearch =
+            searchQuery.isEmpty ||
             item.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
             item.description.toLowerCase().contains(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
@@ -177,28 +190,35 @@ class _StoreViewState extends State<StoreView> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: [
-                      'Tất cả',
-                      'Đồ chơi giáo dục',
-                      'Sách tương tác',
-                      'Dụng cụ trị liệu',
-                      'Tài liệu học tập',
-                      'Đồ chơi cảm giác',
-                    ].map((category) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(category),
-                        selected: selectedCategory == category,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedCategory = category;
-                            _filterItems();
-                          });
-                        },
-                        selectedColor: AppColors.primary.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primary,
-                      ),
-                    )).toList(),
+                    children:
+                        [
+                              'Tất cả',
+                              'Đồ chơi giáo dục',
+                              'Sách tương tác',
+                              'Dụng cụ trị liệu',
+                              'Tài liệu học tập',
+                              'Đồ chơi cảm giác',
+                            ]
+                            .map(
+                              (category) => Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: FilterChip(
+                                  label: Text(category),
+                                  selected: selectedCategory == category,
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      selectedCategory = category;
+                                      _filterItems();
+                                    });
+                                  },
+                                  selectedColor: AppColors.primary.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  checkmarkColor: AppColors.primary,
+                                ),
+                              ),
+                            )
+                            .toList(),
                   ),
                 ),
               ],
@@ -211,12 +231,13 @@ class _StoreViewState extends State<StoreView> {
                 ? _buildEmptyState()
                 : GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.75,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
                     itemCount: filteredItems.length,
                     itemBuilder: (context, index) {
                       return _buildStoreItem(filteredItems[index]);
@@ -250,7 +271,9 @@ class _StoreViewState extends State<StoreView> {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
                 image: DecorationImage(
                   image: NetworkImage(item.imageUrl),
                   fit: BoxFit.cover,
@@ -264,7 +287,10 @@ class _StoreViewState extends State<StoreView> {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(12),
@@ -285,7 +311,10 @@ class _StoreViewState extends State<StoreView> {
                       top: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey,
                           borderRadius: BorderRadius.circular(12),
@@ -304,7 +333,7 @@ class _StoreViewState extends State<StoreView> {
               ),
             ),
           ),
-          
+
           // Product Info
           Expanded(
             flex: 2,
@@ -324,9 +353,9 @@ class _StoreViewState extends State<StoreView> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
+
                   const SizedBox(height: 4),
-                  
+
                   // Rating
                   Row(
                     children: [
@@ -341,9 +370,9 @@ class _StoreViewState extends State<StoreView> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Price
                   Row(
                     children: [
@@ -368,9 +397,9 @@ class _StoreViewState extends State<StoreView> {
                       ],
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Add to Cart Button
                   SizedBox(
                     width: double.infinity,
@@ -417,10 +446,7 @@ class _StoreViewState extends State<StoreView> {
           const SizedBox(height: 8),
           Text(
             'Thử thay đổi bộ lọc hoặc tìm kiếm',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
         ],
       ),

@@ -30,7 +30,11 @@ class BookApiResponse {
         .toList();
     final page = json['page'] as Map<String, dynamic>?;
     final hasNext = (page != null)
-        ? (page['hasNext'] ?? page['hasNextPage'] ?? page['hasNextSlice'] ?? false) == true
+        ? (page['hasNext'] ??
+                  page['hasNextPage'] ??
+                  page['hasNextSlice'] ??
+                  false) ==
+              true
         : (json['hasNext'] ?? json['hasNextPage'] ?? false) == true;
     return BookApiResponse(content: list, hasNext: hasNext);
   }
@@ -65,8 +69,10 @@ class ApiBook {
 
   factory ApiBook.fromJson(Map<String, dynamic> json) {
     String safeString(dynamic v) => v?.toString() ?? '';
-    int safeInt(dynamic v) => v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
-    double safeDouble(dynamic v) => v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0.0;
+    int safeInt(dynamic v) =>
+        v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
+    double safeDouble(dynamic v) =>
+        v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0.0;
 
     return ApiBook(
       id: safeString(json['id'] ?? json['bookId']),
@@ -150,14 +156,20 @@ class _LibraryViewState extends State<LibraryView> {
     _loadFormats();
     // Build target ages list including range 0-2
     final baseAges = SampleLibraryItems.getTargetAges();
-    filterTargetAges = ['Tất cả', '0-2', ...{
-      ...baseAges.where((e) => e != 'Tất cả' && e != '0' && e != '1' && e != '2')
-    }.toList()];
+    filterTargetAges = [
+      'Tất cả',
+      '0-2',
+      ...{
+        ...baseAges.where(
+          (e) => e != 'Tất cả' && e != '0' && e != '1' && e != '2',
+        ),
+      }.toList(),
+    ];
   }
 
   Future<void> _loadYoutubeVideos() async {
     if (isLoadingYoutube || hasLoadedYoutube) return;
-    
+
     try {
       setState(() {
         isLoadingYoutube = true;
@@ -174,7 +186,9 @@ class _LibraryViewState extends State<LibraryView> {
           list = [];
         }
         setState(() {
-          youtubeVideos = list.map((e) => (e as Map).cast<String, dynamic>()).toList();
+          youtubeVideos = list
+              .map((e) => (e as Map).cast<String, dynamic>())
+              .toList();
           isLoadingYoutube = false;
           hasLoadedYoutube = true;
         });
@@ -258,9 +272,11 @@ class _LibraryViewState extends State<LibraryView> {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final apiResponse = BookApiResponse.fromJson(jsonData);
-        
-        final newItems = apiResponse.content.map((book) => book.toLibraryItem()).toList();
-        
+
+        final newItems = apiResponse.content
+            .map((book) => book.toLibraryItem())
+            .toList();
+
         setState(() {
           if (currentPage == 0) {
             items = newItems;
@@ -290,18 +306,32 @@ class _LibraryViewState extends State<LibraryView> {
   void _filterItems() {
     setState(() {
       filteredItems = items.where((item) {
-        final matchesSearch = searchQuery.isEmpty ||
+        final matchesSearch =
+            searchQuery.isEmpty ||
             item.title.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            item.description.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            item.description.toLowerCase().contains(
+              searchQuery.toLowerCase(),
+            ) ||
             item.author.toLowerCase().contains(searchQuery.toLowerCase());
-        
-        final matchesTargetAge = selectedTargetAge == 'Tất cả' || item.targetAge == selectedTargetAge;
-        final matchesDomain = selectedDomain == 'Tất cả' || item.domain == selectedDomain || item.domain == _mapDomainIdToName(selectedDomain);
-        final matchesCategory = selectedCategory == 'Tất cả' ||
+
+        final matchesTargetAge =
+            selectedTargetAge == 'Tất cả' ||
+            item.targetAge == selectedTargetAge;
+        final matchesDomain =
+            selectedDomain == 'Tất cả' ||
+            item.domain == selectedDomain ||
+            item.domain == _mapDomainIdToName(selectedDomain);
+        final matchesCategory =
+            selectedCategory == 'Tất cả' ||
             item.title.toLowerCase().endsWith(selectedCategory.toLowerCase()) ||
-            item.getFileTypeText().toLowerCase().contains(selectedCategory.toLowerCase());
-        
-        return matchesSearch && matchesTargetAge && matchesDomain && matchesCategory;
+            item.getFileTypeText().toLowerCase().contains(
+              selectedCategory.toLowerCase(),
+            );
+
+        return matchesSearch &&
+            matchesTargetAge &&
+            matchesDomain &&
+            matchesCategory;
       }).toList();
     });
   }
@@ -334,9 +364,11 @@ class _LibraryViewState extends State<LibraryView> {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final apiResponse = BookApiResponse.fromJson(jsonData);
-        
-        final newItems = apiResponse.content.map((book) => book.toLibraryItem()).toList();
-        
+
+        final newItems = apiResponse.content
+            .map((book) => book.toLibraryItem())
+            .toList();
+
         setState(() {
           items.addAll(newItems);
           filteredItems = items;
@@ -378,9 +410,11 @@ class _LibraryViewState extends State<LibraryView> {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final apiResponse = BookApiResponse.fromJson(jsonData);
-        
-        final newItems = apiResponse.content.map((book) => book.toLibraryItem()).toList();
-        
+
+        final newItems = apiResponse.content
+            .map((book) => book.toLibraryItem())
+            .toList();
+
         setState(() {
           items = newItems;
           filteredItems = newItems;
@@ -406,90 +440,101 @@ class _LibraryViewState extends State<LibraryView> {
 
   Widget _buildDomainChip(String id, String label) {
     final isSelected = selectedDomain == id;
-    return Builder(builder: (chipContext) {
-      return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) {
-          final domain = domains.firstWhere(
-            (d) => (d['id'] ?? '') == id,
-            orElse: () => const {},
-          );
-          final desc = (domain['description']?[currentLocale] ?? '').toString();
-          if (desc.isEmpty) return;
+    return Builder(
+      builder: (chipContext) {
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) {
+            final domain = domains.firstWhere(
+              (d) => (d['id'] ?? '') == id,
+              orElse: () => const {},
+            );
+            final desc = (domain['description']?[currentLocale] ?? '')
+                .toString();
+            if (desc.isEmpty) return;
 
-          // Remove existing tooltip if any
-          _domainTooltipEntry?.remove();
-          _domainTooltipEntry = null;
+            // Remove existing tooltip if any
+            _domainTooltipEntry?.remove();
+            _domainTooltipEntry = null;
 
-          // Calculate position right under the chip
-          final box = chipContext.findRenderObject() as RenderBox?;
-          if (box == null) return;
-          final offset = box.localToGlobal(Offset.zero);
-          final size = box.size;
+            // Calculate position right under the chip
+            final box = chipContext.findRenderObject() as RenderBox?;
+            if (box == null) return;
+            final offset = box.localToGlobal(Offset.zero);
+            final size = box.size;
 
-          final entry = OverlayEntry(
-            builder: (_) => Positioned(
-              left: offset.dx,
-              top: offset.dy + size.height + 6,
-              child: IgnorePointer(
-                ignoring: true,
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 320),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.grey900.withValues(alpha: 0.95),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(color: AppColors.shadowLight, blurRadius: 8, offset: Offset(0, 4)),
-                      ],
-                    ),
-                    child: Text(
-                      desc,
-                      style: const TextStyle(color: AppColors.white, fontSize: 12, height: 1.4),
+            final entry = OverlayEntry(
+              builder: (_) => Positioned(
+                left: offset.dx,
+                top: offset.dy + size.height + 6,
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey900.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.shadowLight,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        desc,
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
+            );
+            Overlay.of(chipContext).insert(entry);
+            _domainTooltipEntry = entry;
+          },
+          onExit: (_) {
+            _domainTooltipEntry?.remove();
+            _domainTooltipEntry = null;
+          },
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedDomain = id;
+                currentPage = 0;
+                hasMoreData = true;
+                _filterItems();
+              });
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 0),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : AppColors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isSelected ? AppColors.white : AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-          );
-          Overlay.of(chipContext).insert(entry);
-          _domainTooltipEntry = entry;
-        },
-        onExit: (_) {
-          _domainTooltipEntry?.remove();
-          _domainTooltipEntry = null;
-        },
-        child: GestureDetector(
-        onTap: () {
-          setState(() {
-            selectedDomain = id;
-            currentPage = 0;
-            hasMoreData = true;
-            _filterItems();
-          });
-        },
-        child: Container(
-          margin: const EdgeInsets.only(right: 0),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
           ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: isSelected ? AppColors.white : AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
+        );
+      },
     );
-    });
   }
 
   Widget _buildFormatChip(String idOrExt, String label) {
@@ -530,8 +575,20 @@ class _LibraryViewState extends State<LibraryView> {
       formats.isNotEmpty
           ? formats
           : [
-              {'id': 1, 'formatName': 'PDF Document', 'fileExtension': '.pdf', 'mimeType': 'application/pdf', 'category': 'PDF'},
-              {'id': 2, 'formatName': 'MP4 Video', 'fileExtension': '.mp4', 'mimeType': 'video/mp4', 'category': 'VIDEO'},
+              {
+                'id': 1,
+                'formatName': 'PDF Document',
+                'fileExtension': '.pdf',
+                'mimeType': 'application/pdf',
+                'category': 'PDF',
+              },
+              {
+                'id': 2,
+                'formatName': 'MP4 Video',
+                'fileExtension': '.mp4',
+                'mimeType': 'video/mp4',
+                'category': 'VIDEO',
+              },
             ],
     );
     int _priority(Map<String, dynamic> f) {
@@ -539,249 +596,263 @@ class _LibraryViewState extends State<LibraryView> {
       final ext = (f['fileExtension'] ?? '').toString().toLowerCase();
       final mime = (f['mimeType'] ?? '').toString().toLowerCase();
       final cat = (f['category'] ?? '').toString().toUpperCase();
-      final isPdf = id == 1 || ext == '.pdf' || mime == 'application/pdf' || cat == 'PDF';
-      final isVideo = id == 2 || ext == '.mp4' || mime.startsWith('video/') || cat == 'VIDEO';
+      final isPdf =
+          id == 1 || ext == '.pdf' || mime == 'application/pdf' || cat == 'PDF';
+      final isVideo =
+          id == 2 ||
+          ext == '.mp4' ||
+          mime.startsWith('video/') ||
+          cat == 'VIDEO';
       if (isPdf) return 0;
       if (isVideo) return 1;
       return 2;
     }
+
     tabFormats.sort((a, b) => _priority(a).compareTo(_priority(b)));
     return DefaultTabController(
       length: tabFormats.length,
       initialIndex: 0,
       child: Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        title: const Text('Thư Viện'),
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await _loadYoutubeVideos();
-            },
-            icon: const Icon(Icons.play_circle_fill),
-            tooltip: 'Tải lại YouTube',
-          ),
-          IconButton(
-            onPressed: () {
-              try {
-                final domainModels = domains
-                    .where((domain) => domain != null)
-                    .map((domain) => InterventionDomainModel.fromJson(domain))
-                    .toList();
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddPostPage(
-                      domains: domainModels,
-                    ),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Lỗi khi mở trang thêm bài post: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.article),
-            tooltip: 'Thêm bài post',
-          ),
-          IconButton(
-            onPressed: () {
-              try {
-                final domainModels = domains
-                    .where((domain) => domain != null)
-                    .map((domain) => InterventionDomainModel.fromJson(domain))
-                    .toList();
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddVideoPage(
-                      domains: domainModels,
-                    ),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Lỗi khi mở trang thêm video: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.video_library),
-            tooltip: 'Thêm video',
-          ),
-          IconButton(
-            onPressed: () {
-              try {
-                final domainModels = domains
-                    .where((domain) => domain != null)
-                    .map((domain) => InterventionDomainModel.fromJson(domain))
-                    .toList();
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddBookPage(
-                      domains: domainModels,
-                    ),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Lỗi khi mở trang thêm sách: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.book),
-            tooltip: 'Thêm sách',
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: Container(
-            color: AppColors.primary,
-            child: TabBar(
-              isScrollable: true,
-              indicatorColor: AppColors.white,
-              labelColor: AppColors.white,
-              unselectedLabelColor: AppColors.white.withValues(alpha: 0.7),
-              tabs: tabFormats
-                  .map((f) => Tab(text: (f['formatName'] ?? 'Unknown').toString()))
-                  .toList(),
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          title: const Text('Thư Viện'),
+          elevation: 0,
+          centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: () async {
+                await _loadYoutubeVideos();
+              },
+              icon: const Icon(Icons.play_circle_fill),
+              tooltip: 'Tải lại YouTube',
             ),
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          // Search Bar + Filter Button
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadowLight,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    onChanged: (value) {
-                      searchQuery = value;
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        if (searchQuery == value) {
-                          _searchBooks();
-                        }
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Tìm kiếm tài liệu...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: AppColors.grey50,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton.icon(
-                  onPressed: _openFilterSidebar,
-                  icon: const Icon(Icons.tune),
-                  label: const Text('Bộ lọc'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Inline filters removed; use sidebar button instead
-          
-          // Tabbed content
-          Expanded(
-            child: TabBarView(
-              children: tabFormats.map((f) {
-                final id = (f['id'] as num?)?.toInt();
-                final category = (f['category'] ?? '').toString().toUpperCase();
-                final isVideo = id == 2 || category == 'VIDEO' || (f['mimeType']?.toString().startsWith('video/') ?? false);
-                final isPdf = id == 1 || (f['fileExtension'] ?? '').toString().toLowerCase() == '.pdf' || (f['mimeType'] ?? '').toString() == 'application/pdf';
-                if (isVideo) {
-                  // Lazy-load videos only when the tab is opened
-                  if (!isLoadingYoutube && !hasLoadedYoutube) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted && !hasLoadedYoutube) {
-                        _loadYoutubeVideos();
-                      }
-                    });
-                  }
-                  return const YoutubeListWidget();
-                } else if (isPdf) {
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      currentPage = 0;
-                      hasMoreData = true;
-                      await _loadLibraryItems();
-                    },
-                    child: PdfListWidget(
-                      items: items,
-                      filteredItems: filteredItems,
-                      isLoading: isLoading,
-                      hasMoreData: hasMoreData,
-                      currentPage: currentPage,
-                      onLoadMore: _loadMoreData,
-                      onReadItem: _readItem,
-                      onShowItemDetails: _showItemDetails,
-                      onDeleteItem: _deleteItem,
-                      emptyStateBuilder: _buildEmptyState,
+            IconButton(
+              onPressed: () {
+                try {
+                  final domainModels = domains
+                      .where((domain) => domain != null)
+                      .map((domain) => InterventionDomainModel.fromJson(domain))
+                      .toList();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddPostPage(domains: domainModels),
                     ),
                   );
-                } else {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.info_outline, color: AppColors.textSecondary),
-                          SizedBox(height: 8),
-                          Text('Định dạng này sẽ được hỗ trợ sau'),
-                        ],
-                      ),
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Lỗi khi mở trang thêm bài post: $e'),
+                      backgroundColor: Colors.red,
                     ),
                   );
                 }
-              }).toList(),
+              },
+              icon: const Icon(Icons.article),
+              tooltip: 'Thêm bài post',
+            ),
+            IconButton(
+              onPressed: () {
+                try {
+                  final domainModels = domains
+                      .where((domain) => domain != null)
+                      .map((domain) => InterventionDomainModel.fromJson(domain))
+                      .toList();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddVideoPage(domains: domainModels),
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Lỗi khi mở trang thêm video: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.video_library),
+              tooltip: 'Thêm video',
+            ),
+            IconButton(
+              onPressed: () {
+                try {
+                  final domainModels = domains
+                      .where((domain) => domain != null)
+                      .map((domain) => InterventionDomainModel.fromJson(domain))
+                      .toList();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddBookPage(domains: domainModels),
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Lỗi khi mở trang thêm sách: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.book),
+              tooltip: 'Thêm sách',
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(48),
+            child: Container(
+              color: AppColors.primary,
+              child: TabBar(
+                isScrollable: true,
+                indicatorColor: AppColors.white,
+                labelColor: AppColors.white,
+                unselectedLabelColor: AppColors.white.withValues(alpha: 0.7),
+                tabs: tabFormats
+                    .map(
+                      (f) =>
+                          Tab(text: (f['formatName'] ?? 'Unknown').toString()),
+                    )
+                    .toList(),
+              ),
             ),
           ),
-        ],
+        ),
+        body: Column(
+          children: [
+            // Search Bar + Filter Button
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowLight,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) {
+                        searchQuery = value;
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          if (searchQuery == value) {
+                            _searchBooks();
+                          }
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Tìm kiếm tài liệu...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: AppColors.grey50,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: _openFilterSidebar,
+                    icon: const Icon(Icons.tune),
+                    label: const Text('Bộ lọc'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Inline filters removed; use sidebar button instead
+
+            // Tabbed content
+            Expanded(
+              child: TabBarView(
+                children: tabFormats.map((f) {
+                  final id = (f['id'] as num?)?.toInt();
+                  final category = (f['category'] ?? '')
+                      .toString()
+                      .toUpperCase();
+                  final isVideo =
+                      id == 2 ||
+                      category == 'VIDEO' ||
+                      (f['mimeType']?.toString().startsWith('video/') ?? false);
+                  final isPdf =
+                      id == 1 ||
+                      (f['fileExtension'] ?? '').toString().toLowerCase() ==
+                          '.pdf' ||
+                      (f['mimeType'] ?? '').toString() == 'application/pdf';
+                  if (isVideo) {
+                    // Lazy-load videos only when the tab is opened
+                    if (!isLoadingYoutube && !hasLoadedYoutube) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted && !hasLoadedYoutube) {
+                          _loadYoutubeVideos();
+                        }
+                      });
+                    }
+                    return const YoutubeListWidget();
+                  } else if (isPdf) {
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        currentPage = 0;
+                        hasMoreData = true;
+                        await _loadLibraryItems();
+                      },
+                      child: PdfListWidget(
+                        items: items,
+                        filteredItems: filteredItems,
+                        isLoading: isLoading,
+                        hasMoreData: hasMoreData,
+                        currentPage: currentPage,
+                        onLoadMore: _loadMoreData,
+                        onReadItem: _readItem,
+                        onShowItemDetails: _showItemDetails,
+                        onDeleteItem: _deleteItem,
+                        emptyStateBuilder: _buildEmptyState,
+                      ),
+                    );
+                  } else {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(
+                              Icons.info_outline,
+                              color: AppColors.textSecondary,
+                            ),
+                            SizedBox(height: 8),
+                            Text('Định dạng này sẽ được hỗ trợ sau'),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
-
-
 
   Widget _buildYoutubeList() {
     if (youtubeVideos.isEmpty) {
@@ -792,7 +863,7 @@ class _LibraryViewState extends State<LibraryView> {
       itemBuilder: (context, index) {
         final v = youtubeVideos[index];
         final url = (v['url'] ?? '').toString();
-        print('[WEB-VIDEO] youtube video url=' + url);
+
         final id = (v['id'] ?? v['videoId'] ?? v['uuid'] ?? '').toString();
         final language = (v['language'] ?? 'vi').toString();
         final publishedAt = (v['publishedAt'] ?? '').toString();
@@ -800,33 +871,44 @@ class _LibraryViewState extends State<LibraryView> {
         final maxAge = (v['maxAge'] ?? '').toString();
         final ageGroup = (v['ageGroup'] ?? '').toString();
         final contentRating = (v['contentRating'] ?? '').toString();
-        final domainNames = (v['developmentalDomainNames'] as List?)?.join(', ') ?? '';
+        final domainNames =
+            (v['developmentalDomainNames'] as List?)?.join(', ') ?? '';
         // Derive YouTube thumbnail from watch URL if possible
         final ytId = _extractYoutubeId(url);
-        final thumb = ytId != null ? 'https://img.youtube.com/vi/$ytId/hqdefault.jpg' : null;
+        final thumb = ytId != null
+            ? 'https://img.youtube.com/vi/$ytId/hqdefault.jpg'
+            : null;
         // Handle nested title/description structure
         String title = 'MP4 Video';
         String desc = '';
-        
+
         if (v['title'] is Map) {
           final titleMap = v['title'] as Map;
           title = (titleMap['vi'] ?? titleMap['en'] ?? 'MP4 Video').toString();
         } else {
           title = (v['titleVi'] ?? v['titleEn'] ?? 'MP4 Video').toString();
         }
-        
+
         if (v['description'] is Map) {
           final descMap = v['description'] as Map;
           desc = (descMap['vi'] ?? descMap['en'] ?? '').toString();
         } else {
           desc = (v['descriptionVi'] ?? v['descriptionEn'] ?? '').toString();
         }
-        final domainCount = (v['developmentalDomainIds'] is List) ? (v['developmentalDomainIds'] as List).length : 0;
+        final domainCount = (v['developmentalDomainIds'] is List)
+            ? (v['developmentalDomainIds'] as List).length
+            : 0;
         return Container(
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: const Offset(0, 2))],
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowLight,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: ListTile(
             leading: thumb == null
@@ -838,19 +920,31 @@ class _LibraryViewState extends State<LibraryView> {
                       width: 56,
                       height: 56,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.play_circle_fill, color: AppColors.primary),
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.play_circle_fill,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
-            title: Text(title.isEmpty ? 'Untitled Video' : title, maxLines: 2, overflow: TextOverflow.ellipsis),
+            title: Text(
+              title.isEmpty ? 'Untitled Video' : title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 4),
-                if (desc.isNotEmpty) Text(desc, maxLines: 2, overflow: TextOverflow.ellipsis),
+                if (desc.isNotEmpty)
+                  Text(desc, maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 6),
                 Text(
                   'Lang: $language • Age: $minAge-$maxAge ($ageGroup) • Rated: $contentRating\nDomains: ${domainNames.isEmpty ? domainCount : domainNames}\n$publishedAt',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.3),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    height: 1.3,
+                  ),
                 ),
               ],
             ),
@@ -865,7 +959,9 @@ class _LibraryViewState extends State<LibraryView> {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   tooltip: 'Xóa video',
-                  onPressed: id.isEmpty ? null : () => _confirmDeleteYoutube(id, title),
+                  onPressed: id.isEmpty
+                      ? null
+                      : () => _confirmDeleteYoutube(id, title),
                 ),
               ],
             ),
@@ -889,7 +985,9 @@ class _LibraryViewState extends State<LibraryView> {
       if (v != null && v.isNotEmpty) return v;
       // Shorts or embed patterns
       final segs = uri.pathSegments;
-      final idx = segs.indexWhere((s) => s == 'shorts' || s == 'embed' || s == 'v');
+      final idx = segs.indexWhere(
+        (s) => s == 'shorts' || s == 'embed' || s == 'v',
+      );
       if (idx >= 0 && idx + 1 < segs.length) return segs[idx + 1];
     }
     return null;
@@ -940,7 +1038,10 @@ class _LibraryViewState extends State<LibraryView> {
         barrierColor: Colors.black87,
         builder: (_) => Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final maxW = constraints.maxWidth;
@@ -998,9 +1099,11 @@ class _LibraryViewState extends State<LibraryView> {
     // Register a view factory for this iframe
     ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
       final element = html.IFrameElement()
-        ..src = 'https://www.youtube.com/embed/$ytId?autoplay=1&modestbranding=1&rel=0'
+        ..src =
+            'https://www.youtube.com/embed/$ytId?autoplay=1&modestbranding=1&rel=0'
         ..style.border = '0'
-        ..allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+        ..allow =
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
         ..allowFullscreen = true;
       return element;
     });
@@ -1136,10 +1239,16 @@ class _LibraryViewState extends State<LibraryView> {
         title: const Text('Xác nhận xóa video'),
         content: Text('Bạn có chắc muốn xóa "${title.isEmpty ? id : title}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Xóa'),
           ),
         ],
@@ -1151,23 +1260,39 @@ class _LibraryViewState extends State<LibraryView> {
       if (resp.statusCode == 200 || resp.statusCode == 204) {
         if (mounted) {
           setState(() {
-            youtubeVideos.removeWhere((e) => (e['id']?.toString() ?? e['videoId']?.toString() ?? e['uuid']?.toString() ?? '') == id);
+            youtubeVideos.removeWhere(
+              (e) =>
+                  (e['id']?.toString() ??
+                      e['videoId']?.toString() ??
+                      e['uuid']?.toString() ??
+                      '') ==
+                  id,
+            );
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Xóa video thành công'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('Xóa video thành công'),
+              backgroundColor: Colors.green,
+            ),
           );
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Lỗi xóa video: ${resp.statusCode} - ${resp.body}'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Lỗi xóa video: ${resp.statusCode} - ${resp.body}'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi xóa video: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Lỗi xóa video: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -1178,11 +1303,7 @@ class _LibraryViewState extends State<LibraryView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.library_books,
-            size: 64,
-            color: AppColors.grey400,
-          ),
+          Icon(Icons.library_books, size: 64, color: AppColors.grey400),
           const SizedBox(height: 16),
           Text(
             'Không tìm thấy tài liệu nào',
@@ -1279,13 +1400,24 @@ class _LibraryViewState extends State<LibraryView> {
                       return Column(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             decoration: BoxDecoration(
-                              border: Border(bottom: BorderSide(color: AppColors.border)),
+                              border: Border(
+                                bottom: BorderSide(color: AppColors.border),
+                              ),
                             ),
                             child: Row(
                               children: [
-                                const Text('Bộ lọc', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                const Text(
+                                  'Bộ lọc',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 const Spacer(),
                                 IconButton(
                                   onPressed: () => Navigator.pop(context),
@@ -1299,17 +1431,28 @@ class _LibraryViewState extends State<LibraryView> {
                               controller: controller,
                               padding: const EdgeInsets.all(16),
                               children: [
-                                _buildFilterSection('Độ Tuổi', filterTargetAges, tempTargetAge, (v) => setSheetState(() {
-                                  tempTargetAge = v;
-                                })),
+                                _buildFilterSection(
+                                  'Độ Tuổi',
+                                  filterTargetAges,
+                                  tempTargetAge,
+                                  (v) => setSheetState(() {
+                                    tempTargetAge = v;
+                                  }),
+                                ),
                                 const SizedBox(height: 16),
-                                _buildDomainSidebarSection(current: tempDomain, onChanged: (v) => setSheetState(() {
-                                  tempDomain = v;
-                                })),
+                                _buildDomainSidebarSection(
+                                  current: tempDomain,
+                                  onChanged: (v) => setSheetState(() {
+                                    tempDomain = v;
+                                  }),
+                                ),
                                 const SizedBox(height: 16),
-                                _buildFormatSidebarSection(current: tempCategory, onChanged: (v) => setSheetState(() {
-                                  tempCategory = v;
-                                })),
+                                _buildFormatSidebarSection(
+                                  current: tempCategory,
+                                  onChanged: (v) => setSheetState(() {
+                                    tempCategory = v;
+                                  }),
+                                ),
                               ],
                             ),
                           ),
@@ -1366,11 +1509,21 @@ class _LibraryViewState extends State<LibraryView> {
     );
   }
 
-  Widget _buildDomainSidebarSection({required String current, required ValueChanged<String> onChanged}) {
+  Widget _buildDomainSidebarSection({
+    required String current,
+    required ValueChanged<String> onChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Lĩnh Vực', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        const Text(
+          'Lĩnh Vực',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -1378,7 +1531,9 @@ class _LibraryViewState extends State<LibraryView> {
           children: [
             _domainChoiceChip('Tất cả', 'Tất cả', current, onChanged),
             ...domains.map((d) {
-              final label = (d['displayedName']?[currentLocale] ?? d['name'] ?? '').toString();
+              final label =
+                  (d['displayedName']?[currentLocale] ?? d['name'] ?? '')
+                      .toString();
               final id = (d['id'] ?? '').toString();
               return _domainChoiceChip(id, label, current, onChanged);
             }).toList(),
@@ -1388,79 +1543,107 @@ class _LibraryViewState extends State<LibraryView> {
     );
   }
 
-  Widget _domainChoiceChip(String id, String label, String current, ValueChanged<String> onChanged) {
+  Widget _domainChoiceChip(
+    String id,
+    String label,
+    String current,
+    ValueChanged<String> onChanged,
+  ) {
     final isSelected = current == id;
-    return Builder(builder: (chipContext) {
-      return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) {
-          // Find domain description for tooltip
-          final domain = domains.firstWhere(
-            (d) => (d['id'] ?? '') == id,
-            orElse: () => const {},
-          );
-          final desc = (domain['description']?[currentLocale] ?? '').toString();
-          if (desc.isEmpty) return;
+    return Builder(
+      builder: (chipContext) {
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) {
+            // Find domain description for tooltip
+            final domain = domains.firstWhere(
+              (d) => (d['id'] ?? '') == id,
+              orElse: () => const {},
+            );
+            final desc = (domain['description']?[currentLocale] ?? '')
+                .toString();
+            if (desc.isEmpty) return;
 
-          // Remove existing tooltip
-          _domainTooltipEntry?.remove();
-          _domainTooltipEntry = null;
+            // Remove existing tooltip
+            _domainTooltipEntry?.remove();
+            _domainTooltipEntry = null;
 
-          // Position below chip
-          final box = chipContext.findRenderObject() as RenderBox?;
-          if (box == null) return;
-          final offset = box.localToGlobal(Offset.zero);
-          final size = box.size;
+            // Position below chip
+            final box = chipContext.findRenderObject() as RenderBox?;
+            if (box == null) return;
+            final offset = box.localToGlobal(Offset.zero);
+            final size = box.size;
 
-          final entry = OverlayEntry(
-            builder: (_) => Positioned(
-              left: offset.dx,
-              top: offset.dy + size.height + 6,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 320),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.grey900.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(color: AppColors.shadowLight, blurRadius: 8, offset: Offset(0, 4)),
-                    ],
-                  ),
-                  child: Text(
-                    desc,
-                    style: const TextStyle(color: AppColors.white, fontSize: 12, height: 1.4),
+            final entry = OverlayEntry(
+              builder: (_) => Positioned(
+                left: offset.dx,
+                top: offset.dy + size.height + 6,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.grey900.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowLight,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      desc,
+                      style: const TextStyle(
+                        color: AppColors.white,
+                        fontSize: 12,
+                        height: 1.4,
+                      ),
+                    ),
                   ),
                 ),
               ),
+            );
+            Overlay.of(chipContext).insert(entry);
+            _domainTooltipEntry = entry;
+          },
+          onExit: (_) {
+            _domainTooltipEntry?.remove();
+            _domainTooltipEntry = null;
+          },
+          child: ChoiceChip(
+            selected: isSelected,
+            label: Text(label),
+            onSelected: (val) => onChanged(id),
+            selectedColor: AppColors.primary,
+            labelStyle: TextStyle(
+              color: isSelected ? AppColors.white : AppColors.textSecondary,
             ),
-          );
-          Overlay.of(chipContext).insert(entry);
-          _domainTooltipEntry = entry;
-        },
-        onExit: (_) {
-          _domainTooltipEntry?.remove();
-          _domainTooltipEntry = null;
-        },
-        child: ChoiceChip(
-          selected: isSelected,
-          label: Text(label),
-          onSelected: (val) => onChanged(id),
-          selectedColor: AppColors.primary,
-          labelStyle: TextStyle(color: isSelected ? AppColors.white : AppColors.textSecondary),
-          backgroundColor: AppColors.grey100,
-          shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
-        ),
-      );
-    });
+            backgroundColor: AppColors.grey100,
+            shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
+          ),
+        );
+      },
+    );
   }
 
-  Widget _buildFormatSidebarSection({required String current, required ValueChanged<String> onChanged}) {
+  Widget _buildFormatSidebarSection({
+    required String current,
+    required ValueChanged<String> onChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Định Dạng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        const Text(
+          'Định Dạng',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -1479,14 +1662,21 @@ class _LibraryViewState extends State<LibraryView> {
     );
   }
 
-  Widget _formatChoiceChip(String key, String label, String current, ValueChanged<String> onChanged) {
+  Widget _formatChoiceChip(
+    String key,
+    String label,
+    String current,
+    ValueChanged<String> onChanged,
+  ) {
     final isSelected = current == key;
     return ChoiceChip(
       selected: isSelected,
       label: Text(label),
       onSelected: (val) => onChanged(key),
       selectedColor: AppColors.primary,
-      labelStyle: TextStyle(color: isSelected ? AppColors.white : AppColors.textSecondary),
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.white : AppColors.textSecondary,
+      ),
       backgroundColor: AppColors.grey100,
       shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
     );
@@ -1542,13 +1732,14 @@ class _LibraryViewState extends State<LibraryView> {
   }
 
   void _deleteItem(LibraryItem item) async {
-    print('Delete button clicked for item: ${item.title}');
     // Hiển thị dialog xác nhận
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc chắn muốn xóa "${item.title}" không? Hành động này không thể hoàn tác.'),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa "${item.title}" không? Hành động này không thể hoàn tác.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -1582,7 +1773,7 @@ class _LibraryViewState extends State<LibraryView> {
         }
         return;
       }
-      
+
       final apiService = ApiService();
       final response = await apiService.deleteBook(bookId);
 
@@ -1624,9 +1815,7 @@ class _LibraryViewState extends State<LibraryView> {
   void _readItem(LibraryItem item) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => _ItemReaderPage(item: item),
-      ),
+      MaterialPageRoute(builder: (context) => _ItemReaderPage(item: item)),
     );
   }
 }
@@ -1680,7 +1869,7 @@ class _FilterDialogState extends State<_FilterDialog> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -1707,7 +1896,7 @@ class _FilterDialogState extends State<_FilterDialog> {
               ],
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1720,38 +1909,42 @@ class _FilterDialogState extends State<_FilterDialog> {
                     selectedTargetAge,
                     (value) => setState(() => selectedTargetAge = value),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   _buildFilterSection(
                     'Lĩnh Vực',
                     SampleLibraryItems.getDomains(),
                     selectedDomain,
                     (value) => setState(() => selectedDomain = value),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   _buildFilterSection(
                     'Định Dạng',
                     SampleLibraryItems.getCategories(),
                     selectedCategory,
                     (value) => setState(() => selectedCategory = value),
                   ),
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  widget.onApply(selectedTargetAge, selectedDomain, selectedCategory);
+                  widget.onApply(
+                    selectedTargetAge,
+                    selectedDomain,
+                    selectedCategory,
+                  );
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -1764,10 +1957,7 @@ class _FilterDialogState extends State<_FilterDialog> {
                 ),
                 child: const Text(
                   'Áp Dụng',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -1777,7 +1967,12 @@ class _FilterDialogState extends State<_FilterDialog> {
     );
   }
 
-  Widget _buildFilterSection(String title, List<String> options, String selected, Function(String) onChanged) {
+  Widget _buildFilterSection(
+    String title,
+    List<String> options,
+    String selected,
+    Function(String) onChanged,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1793,27 +1988,40 @@ class _FilterDialogState extends State<_FilterDialog> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: options.map((option) => GestureDetector(
-            onTap: () => onChanged(option),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: selected == option ? AppColors.primary : AppColors.grey100,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: selected == option ? AppColors.primary : AppColors.border,
+          children: options
+              .map(
+                (option) => GestureDetector(
+                  onTap: () => onChanged(option),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected == option
+                          ? AppColors.primary
+                          : AppColors.grey100,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: selected == option
+                            ? AppColors.primary
+                            : AppColors.border,
+                      ),
+                    ),
+                    child: Text(
+                      option,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: selected == option
+                            ? AppColors.white
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                option,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: selected == option ? AppColors.white : AppColors.textSecondary,
-                ),
-              ),
-            ),
-          )).toList(),
+              )
+              .toList(),
         ),
       ],
     );
@@ -1844,7 +2052,7 @@ class _ItemDetailsSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -1856,7 +2064,9 @@ class _ItemDetailsSheet extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Color(item.getFileTypeColor()).withValues(alpha: 0.1),
+                          color: Color(
+                            item.getFileTypeColor(),
+                          ).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -1891,28 +2101,30 @@ class _ItemDetailsSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   _buildDetailSection('Mô tả', item.description),
-                  _buildDetailSection('Thông tin', 
+                  _buildDetailSection(
+                    'Thông tin',
                     'Loại: ${item.getFileTypeText()}\n'
-                    'Lĩnh vực: ${item.getDomainText()}\n'
-                    'Độ khó: ${item.getDifficultyText()}\n'
-                    'Độ tuổi: ${item.targetAge}\n'
-                    'Lượt xem: ${item.viewCount}'),
-                  
+                        'Lĩnh vực: ${item.getDomainText()}\n'
+                        'Độ khó: ${item.getDifficultyText()}\n'
+                        'Độ tuổi: ${item.targetAge}\n'
+                        'Lượt xem: ${item.viewCount}',
+                  ),
+
                   if (item.reviews.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     _buildReviewsSection(),
                   ],
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -2008,62 +2220,64 @@ class _ItemDetailsSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          ...item.reviews.map((review) => Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      review.userName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        Icon(Icons.star, size: 16, color: AppColors.warning),
-                        const SizedBox(width: 4),
-                        Text(
-                          review.rating.toString(),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+          ...item.reviews.map(
+            (review) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        review.userName,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
                         ),
-                      ],
+                      ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Icon(Icons.star, size: 16, color: AppColors.warning),
+                          const SizedBox(width: 4),
+                          Text(
+                            review.rating.toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    review.comment,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  review.comment,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatDate(review.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDate(review.createdAt),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-           )),
+          ),
         ],
       ),
     );
@@ -2094,9 +2308,7 @@ class _ItemDetailsSheet extends StatelessWidget {
     Navigator.pop(context);
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => _ItemReaderPage(item: item),
-      ),
+      MaterialPageRoute(builder: (context) => _ItemReaderPage(item: item)),
     );
   }
 
@@ -2196,10 +2408,10 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
 
       // Gọi API để lấy chi tiết sách
       final response = await _apiService.getBookById(int.parse(widget.item.id));
-      
+
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        
+
         // Kiểm tra tất cả các field có thể chứa nội dung
         final contentFile = jsonData['contentFile'] as String?;
         final content = jsonData['content'] as String?;
@@ -2219,7 +2431,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         } else if (description != null && description.isNotEmpty) {
           finalContent = description;
         }
-        
+
         if (finalContent != null && finalContent.isNotEmpty) {
           setState(() {
             bookContent = finalContent;
@@ -2260,7 +2472,9 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
     // Nếu là data URI -> tách lấy phần base64 phía sau dấu phẩy
     if (_looksLikeDataUri(trimmed)) {
       final commaIdx = trimmed.indexOf(',');
-      final dataPart = commaIdx >= 0 ? trimmed.substring(commaIdx + 1) : trimmed;
+      final dataPart = commaIdx >= 0
+          ? trimmed.substring(commaIdx + 1)
+          : trimmed;
       return _cleanBase64(dataPart);
     }
     // Mặc định coi như base64 -> dọn dẹp whitespace và padding
@@ -2272,7 +2486,8 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
   }
 
   bool _looksLikeDataUri(String s) {
-    return s.startsWith('data:application/pdf') || s.startsWith('data:;base64,');
+    return s.startsWith('data:application/pdf') ||
+        s.startsWith('data:;base64,');
   }
 
   String _cleanBase64(String b64) {
@@ -2330,11 +2545,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
               errorMessage!,
@@ -2359,18 +2570,11 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.book_outlined,
-              size: 64,
-              color: AppColors.grey400,
-            ),
+            Icon(Icons.book_outlined, size: 64, color: AppColors.grey400),
             SizedBox(height: 16),
             Text(
               'Không có nội dung sách',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -2384,7 +2588,6 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
 
     // Hiển thị nội dung sách
     try {
-      
       // Kiểm tra nếu nội dung có vẻ là base64
       if (bookContent != null && bookContent!.isNotEmpty) {
         try {
@@ -2398,7 +2601,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
             }
           }
           final content = utf8.decode(bytes);
-          
+
           // Parse content as JSON if possible, otherwise treat as plain text
           try {
             final jsonData = jsonDecode(content);
@@ -2416,18 +2619,11 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.book_outlined,
-                size: 64,
-                color: AppColors.grey400,
-              ),
+              Icon(Icons.book_outlined, size: 64, color: AppColors.grey400),
               SizedBox(height: 16),
               Text(
                 'Không có nội dung sách',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
               ),
             ],
           ),
@@ -2438,11 +2634,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
               'Không thể đọc nội dung sách: $e',
@@ -2465,7 +2657,8 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
     final title = item.title.toLowerCase();
     if (title.endsWith('.pdf')) return true;
     if (content.startsWith('data:application/pdf')) return true;
-    if (_looksLikeUrl(content) && content.toLowerCase().contains('.pdf')) return true;
+    if (_looksLikeUrl(content) && content.toLowerCase().contains('.pdf'))
+      return true;
     // Try check base64 signature quickly without throwing
     try {
       final bytes = base64Decode(content);
@@ -2495,7 +2688,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
                 ),
               ),
             ),
-          
+
           if (jsonData['content'] != null)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -2508,11 +2701,11 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
                 ),
               ),
             ),
-          
+
           if (jsonData['chapters'] != null)
-            ...(jsonData['chapters'] as List).map((chapter) => 
-              _buildChapterWidget(chapter)
-            ).toList(),
+            ...(jsonData['chapters'] as List)
+                .map((chapter) => _buildChapterWidget(chapter))
+                .toList(),
         ],
       ),
     );
@@ -2550,7 +2743,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
                   color: AppColors.textPrimary,
                 ),
               ),
-            
+
             if (chapter['content'] != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -2574,7 +2767,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
     // Hiển thị nội dung text thông thường
     final lines = content.split('\n');
     final widgets = <Widget>[];
-    
+
     for (final line in lines) {
       if (line.startsWith('# ')) {
         // H1
@@ -2680,7 +2873,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         widgets.add(const SizedBox(height: 8));
       }
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: widgets,
