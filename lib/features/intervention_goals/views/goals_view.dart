@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'dart:convert';
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_config.dart';
+import '../../../models/api_service.dart';
 import '../models/goal_models.dart';
 import '../services/goal_service.dart';
 
@@ -14,6 +16,7 @@ class GoalsView extends StatefulWidget {
 
 class _GoalsViewState extends State<GoalsView> {
   final InterventionGoalService _service = InterventionGoalService();
+  final ApiService _apiService = ApiService();
   bool _isLoading = true;
   bool _hasError = false;
   String _errorMessage = '';
@@ -21,11 +24,16 @@ class _GoalsViewState extends State<GoalsView> {
   int _page = 0;
   final int _size = 10;
 
+  // Developmental Programs
+  bool _isLoadingPrograms = false;
+  List<Map<String, dynamic>> _programs = [];
+
   @override
   void initState() {
     super.initState();
     print('🎯 GoalsView initState called!'); // Debug log
     _load();
+    _loadPrograms();
   }
 
   Future<void> _load() async {
@@ -51,6 +59,42 @@ class _GoalsViewState extends State<GoalsView> {
     } finally {
       setState(() {
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadPrograms() async {
+    if (_isLoadingPrograms) return;
+    setState(() {
+      _isLoadingPrograms = true;
+    });
+    try {
+      final resp = await _apiService.getDevelopmentalPrograms();
+      if (resp.statusCode == 200) {
+        final dynamic data = jsonDecode(resp.body);
+        List<dynamic> list;
+        if (data is List) {
+          list = data;
+        } else if (data is Map<String, dynamic> && data['content'] is List) {
+          list = data['content'] as List;
+        } else {
+          list = [];
+        }
+        setState(() {
+          _programs = list.map((e) => (e as Map).cast<String, dynamic>()).toList();
+        });
+      } else {
+        setState(() {
+          _programs = [];
+        });
+      }
+    } catch (_) {
+      setState(() {
+        _programs = [];
+      });
+    } finally {
+      setState(() {
+        _isLoadingPrograms = false;
       });
     }
   }
@@ -385,7 +429,10 @@ class _GoalsViewState extends State<GoalsView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _load,
+            onPressed: () {
+              _load();
+              _loadPrograms();
+            },
             tooltip: 'Làm mới',
           ),
         ],
@@ -406,10 +453,13 @@ class _GoalsViewState extends State<GoalsView> {
                   ? const Center(child: Text('Chưa có mục tiêu can thiệp nào'))
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
-                      itemCount: _goals.length,
+                      itemCount: _goals.length + 1,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
-                        final goal = _goals[index];
+                        if (index == 0) {
+                          return _buildProgramsSection();
+                        }
+                        final goal = _goals[index - 1];
                         final goalTitle = goal.displayedName.vi.isNotEmpty ? goal.displayedName.vi : goal.displayedName.en;
                         final goalDesc = goal.description == null
                             ? null
@@ -588,6 +638,92 @@ class _GoalsViewState extends State<GoalsView> {
                         );
                       },
                     ),
+    );
+  }
+
+  Widget _buildProgramsSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(color: AppColors.shadowLight, blurRadius: 4, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(8)),
+                  child: Icon(Icons.layers, color: AppColors.primary, size: 20),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Chương trình can thiệp',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Làm mới chương trình',
+                  onPressed: _loadPrograms,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (_isLoadingPrograms)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_programs.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Text('Chưa có chương trình nào', style: TextStyle(color: AppColors.textSecondary)),
+              )
+            else
+              Column(
+                children: _programs.take(5).map((p) {
+                  final name = (p['name'] ?? '').toString();
+                  final displayedName = p['displayedName'];
+                  String shown = name;
+                  if (displayedName is Map) {
+                    final m = displayedName.cast<String, dynamic>();
+                    shown = (m['vi'] ?? m['en'] ?? name).toString();
+                  }
+                  return Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.playlist_add_check, size: 18, color: AppColors.textSecondary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            shown.isEmpty ? 'Chương trình' : shown,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
+      ),
     );
   }
 

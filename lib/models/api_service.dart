@@ -397,6 +397,19 @@ class ApiService {
     return resp;
   }
 
+  /// Lấy toàn bộ chương trình can thiệp (developmental programs)
+  Future<http.Response> getDevelopmentalPrograms() async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/developmental-programs');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
   // Library Management APIs
   Future<http.Response> createBook(Map<String, dynamic> bookData) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/books');
