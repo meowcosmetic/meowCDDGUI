@@ -10,7 +10,7 @@ class AppConfig {
   static const bool showExpertConnection = true;  // Liên kết với chuyên gia
   static const bool showStore = true;             // Cửa hàng
   static const bool showDonation = true;          // Đóng góp
-  static const bool showInterventions = true;     // Mục tiêu can thiệp
+  static const bool showInterventions = true;     // Chương trình can thiệp
   static const bool showInterventionDomains = true; // Lĩnh vực can thiệp
   static const bool showInterventionMethods = true; // Nhóm phương pháp can thiệp
   
@@ -144,8 +144,8 @@ class AppConfig {
     if (showInterventions && enableInterventions) {
       categories.add(DashboardCategory(
         id: 'interventions',
-        title: 'Mục Tiêu Can Thiệp',
-        subtitle: 'Quản lý lĩnh vực và mục tiêu',
+        title: 'Chương Trình Can Thiệp',
+        subtitle: 'Quản lý chương trình và mục tiêu',
         icon: 'flag',
         color: 0xFF3F51B5,
         route: '/interventions',

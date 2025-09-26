@@ -359,7 +359,7 @@ class ChildTrackingHistoryView extends StatelessWidget {
                 // Selected Goals
                 if (tracking.selectedGoals.isNotEmpty) ...[
                   const Text(
-                    'Mục tiêu can thiệp:',
+                    'Chương trình can thiệp:',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

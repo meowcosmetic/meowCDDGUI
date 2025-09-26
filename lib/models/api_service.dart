@@ -554,6 +554,96 @@ class ApiService {
     return resp;
   }
 
+  /// Tạo bài post can thiệp mới
+  Future<http.Response> createInterventionPost(Map<String, dynamic> postData) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/intervention-posts');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(postData),
+    );
+    return resp;
+  }
+
+  /// Lấy danh sách bài post can thiệp với phân trang
+  Future<http.Response> getInterventionPostsPaginated({
+    int page = 0,
+    int size = 10,
+    String sortBy = 'title',
+    String sortDir = 'desc',
+    String? postType,
+    bool? isPublished,
+  }) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'size': size.toString(),
+      'sortBy': sortBy,
+      'sortDir': sortDir,
+    };
+    
+    if (postType != null && postType.isNotEmpty) {
+      queryParams['postType'] = postType;
+    }
+    
+    if (isPublished != null) {
+      queryParams['isPublished'] = isPublished.toString();
+    }
+    
+    final uri = Uri.parse('${AppConfig.cddAPI}/intervention-posts').replace(queryParameters: queryParams);
+    
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Lấy chi tiết bài post can thiệp theo ID
+  Future<http.Response> getInterventionPostById(int postId) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/intervention-posts/$postId');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Cập nhật bài post can thiệp
+  Future<http.Response> updateInterventionPost(int postId, Map<String, dynamic> postData) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/intervention-posts/$postId');
+    final resp = await http.put(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(postData),
+    );
+    return resp;
+  }
+
+  /// Xóa bài post can thiệp
+  Future<http.Response> deleteInterventionPost(int postId) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/intervention-posts/$postId');
+    final resp = await http.delete(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
   // Delete book by ID
   Future<http.Response> deleteBook(int bookId) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/books/$bookId');

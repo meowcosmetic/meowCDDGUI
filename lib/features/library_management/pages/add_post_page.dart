@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../constants/app_colors.dart';
 import '../../../models/api_service.dart';
+import '../../../models/intervention_post.dart';
 import '../../intervention_domains/models/domain_models.dart';
 
 class AddPostPage extends StatefulWidget {
@@ -21,22 +22,33 @@ class _AddPostPageState extends State<AddPostPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _summaryController = TextEditingController();
   final _tagsController = TextEditingController();
   final _authorController = TextEditingController();
-  final _featuredImageUrlController = TextEditingController();
+  final _versionController = TextEditingController();
+  final _difficultyController = TextEditingController();
+  final _targetAgeMinController = TextEditingController();
+  final _targetAgeMaxController = TextEditingController();
+  final _durationController = TextEditingController();
+  final _criteriaIdController = TextEditingController();
+  final _programIdController = TextEditingController();
 
-  List<String> _selectedDomainIds = [];
+  PostType _selectedPostType = PostType.INTERVENTION_METHOD;
+  bool _isPublished = false;
   bool _isLoading = false;
 
   @override
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
-    _summaryController.dispose();
     _tagsController.dispose();
     _authorController.dispose();
-    _featuredImageUrlController.dispose();
+    _versionController.dispose();
+    _difficultyController.dispose();
+    _targetAgeMinController.dispose();
+    _targetAgeMaxController.dispose();
+    _durationController.dispose();
+    _criteriaIdController.dispose();
+    _programIdController.dispose();
     super.dispose();
   }
 
@@ -48,24 +60,37 @@ class _AddPostPageState extends State<AddPostPage> {
     });
 
     try {
-      final postData = {
-        'title': _titleController.text,
-        'content': _contentController.text,
-        'summary': _summaryController.text,
-        'tags': _tagsController.text.split(',').map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toList(),
-        'author': _authorController.text,
-        'featuredImageUrl': _featuredImageUrlController.text,
-        'developmentalDomainIds': _selectedDomainIds,
+      // Tạo content JSON từ nội dung
+      final content = {
+        'text': _contentController.text,
+        'type': 'text',
+        'createdAt': DateTime.now().toIso8601String(),
       };
 
+      final interventionPost = InterventionPost(
+        title: _titleController.text,
+        content: content,
+        postType: _selectedPostType,
+        difficultyLevel: int.tryParse(_difficultyController.text),
+        targetAgeMinMonths: int.tryParse(_targetAgeMinController.text),
+        targetAgeMaxMonths: int.tryParse(_targetAgeMaxController.text),
+        estimatedDurationMinutes: int.tryParse(_durationController.text),
+        tags: _tagsController.text.isNotEmpty ? _tagsController.text : null,
+        isPublished: _isPublished,
+        author: _authorController.text.isNotEmpty ? _authorController.text : null,
+        version: _versionController.text.isNotEmpty ? _versionController.text : null,
+        criteriaId: int.tryParse(_criteriaIdController.text),
+        programId: int.tryParse(_programIdController.text),
+      );
+
       final apiService = ApiService();
-      final response = await apiService.createPost(postData);
+      final response = await apiService.createInterventionPost(interventionPost.toJson());
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Thêm bài post thành công!'),
+              content: Text('Thêm bài post can thiệp thành công!'),
               backgroundColor: Colors.green,
             ),
           );
@@ -106,7 +131,7 @@ class _AddPostPageState extends State<AddPostPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
-        title: const Text('Thêm Bài Post Mới'),
+        title: const Text('Thêm Bài Post Can Thiệp'),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -138,12 +163,6 @@ class _AddPostPageState extends State<AddPostPage> {
                 validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập tiêu đề' : null,
               ),
               _buildTextField(
-                controller: _summaryController,
-                label: 'Tóm tắt *',
-                maxLines: 3,
-                validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập tóm tắt' : null,
-              ),
-              _buildTextField(
                 controller: _contentController,
                 label: 'Nội dung *',
                 maxLines: 10,
@@ -154,17 +173,79 @@ class _AddPostPageState extends State<AddPostPage> {
                 label: 'Tác giả',
               ),
               _buildTextField(
+                controller: _versionController,
+                label: 'Phiên bản *',
+                hintText: 'Ví dụ: 1.0',
+                validator: (value) => value?.isEmpty == true ? 'Vui lòng nhập phiên bản' : null,
+              ),
+              _buildTextField(
                 controller: _tagsController,
                 label: 'Tags (phân cách bằng dấu phẩy)',
                 hintText: 'Ví dụ: giáo dục, trẻ em, phát triển',
               ),
-              _buildSectionTitle('Lĩnh vực phát triển'),
-              _buildDomainSelection(),
-              _buildSectionTitle('Hình ảnh'),
+              
+              _buildSectionTitle('Loại bài post'),
+              _buildPostTypeSelection(),
+              
+              _buildSectionTitle('Thông tin can thiệp'),
               _buildTextField(
-                controller: _featuredImageUrlController,
-                label: 'URL ảnh đại diện',
+                controller: _difficultyController,
+                label: 'Mức độ khó (1-5)',
+                keyboardType: TextInputType.number,
+                hintText: '1 = Dễ, 5 = Khó',
               ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _targetAgeMinController,
+                      label: 'Độ tuổi tối thiểu (tháng)',
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _targetAgeMaxController,
+                      label: 'Độ tuổi tối đa (tháng)',
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              _buildTextField(
+                controller: _durationController,
+                label: 'Thời gian ước tính (phút)',
+                keyboardType: TextInputType.number,
+                hintText: 'Ví dụ: 30',
+              ),
+              
+              _buildSectionTitle('Liên kết'),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _criteriaIdController,
+                      label: 'ID Tiêu chí',
+                      keyboardType: TextInputType.number,
+                      hintText: 'ID của DevelopmentalItemCriteria',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _programIdController,
+                      label: 'ID Chương trình',
+                      keyboardType: TextInputType.number,
+                      hintText: 'ID của DevelopmentalProgram',
+                    ),
+                  ),
+                ],
+              ),
+              
+              _buildSectionTitle('Trạng thái'),
+              _buildPublishedToggle(),
+              
               const SizedBox(height: 32),
               _buildSubmitButton(),
             ],
@@ -218,14 +299,14 @@ class _AddPostPageState extends State<AddPostPage> {
     );
   }
 
-  Widget _buildDomainSelection() {
+  Widget _buildPostTypeSelection() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Lĩnh vực phát triển *',
+            'Loại bài post *',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -235,33 +316,49 @@ class _AddPostPageState extends State<AddPostPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: widget.domains.map((domain) {
-              final isSelected = _selectedDomainIds.contains(domain.id);
+            children: PostType.values.map((postType) {
+              final isSelected = _selectedPostType == postType;
               return FilterChip(
-                label: Text(domain.displayedName.vi),
+                label: Text(postType.displayName),
                 selected: isSelected,
                 onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedDomainIds.add(domain.id);
-                    } else {
-                      _selectedDomainIds.remove(domain.id);
-                    }
-                  });
+                  if (selected) {
+                    setState(() {
+                      _selectedPostType = postType;
+                    });
+                  }
                 },
                 selectedColor: AppColors.primary.withOpacity(0.2),
                 checkmarkColor: AppColors.primary,
               );
             }).toList(),
           ),
-          if (_selectedDomainIds.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Text(
-                'Vui lòng chọn ít nhất một lĩnh vực',
-                style: TextStyle(color: Colors.red, fontSize: 12),
-              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPublishedToggle() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Checkbox(
+            value: _isPublished,
+            onChanged: (value) {
+              setState(() {
+                _isPublished = value ?? false;
+              });
+            },
+            activeColor: AppColors.primary,
+          ),
+          const Text(
+            'Xuất bản ngay',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
             ),
+          ),
         ],
       ),
     );
@@ -290,7 +387,7 @@ class _AddPostPageState extends State<AddPostPage> {
                 ),
               )
             : const Text(
-                'Thêm Bài Post',
+                'Thêm Bài Post Can Thiệp',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),

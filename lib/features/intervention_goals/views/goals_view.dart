@@ -379,7 +379,7 @@ class _GoalsViewState extends State<GoalsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mục Tiêu Can Thiệp'),
+        title: const Text('Chương Trình Can Thiệp'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         actions: [

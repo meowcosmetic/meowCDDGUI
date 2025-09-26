@@ -367,7 +367,7 @@ class _ChildTrackingViewState extends State<ChildTrackingView> {
               ),
               const SizedBox(width: 8),
               const Text(
-                'Mục tiêu can thiệp (Chọn 3 mục tiêu)',
+                'Chương trình can thiệp (Chọn 3 mục tiêu)',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
