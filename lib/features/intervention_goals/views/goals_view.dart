@@ -6,6 +6,8 @@ import '../../../constants/app_config.dart';
 import '../../../models/api_service.dart';
 import '../models/goal_models.dart';
 import '../services/goal_service.dart';
+import '../widgets/criteria_list_widget.dart';
+import '../pages/add_criteria_page.dart';
 
 class GoalsView extends StatefulWidget {
   const GoalsView({super.key});
@@ -911,8 +913,10 @@ class _ProgramCriteriaViewState extends State<_ProgramCriteriaView> {
       _error = null;
     });
     try {
-      // Use developmental-domains API as requested
-      final resp = await _api.getDevelopmentalDomains();
+      // Use developmental-item-criteria API to get criteria/goals
+      final resp = await _api.getDevelopmentalItemCriteria();
+      print('📡 API Response status: ${resp.statusCode}');
+      print('📡 API Response body: ${resp.body}');
       if (resp.statusCode == 200) {
         final dynamic data = jsonDecode(resp.body);
         List<dynamic> list;
@@ -944,10 +948,23 @@ class _ProgramCriteriaViewState extends State<_ProgramCriteriaView> {
     }
   }
 
+  Future<void> _addNewCriteria() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddCriteriaPage(),
+      ),
+    );
+    
+    if (result == true) {
+      _load();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Program title (prefer vi)
-    String title = 'Tiêu chí chương trình';
+    String title = 'Mục tiêu can thiệp nhỏ';
     final nameField = widget.programData['name'];
     if (nameField is Map) {
       final m = nameField.cast<String, dynamic>();
@@ -963,59 +980,13 @@ class _ProgramCriteriaViewState extends State<_ProgramCriteriaView> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-          ? Center(child: Text(_error!))
-          : _criteria.isEmpty
-          ? const Center(child: Text('Chưa có tiêu chí'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _criteria.length,
-              itemBuilder: (context, index) {
-                final c = _criteria[index];
-                String name = '';
-                final dn = c['displayedName'] ?? c['name'];
-                if (dn is Map) {
-                  final m = dn.cast<String, dynamic>();
-                  name = (m['vi'] ?? m['en'] ?? '').toString();
-                } else if (dn != null) {
-                  name = dn.toString();
-                }
-
-                String? desc;
-                final d = c['description'];
-                if (d is Map) {
-                  final m = d.cast<String, dynamic>();
-                  desc = (m['vi'] ?? m['en'])?.toString();
-                } else if (d is String) {
-                  desc = d;
-                }
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name.isEmpty ? 'Tiêu chí' : name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (desc != null && desc!.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Html(data: desc!),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+      body: CriteriaListWidget(
+        criteria: _criteria,
+        isLoading: _isLoading,
+        error: _error,
+        onRefresh: _load,
+        onAddNew: _addNewCriteria,
+      ),
     );
   }
 }

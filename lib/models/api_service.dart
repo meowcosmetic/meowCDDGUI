@@ -382,6 +382,83 @@ class ApiService {
     return resp;
   }
 
+  /// Lấy danh sách tiêu chí mục tiêu (developmental item criteria)
+  Future<http.Response> getDevelopmentalItemCriteria() async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/developmental-item-criteria');
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Tạo mô tả tự động từ nội dung can thiệp
+  Future<http.Response> generateDescription(String content) async {
+    final uri = Uri.parse('http://localhost:8102/generate-description');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({'intervention_goal': content}),
+    );
+    return resp;
+  }
+
+  /// Tạo mục tiêu can thiệp mới
+  Future<http.Response> createDevelopmentalItemCriteria(Map<String, dynamic> criteriaData) async {
+    final uri = Uri.parse('${AppConfig.cddAPI}/developmental-item-criteria');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(criteriaData),
+    );
+    return resp;
+  }
+
+  /// Tìm kiếm nội dung liên quan
+  Future<http.Response> searchRelatedContent({
+    required String query,
+    int limit = 10,
+    double scoreThreshold = 0.7,
+  }) async {
+    final uri = Uri.parse('http://localhost:8102/search');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({
+        'query': query,
+        'limit': limit,
+        'score_threshold': scoreThreshold,
+      }),
+    );
+    return resp;
+  }
+
+  /// Xử lý mục tiêu can thiệp với nội dung liên quan
+  Future<http.Response> processInterventionGoal(Map<String, dynamic> processData) async {
+    final uri = Uri.parse('http://localhost:8102/process-intervention-goal');
+    final resp = await http.post(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode(processData),
+    );
+    return resp;
+  }
+
   /// Lấy chi tiết sách theo ID
   Future<http.Response> getBookById(int bookId) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/books/$bookId');
@@ -700,4 +777,5 @@ class ApiService {
     );
     return resp;
   }
+
 }

@@ -271,7 +271,6 @@ class InterventionMethodService {
   // DELETE method
   Future<void> deleteMethod(String methodId) async {
     final uri = Uri.parse('$baseUrl/intervention-methods/$methodId');
-
     final resp = await http.delete(
       uri,
       headers: const {

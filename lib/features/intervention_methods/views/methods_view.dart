@@ -306,7 +306,9 @@ class _MethodsViewState extends State<MethodsView> {
 
     if (confirmed == true) {
       try {
+        print('Attempting to delete method with ID: ${method.id}');
         await _service.deleteMethod(method.id);
+        print('Delete method call completed successfully');
         _load();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -315,6 +317,7 @@ class _MethodsViewState extends State<MethodsView> {
           ),
         );
       } catch (e) {
+        print('Error deleting method: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi khi xóa: $e'),
