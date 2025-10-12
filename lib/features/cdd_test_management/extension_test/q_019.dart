@@ -64,8 +64,13 @@ class _ExtensionTestQ019State extends State<ExtensionTestQ019> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Đã chọn: $selectedAnswer')),
                   );
+                  
+                  // Quay lại test chính
+                  if (widget.onReturnToMainTest != null) {
+                    widget.onReturnToMainTest!();
+                  }
                 } : null,
-                child: const Text('Xác nhận'),
+                child: const Text('Xác nhận và tiếp tục'),
               ),
             ),
           ],

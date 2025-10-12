@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../constants/app_colors.dart';
 import '../../../models/test_models.dart';
 import '../../../models/child.dart';
+import '../extension_test/q_001.dart';
 
 class TestTakingPage extends StatefulWidget {
   final Test test;
@@ -23,11 +24,48 @@ class _TestTakingPageState extends State<TestTakingPage> {
   DateTime startTime = DateTime.now();
   bool isCompleted = false;
   TestResult? result;
+  
+  // Extension test state
+  bool isShowingExtensionTest = false;
+  int currentExtensionQuestionIndex = 0;
+  Map<String, String> extensionAnswers = {}; // questionId -> selected answer
+
+  // Check if this is M-CHAT-R test
+  bool _isMCHATRTest() {
+    return widget.test.assessmentCode == 'M-CHAT-R';
+  }
+
+  // Show extension test for specific question
+  void _showExtensionTest(int questionIndex) {
+    if (_isMCHATRTest() && questionIndex == 0) { // Question 1 (index 0)
+      setState(() {
+        isShowingExtensionTest = true;
+        currentExtensionQuestionIndex = 0;
+      });
+    }
+  }
+
+  // Get extension question widget
+  Widget _getExtensionQuestionWidget() {
+    final currentQuestion = widget.test.questions[currentQuestionIndex];
+    final mainAnswer = answers[currentQuestion.questionId];
+    
+    // For now, only show Q_001 for demo
+    return ExtensionTestQ001(
+      mainQuestionAnswer: mainAnswer,
+      onReturnToMainTest: _returnToMainTest,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     if (isCompleted && result != null) {
       return _buildResultPage();
+    }
+
+    // Show extension test if needed
+    if (isShowingExtensionTest) {
+      return _buildExtensionTestPage();
     }
 
     final currentQuestion = widget.test.questions[currentQuestionIndex];
@@ -568,6 +606,12 @@ class _TestTakingPageState extends State<TestTakingPage> {
   }
 
   void _nextQuestion() {
+    // Check if we need to show extension test for current question
+    if (_isMCHATRTest() && currentQuestionIndex == 0) {
+      _showExtensionTest(currentQuestionIndex);
+      return;
+    }
+    
     if (currentQuestionIndex < widget.test.questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
@@ -575,6 +619,36 @@ class _TestTakingPageState extends State<TestTakingPage> {
     } else {
       _completeTest();
     }
+  }
+
+  // Build extension test page
+  Widget _buildExtensionTestPage() {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
+        title: const Text('Extension Test - Câu hỏi mở rộng'),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            setState(() {
+              isShowingExtensionTest = false;
+            });
+          },
+        ),
+      ),
+      body: _getExtensionQuestionWidget(),
+    );
+  }
+
+  // Return to main test
+  void _returnToMainTest() {
+    setState(() {
+      isShowingExtensionTest = false;
+      currentQuestionIndex++;
+    });
   }
 
   void _completeTest() {

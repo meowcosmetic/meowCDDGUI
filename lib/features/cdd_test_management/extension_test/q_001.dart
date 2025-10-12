@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ExtensionTestQ001 extends StatefulWidget {
-  const ExtensionTestQ001({Key? key}) : super(key: key);
+  final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
+  final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
+  
+  const ExtensionTestQ001({
+    Key? key,
+    this.mainQuestionAnswer,
+    this.onReturnToMainTest,
+  }) : super(key: key);
 
   @override
   State<ExtensionTestQ001> createState() => _ExtensionTestQ001State();
@@ -65,8 +72,13 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Đã chọn: $selectedAnswer')),
                   );
+                  
+                  // Quay lại test chính
+                  if (widget.onReturnToMainTest != null) {
+                    widget.onReturnToMainTest!();
+                  }
                 } : null,
-                child: const Text('Xác nhận'),
+                child: const Text('Xác nhận và tiếp tục'),
               ),
             ),
           ],
