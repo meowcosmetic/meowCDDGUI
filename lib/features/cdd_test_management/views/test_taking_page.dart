@@ -508,7 +508,23 @@ class _TestTakingPageState extends State<TestTakingPage> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(context, result),
+                    onPressed: () {
+                      // Trả về kết quả chi tiết khi về trang chủ
+                      final detailedResult = {
+                        'startTime': startTime.toIso8601String(),
+                        'endTime': DateTime.now().toIso8601String(),
+                        'totalScore': result!.score.toDouble(),
+                        'maxScore': result!.totalQuestions.toDouble(),
+                        'percentageScore': (result!.score / result!.totalQuestions) * 100,
+                        'correctAnswers': result!.score,
+                        'totalQuestions': result!.totalQuestions,
+                        'skippedQuestions': result!.totalQuestions - result!.answeredQuestions,
+                        'timeSpent': result!.timeSpent,
+                        'interpretation': _getInterpretation((result!.score / result!.totalQuestions) * 100),
+                        'notes': 'Hoàn thành bài test ${widget.test.getName()}',
+                      };
+                      Navigator.pop(context, detailedResult);
+                    },
                     icon: const Icon(Icons.home),
                     label: const Text('Về trang chủ'),
                     style: OutlinedButton.styleFrom(
@@ -639,6 +655,13 @@ class _TestTakingPageState extends State<TestTakingPage> {
     
     return ExtensionTestQ001(
       mainQuestionAnswer: mainAnswer,
+      onUpdateMainResult: (bool newResult) {
+        // Cập nhật kết quả câu hỏi chính
+        final currentQuestion = widget.test.questions[currentQuestionIndex];
+        setState(() {
+          answers[currentQuestion.questionId] = newResult;
+        });
+      },
       onReturnToMainTest: () {
         // No need to return, just continue with main test
         setState(() {});
@@ -731,9 +754,9 @@ class _TestTakingPageState extends State<TestTakingPage> {
     });
 
     // Trả về kết quả chi tiết cho TestDetailView
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.pop(context, detailedResult);
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Navigator.pop(context, detailedResult);
+    // });
   }
 
   String _getInterpretation(double percentageScore) {
