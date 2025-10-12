@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import '../constants/app_colors.dart';
-import '../models/test_models.dart';
-import '../models/api_service.dart';
-import '../models/test_result_model.dart';
-import '../models/child.dart';
+import '../../../constants/app_colors.dart';
+import '../../../models/test_models.dart';
+import '../../../models/api_service.dart';
+import '../../../models/test_result_model.dart';
+import '../../../models/child.dart';
 import 'test_taking_page.dart';
-import '../features/cdd_test_management/models/cdd_test.dart';
+import '../models/cdd_test.dart';
 
 class TestDetailView extends StatefulWidget {
   final String testId;

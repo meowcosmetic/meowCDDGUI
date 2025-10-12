@@ -8,7 +8,7 @@ import 'child_tracking_history_view.dart';
 import '../../../models/api_service.dart';
 import '../../../features/cdd_test_management/models/cdd_test.dart';
 import 'child_completed_tests_view.dart';
-import '../../../view/test_detail_view.dart';
+import '../../cdd_test_management/views/test_detail_view.dart';
 import '../../../models/test_models.dart';
 import '../../../uiElement/selectable_text_widget.dart';
 import '../../intervention_domains/services/domain_service.dart';

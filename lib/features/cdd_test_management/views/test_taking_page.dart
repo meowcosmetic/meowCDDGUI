@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../models/test_models.dart';
-import '../models/child.dart';
+import '../../../constants/app_colors.dart';
+import '../../../models/test_models.dart';
+import '../../../models/child.dart';
 
 class TestTakingPage extends StatefulWidget {
   final Test test;

@@ -8,7 +8,7 @@ import '../uiElement/alert_demo.dart';
 import '../uiElement/pagination_demo.dart';
 import '../uiElement/heading_demo.dart';
 import '../view/policy_view.dart';
-import '../view/test_view.dart';
+import '../features/cdd_test_management/views/test_view.dart';
 import '../constants/app_colors.dart';
 import '../uiElement/chat_dialog.dart';
 import '../uiElement/fab_utility.dart';
