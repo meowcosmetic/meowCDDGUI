@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../constants/app_colors.dart';
 import '../../../models/test_models.dart';
 import '../../../models/child.dart';
+import '../extension_test/q_001.dart';
 
 class TestTakingPage extends StatefulWidget {
   final Test test;
@@ -631,90 +632,20 @@ class _TestTakingPageState extends State<TestTakingPage> {
     );
   }
 
-  // Get extension question content (simplified version)
+  // Get extension question content (flow assessment version)
   Widget _getExtensionQuestionContent() {
     final currentQuestion = widget.test.questions[currentQuestionIndex];
     final mainAnswer = answers[currentQuestion.questionId];
     
-    return _buildInlineExtensionQuestion(
-      question: "Trong tình huống con bạn gặp khó khăn trong việc học tập, bạn sẽ làm gì đầu tiên?",
-      options: [
-        "A. Tìm hiểu nguyên nhân cụ thể của khó khăn",
-        "B. Yêu cầu con cố gắng hơn nữa", 
-        "C. Tìm kiếm sự giúp đỡ từ giáo viên",
-        "D. So sánh con với các bạn khác"
-      ],
-      mainAnswer: mainAnswer,
-    );
-  }
-
-  // Build inline extension question
-  Widget _buildInlineExtensionQuestion({
-    required String question,
-    required List<String> options,
-    bool? mainAnswer,
-  }) {
-    String? selectedAnswer;
-    
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              question,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ...options.map((option) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: RadioListTile<String>(
-                title: Text(option),
-                value: option,
-                groupValue: selectedAnswer,
-                onChanged: (String? value) {
-                  setState(() {
-                    selectedAnswer = value;
-                  });
-                },
-                contentPadding: EdgeInsets.zero,
-              ),
-            )).toList(),
-            if (selectedAnswer != null) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle, color: AppColors.success, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Đã chọn: $selectedAnswer',
-                        style: TextStyle(
-                          color: AppColors.success,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        );
+    return ExtensionTestQ001(
+      mainQuestionAnswer: mainAnswer,
+      onReturnToMainTest: () {
+        // No need to return, just continue with main test
+        setState(() {});
       },
     );
   }
+
 
 
   void _completeTest() {
