@@ -382,6 +382,24 @@ class ApiService {
     return resp;
   }
 
+  /// Lấy danh sách developmental domains (NEON) có phân trang theo URL yêu cầu
+  Future<http.Response> getNeonDevelopmentalDomainsPaginated({
+    int page = 0,
+    int size = 10,
+  }) async {
+    final uri = Uri.parse(
+      'http://192.168.1.184/api/cdd/api/v1/neon/developmental-domains?page=$page&size=$size',
+    );
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
   /// Lấy danh sách tiêu chí mục tiêu (developmental item criteria)
   Future<http.Response> getDevelopmentalItemCriteria() async {
     final uri = Uri.parse('${AppConfig.cddAPI}/developmental-item-criteria');
@@ -397,7 +415,7 @@ class ApiService {
 
   /// Tạo mô tả tự động từ nội dung can thiệp
   Future<http.Response> generateDescription(String content) async {
-    final uri = Uri.parse('http://localhost:8102/generate-description');
+    final uri = Uri.parse('http://localhost/api/cdd-ai/generate-description');
     final resp = await http.post(
       uri,
       headers: const {
@@ -410,7 +428,9 @@ class ApiService {
   }
 
   /// Tạo mục tiêu can thiệp mới
-  Future<http.Response> createDevelopmentalItemCriteria(Map<String, dynamic> criteriaData) async {
+  Future<http.Response> createDevelopmentalItemCriteria(
+    Map<String, dynamic> criteriaData,
+  ) async {
     final uri = Uri.parse('${AppConfig.cddAPI}/developmental-item-criteria');
     final resp = await http.post(
       uri,
@@ -423,13 +443,85 @@ class ApiService {
     return resp;
   }
 
+  /// Lấy danh sách mục tiêu can thiệp theo itemId
+  Future<http.Response> getDevelopmentalItemCriteriaByItemId(
+    String itemId, {
+    int page = 0,
+    int size = 10,
+  }) async {
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/developmental-item-criteria/item/$itemId?page=$page&size=$size',
+    );
+    final resp = await http.get(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Cập nhật mục tiêu can thiệp
+  Future<http.Response> updateDevelopmentalItemCriteria(
+    String criteriaId,
+    Map<String, dynamic> criteriaData,
+  ) async {
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/developmental-item-criteria/$criteriaId',
+    );
+
+    // Try PUT first, if not supported, use POST with method override
+    try {
+      final resp = await http.put(
+        uri,
+        headers: const {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(criteriaData),
+      );
+      return resp;
+    } catch (e) {
+      // Fallback to POST with method override if PUT is not supported
+      print('PUT method failed, trying POST with method override: $e');
+      final resp = await http.post(
+        uri,
+        headers: const {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-HTTP-Method-Override': 'PUT',
+        },
+        body: jsonEncode(criteriaData),
+      );
+      return resp;
+    }
+  }
+
+  /// Xóa mục tiêu can thiệp
+  Future<http.Response> deleteDevelopmentalItemCriteria(
+    String criteriaId,
+  ) async {
+    final uri = Uri.parse(
+      '${AppConfig.cddAPI}/developmental-item-criteria/$criteriaId',
+    );
+    final resp = await http.delete(
+      uri,
+      headers: const {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
   /// Tìm kiếm nội dung liên quan
   Future<http.Response> searchRelatedContent({
     required String query,
     int limit = 10,
     double scoreThreshold = 0.7,
   }) async {
-    final uri = Uri.parse('http://localhost:8102/search');
+    final uri = Uri.parse('http://localhost/api/cdd-ai/search');
     final resp = await http.post(
       uri,
       headers: const {
@@ -446,8 +538,12 @@ class ApiService {
   }
 
   /// Xử lý mục tiêu can thiệp với nội dung liên quan
-  Future<http.Response> processInterventionGoal(Map<String, dynamic> processData) async {
-    final uri = Uri.parse('http://localhost:8102/process-intervention-goal');
+  Future<http.Response> processInterventionGoal(
+    Map<String, dynamic> processData,
+  ) async {
+    final uri = Uri.parse(
+      'http://localhost/api/cdd-ai/process-intervention-goal',
+    );
     final resp = await http.post(
       uri,
       headers: const {
@@ -777,5 +873,4 @@ class ApiService {
     );
     return resp;
   }
-
 }

@@ -195,70 +195,22 @@ class PostDetailPage extends StatelessWidget {
   }
 
   Widget _buildContentDisplay(Map<String, dynamic> content) {
-    // Handle new content format with text field
-    if (content.containsKey('text') && content['text'] != null) {
-      final text = content['text'].toString();
-      return Html(
-        data: text,
-        style: {
-          "body": Style(
-            margin: Margins.zero,
-            padding: HtmlPaddings.zero,
-            fontSize: FontSize(15),
-            color: AppColors.textPrimary,
-            lineHeight: LineHeight(1.6),
-          ),
-          "p": Style(
-            margin: Margins.only(bottom: 12),
-            fontSize: FontSize(15),
-          ),
-          "strong": Style(fontWeight: FontWeight.bold),
-          "em": Style(fontStyle: FontStyle.italic),
-          "ul": Style(
-            margin: Margins.only(left: 20, bottom: 12),
-          ),
-          "ol": Style(
-            margin: Margins.only(left: 20, bottom: 12),
-          ),
-          "li": Style(
-            margin: Margins.only(bottom: 6),
-            fontSize: FontSize(15),
-          ),
-          "h1": Style(
-            fontSize: FontSize(20),
-            fontWeight: FontWeight.bold,
-            margin: Margins.only(bottom: 16),
-            color: AppColors.primary,
-          ),
-          "h2": Style(
-            fontSize: FontSize(18),
-            fontWeight: FontWeight.bold,
-            margin: Margins.only(bottom: 12),
-            color: AppColors.primary,
-          ),
-          "h3": Style(
-            fontSize: FontSize(16),
-            fontWeight: FontWeight.bold,
-            margin: Margins.only(bottom: 8),
-            color: AppColors.textPrimary,
-          ),
-          "blockquote": Style(
-            padding: HtmlPaddings.only(left: 16),
-            margin: Margins.only(bottom: 12),
-            border: Border(
-              left: BorderSide(
-                color: AppColors.primary,
-                width: 4,
-              ),
-            ),
-          ),
-        },
-      );
+    // Ưu tiên hiển thị nội dung tiếng Việt
+    String displayText = '';
+    
+    if (content.containsKey('vi') && content['vi'] != null) {
+      // Nội dung mới có cấu trúc {"vi": "...", "en": "..."}
+      displayText = content['vi'].toString();
+    } else if (content.containsKey('text') && content['text'] != null) {
+      // Format cũ với text field
+      displayText = content['text'].toString();
+    } else {
+      // Fallback to old format
+      displayText = content.toString();
     }
     
-    // Fallback to old format
     return Html(
-      data: content.toString(),
+      data: displayText,
       style: {
         "body": Style(
           margin: Margins.zero,
@@ -267,12 +219,50 @@ class PostDetailPage extends StatelessWidget {
           color: AppColors.textPrimary,
           lineHeight: LineHeight(1.6),
         ),
-        "p": Style(margin: Margins.only(bottom: 12)),
+        "p": Style(
+          margin: Margins.only(bottom: 12),
+          fontSize: FontSize(15),
+        ),
         "strong": Style(fontWeight: FontWeight.bold),
         "em": Style(fontStyle: FontStyle.italic),
-        "ul": Style(margin: Margins.only(left: 20)),
-        "ol": Style(margin: Margins.only(left: 20)),
-        "li": Style(margin: Margins.only(bottom: 6)),
+        "ul": Style(
+          margin: Margins.only(left: 20, bottom: 12),
+        ),
+        "ol": Style(
+          margin: Margins.only(left: 20, bottom: 12),
+        ),
+        "li": Style(
+          margin: Margins.only(bottom: 6),
+          fontSize: FontSize(15),
+        ),
+        "h1": Style(
+          fontSize: FontSize(20),
+          fontWeight: FontWeight.bold,
+          margin: Margins.only(bottom: 16),
+          color: AppColors.primary,
+        ),
+        "h2": Style(
+          fontSize: FontSize(18),
+          fontWeight: FontWeight.bold,
+          margin: Margins.only(bottom: 12),
+          color: AppColors.primary,
+        ),
+        "h3": Style(
+          fontSize: FontSize(16),
+          fontWeight: FontWeight.bold,
+          margin: Margins.only(bottom: 8),
+          color: AppColors.textPrimary,
+        ),
+        "blockquote": Style(
+          padding: HtmlPaddings.only(left: 16),
+          margin: Margins.only(bottom: 12),
+          border: Border(
+            left: BorderSide(
+              color: AppColors.primary,
+              width: 4,
+            ),
+          ),
+        ),
       },
     );
   }

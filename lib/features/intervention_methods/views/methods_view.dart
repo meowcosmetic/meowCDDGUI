@@ -3,6 +3,7 @@ import 'package:flutter_html/flutter_html.dart';
 import '../../../constants/app_colors.dart';
 import '../models/method_group_models.dart';
 import '../services/method_service.dart';
+import 'method_domain_items_view.dart';
 
 class MethodsView extends StatefulWidget {
   final InterventionMethodGroupModel methodGroup;
@@ -560,6 +561,18 @@ class _MethodsViewState extends State<MethodsView> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MethodDomainItemsView(method: method),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.account_tree_outlined),
+                      label: const Text('Mục tiêu lớn'),
+                    ),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
