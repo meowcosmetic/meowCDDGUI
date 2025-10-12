@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../constants/app_colors.dart';
 import '../../../models/test_models.dart';
 import '../../../models/child.dart';
-import '../extension_test/q_001.dart';
 
 class TestTakingPage extends StatefulWidget {
   final Test test;
@@ -25,47 +24,17 @@ class _TestTakingPageState extends State<TestTakingPage> {
   bool isCompleted = false;
   TestResult? result;
   
-  // Extension test state
-  bool isShowingExtensionTest = false;
-  int currentExtensionQuestionIndex = 0;
-  Map<String, String> extensionAnswers = {}; // questionId -> selected answer
 
   // Check if this is M-CHAT-R test
   bool _isMCHATRTest() {
     return widget.test.assessmentCode == 'M-CHAT-R';
   }
 
-  // Show extension test for specific question
-  void _showExtensionTest(int questionIndex) {
-    if (_isMCHATRTest() && questionIndex == 0) { // Question 1 (index 0)
-      setState(() {
-        isShowingExtensionTest = true;
-        currentExtensionQuestionIndex = 0;
-      });
-    }
-  }
-
-  // Get extension question widget
-  Widget _getExtensionQuestionWidget() {
-    final currentQuestion = widget.test.questions[currentQuestionIndex];
-    final mainAnswer = answers[currentQuestion.questionId];
-    
-    // For now, only show Q_001 for demo
-    return ExtensionTestQ001(
-      mainQuestionAnswer: mainAnswer,
-      onReturnToMainTest: _returnToMainTest,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     if (isCompleted && result != null) {
       return _buildResultPage();
-    }
-
-    // Show extension test if needed
-    if (isShowingExtensionTest) {
-      return _buildExtensionTestPage();
     }
 
     final currentQuestion = widget.test.questions[currentQuestionIndex];
@@ -283,6 +252,10 @@ class _TestTakingPageState extends State<TestTakingPage> {
 
                   // No Option
                   _buildAnswerOption(false, 'Không', Icons.cancel, Colors.red),
+
+                  // Extension Test (inline)
+                  if (_isMCHATRTest() && currentQuestionIndex == 0 && answers.containsKey(currentQuestion.questionId))
+                    _buildInlineExtensionTest(),
 
                   const SizedBox(height: 32),
                 ],
@@ -606,12 +579,6 @@ class _TestTakingPageState extends State<TestTakingPage> {
   }
 
   void _nextQuestion() {
-    // Check if we need to show extension test for current question
-    if (_isMCHATRTest() && currentQuestionIndex == 0) {
-      _showExtensionTest(currentQuestionIndex);
-      return;
-    }
-    
     if (currentQuestionIndex < widget.test.questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
@@ -621,35 +588,134 @@ class _TestTakingPageState extends State<TestTakingPage> {
     }
   }
 
-  // Build extension test page
-  Widget _buildExtensionTestPage() {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        title: const Text('Extension Test - Câu hỏi mở rộng'),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            setState(() {
-              isShowingExtensionTest = false;
-            });
-          },
+
+  // Build inline extension test
+  Widget _buildInlineExtensionTest() {
+    return Container(
+      margin: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primaryLight.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.3),
+          width: 2,
         ),
       ),
-      body: _getExtensionQuestionWidget(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.extension,
+                color: AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Câu hỏi mở rộng',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Show extension question content inline
+          _getExtensionQuestionContent(),
+        ],
+      ),
     );
   }
 
-  // Return to main test
-  void _returnToMainTest() {
-    setState(() {
-      isShowingExtensionTest = false;
-      currentQuestionIndex++;
-    });
+  // Get extension question content (simplified version)
+  Widget _getExtensionQuestionContent() {
+    final currentQuestion = widget.test.questions[currentQuestionIndex];
+    final mainAnswer = answers[currentQuestion.questionId];
+    
+    return _buildInlineExtensionQuestion(
+      question: "Trong tình huống con bạn gặp khó khăn trong việc học tập, bạn sẽ làm gì đầu tiên?",
+      options: [
+        "A. Tìm hiểu nguyên nhân cụ thể của khó khăn",
+        "B. Yêu cầu con cố gắng hơn nữa", 
+        "C. Tìm kiếm sự giúp đỡ từ giáo viên",
+        "D. So sánh con với các bạn khác"
+      ],
+      mainAnswer: mainAnswer,
+    );
   }
+
+  // Build inline extension question
+  Widget _buildInlineExtensionQuestion({
+    required String question,
+    required List<String> options,
+    bool? mainAnswer,
+  }) {
+    String? selectedAnswer;
+    
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              question,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...options.map((option) => Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: RadioListTile<String>(
+                title: Text(option),
+                value: option,
+                groupValue: selectedAnswer,
+                onChanged: (String? value) {
+                  setState(() {
+                    selectedAnswer = value;
+                  });
+                },
+                contentPadding: EdgeInsets.zero,
+              ),
+            )).toList(),
+            if (selectedAnswer != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: AppColors.success, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Đã chọn: $selectedAnswer',
+                        style: TextStyle(
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
 
   void _completeTest() {
     final endTime = DateTime.now();
