@@ -76,8 +76,8 @@ class _TestTakingPageState extends State<TestTakingPage> {
           ),
           body: ResponsiveContainer(
             child: Column(
-        children: [
-          // Progress Bar
+              children: [
+                // Progress Bar
           Container(
             padding: ResponsiveUtils.getResponsivePadding(context),
             decoration: BoxDecoration(
@@ -321,7 +321,8 @@ class _TestTakingPageState extends State<TestTakingPage> {
               ],
             ),
           ),
-            ],
+              ],
+            ),
           ),
         );
       },
