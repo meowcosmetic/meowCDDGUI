@@ -3,6 +3,11 @@ import '../../../constants/app_colors.dart';
 import '../../../models/test_models.dart';
 import '../../../models/child.dart';
 import '../extension_test/q_001.dart';
+import '../extension_test/q_002.dart';
+import '../extension_test/q_003.dart';
+import '../extension_test/q_004.dart';
+import '../extension_test/q_005.dart';
+import '../extension_test/q_006.dart';
 
 class TestTakingPage extends StatefulWidget {
   final Test test;
@@ -255,7 +260,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
                   _buildAnswerOption(false, 'Không', Icons.cancel, Colors.red),
 
                   // Extension Test (inline)
-                  if (_isMCHATRTest() && currentQuestionIndex == 0 && answers.containsKey(currentQuestion.questionId))
+                  if (_isMCHATRTest() && (currentQuestionIndex == 0 || currentQuestionIndex == 1 || currentQuestionIndex == 2 || currentQuestionIndex == 3 || currentQuestionIndex == 4 || currentQuestionIndex == 5) && answers.containsKey(currentQuestion.questionId))
                     _buildInlineExtensionTest(),
 
                   const SizedBox(height: 32),
@@ -653,20 +658,101 @@ class _TestTakingPageState extends State<TestTakingPage> {
     final currentQuestion = widget.test.questions[currentQuestionIndex];
     final mainAnswer = answers[currentQuestion.questionId];
     
-    return ExtensionTestQ001(
-      mainQuestionAnswer: mainAnswer,
-      onUpdateMainResult: (bool newResult) {
-        // Cập nhật kết quả câu hỏi chính
-        final currentQuestion = widget.test.questions[currentQuestionIndex];
-        setState(() {
-          answers[currentQuestion.questionId] = newResult;
-        });
-      },
-      onReturnToMainTest: () {
-        // No need to return, just continue with main test
-        setState(() {});
-      },
-    );
+    // Show Q_001 for question 0, Q_002 for question 1, Q_003 for question 2, Q_004 for question 3, Q_005 for question 4, Q_006 for question 5
+    if (currentQuestionIndex == 0) {
+      return ExtensionTestQ001(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 1) {
+      return ExtensionTestQ002(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 2) {
+      return ExtensionTestQ003(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 3) {
+      return ExtensionTestQ004(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 4) {
+      return ExtensionTestQ005(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 5) {
+      return ExtensionTestQ006(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    }
+    
+    // Fallback (should not reach here)
+    return const SizedBox.shrink();
   }
 
 
