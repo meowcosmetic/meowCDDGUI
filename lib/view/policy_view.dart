@@ -641,7 +641,6 @@ class _MainAppViewState extends State<MainAppView> {
                 items: _bottomNavItems,
               )
             : null,
-          ),
         );
       },
     );
