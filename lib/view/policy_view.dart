@@ -6,6 +6,7 @@ import '../models/policy_service.dart';
 import '../models/policy_data.dart';
 import '../models/user_session.dart';
 import '../services/messaging_service.dart';
+import '../utils/responsive_utils.dart';
 import 'children_list_view.dart';
 import '../features/library_management/library_view.dart';
 import '../features/cdd_test_management/views/test_view.dart';
@@ -602,36 +603,47 @@ class _MainAppViewState extends State<MainAppView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      floatingActionButton: FABUtility.buildSmartFAB(context),
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        title: const Text(
-          'Hỗ Trợ Trẻ Tự Kỷ',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.grey600,
-        backgroundColor: AppColors.white,
-        elevation: 8,
-        selectedFontSize: 12,
-        unselectedFontSize: 11,
-        items: _bottomNavItems,
-      ),
+    return ResponsiveBuilder(
+      builder: (context, layoutType) {
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          floatingActionButton: FABUtility.buildSmartFAB(context),
+          appBar: AppBar(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.white,
+            title: ResponsiveText(
+              'Hỗ Trợ Trẻ Tự Kỷ',
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: AppColors.white,
+            ),
+            elevation: 0,
+            centerTitle: true,
+          ),
+          body: ResponsiveContainer(
+            child: _pages[_currentIndex],
+          ),
+          bottomNavigationBar: ResponsiveUtils.isMobile(context) 
+            ? BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                currentIndex: _currentIndex,
+                onTap: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                selectedItemColor: AppColors.primary,
+                unselectedItemColor: AppColors.grey600,
+                backgroundColor: AppColors.white,
+                elevation: 8,
+                selectedFontSize: 12,
+                unselectedFontSize: 11,
+                items: _bottomNavItems,
+              )
+            : null,
+          ),
+        );
+      },
     );
   }
 }
@@ -644,11 +656,13 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final categories = AppConfig.getEnabledCategories();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return ResponsiveBuilder(
+      builder: (context, layoutType) {
+        return SingleChildScrollView(
+          padding: ResponsiveUtils.getResponsivePadding(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           // Welcome Section
           if (AppConfig.showWelcomeMessage) ...[
             Container(
@@ -690,7 +704,7 @@ class HomePage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 24)),
           ],
 
           // Categories Grid
@@ -702,15 +716,15 @@ class HomePage extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 16)),
 
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: ResponsiveUtils.getResponsiveColumns(context),
+              crossAxisSpacing: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 16),
+              mainAxisSpacing: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 16),
               childAspectRatio: 1.1,
             ),
             itemCount: categories.length,
@@ -720,7 +734,7 @@ class HomePage extends StatelessWidget {
             },
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 24)),
 
           // Quick Stats Section
           if (AppConfig.showProgressTips) ...[
@@ -786,9 +800,11 @@ class HomePage extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: 32),
-        ],
-      ),
+          SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 32)),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../constants/app_colors.dart';
 import '../../../models/test_models.dart';
 import '../../../models/child.dart';
+import '../../../utils/responsive_utils.dart';
 import '../extension_test/q_001.dart';
 import '../extension_test/q_002.dart';
 import '../extension_test/q_003.dart';
@@ -50,30 +51,35 @@ class _TestTakingPageState extends State<TestTakingPage> {
     final currentQuestion = widget.test.questions[currentQuestionIndex];
     final progress = (currentQuestionIndex + 1) / widget.test.questions.length;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        title: Text(
-          widget.test.getName(),
-          style: const TextStyle(fontSize: 16),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => _showExitDialog(),
+    return ResponsiveBuilder(
+      builder: (context, layoutType) {
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.white,
+            title: ResponsiveText(
+              widget.test.getName(),
+              fontSize: 16,
+              color: AppColors.white,
+            ),
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: Icon(
+                  Icons.close,
+                  size: ResponsiveUtils.getResponsiveIconSize(context, baseSize: 24),
+                ),
+                onPressed: () => _showExitDialog(),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Column(
+          body: ResponsiveContainer(
+            child: Column(
         children: [
           // Progress Bar
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: ResponsiveUtils.getResponsivePadding(context),
             decoration: BoxDecoration(
               color: AppColors.white,
               boxShadow: [
@@ -107,7 +113,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 8)),
                 LinearProgressIndicator(
                   value: progress,
                   backgroundColor: AppColors.grey200,
@@ -120,7 +126,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
           // Question
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: ResponsiveUtils.getResponsivePadding(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -315,8 +321,10 @@ class _TestTakingPageState extends State<TestTakingPage> {
               ],
             ),
           ),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
