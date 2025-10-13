@@ -566,7 +566,8 @@ class _MethodsViewState extends State<MethodsView> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => MethodDomainItemsView(method: method),
+                            builder: (_) =>
+                                MethodDomainItemsView(method: method),
                           ),
                         );
                       },

@@ -151,7 +151,7 @@ class _LibraryViewState extends State<LibraryView> {
   bool isLoadingYoutube = false;
   bool hasLoadedYoutube = false;
   List<Map<String, dynamic>> youtubeVideos = [];
-  
+
   // Intervention posts state
   List<InterventionPost> posts = [];
   List<InterventionPost> filteredPosts = [];
@@ -222,7 +222,7 @@ class _LibraryViewState extends State<LibraryView> {
 
   Future<void> _loadInterventionPosts() async {
     if (isLoadingPosts || hasLoadedPosts) return;
-    
+
     setState(() {
       isLoadingPosts = true;
     });
@@ -235,11 +235,11 @@ class _LibraryViewState extends State<LibraryView> {
 
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
-        
+
         // Handle both array format and paginated format
         List<dynamic> content;
         bool hasNext = false;
-        
+
         if (data is List) {
           // Direct array format
           content = data;
@@ -251,9 +251,11 @@ class _LibraryViewState extends State<LibraryView> {
         } else {
           content = [];
         }
-        
+
         setState(() {
-          posts.addAll(content.map((item) => InterventionPost.fromJson(item)).toList());
+          posts.addAll(
+            content.map((item) => InterventionPost.fromJson(item)).toList(),
+          );
           filteredPosts = List.from(posts);
           isLoadingPosts = false;
           hasLoadedPosts = true;
@@ -279,11 +281,11 @@ class _LibraryViewState extends State<LibraryView> {
 
   Future<void> _loadMorePosts() async {
     if (isLoadingPosts || !hasMorePosts) return;
-    
+
     setState(() {
       postsCurrentPage++;
     });
-    
+
     await _loadInterventionPosts();
   }
 
@@ -351,11 +353,11 @@ class _LibraryViewState extends State<LibraryView> {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final apiResponse = BookApiResponse.fromJson(jsonData);
-        
+
         final newItems = apiResponse.content
             .map((book) => book.toLibraryItem())
             .toList();
-        
+
         setState(() {
           if (currentPage == 0) {
             items = newItems;
@@ -392,7 +394,7 @@ class _LibraryViewState extends State<LibraryView> {
               searchQuery.toLowerCase(),
             ) ||
             item.author.toLowerCase().contains(searchQuery.toLowerCase());
-        
+
         final matchesTargetAge =
             selectedTargetAge == 'Tất cả' ||
             item.targetAge == selectedTargetAge;
@@ -406,7 +408,7 @@ class _LibraryViewState extends State<LibraryView> {
             item.getFileTypeText().toLowerCase().contains(
               selectedCategory.toLowerCase(),
             );
-        
+
         return matchesSearch &&
             matchesTargetAge &&
             matchesDomain &&
@@ -443,11 +445,11 @@ class _LibraryViewState extends State<LibraryView> {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final apiResponse = BookApiResponse.fromJson(jsonData);
-        
+
         final newItems = apiResponse.content
             .map((book) => book.toLibraryItem())
             .toList();
-        
+
         setState(() {
           items.addAll(newItems);
           filteredItems = items;
@@ -489,11 +491,11 @@ class _LibraryViewState extends State<LibraryView> {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final apiResponse = BookApiResponse.fromJson(jsonData);
-        
+
         final newItems = apiResponse.content
             .map((book) => book.toLibraryItem())
             .toList();
-        
+
         setState(() {
           items = newItems;
           filteredItems = newItems;
@@ -521,97 +523,97 @@ class _LibraryViewState extends State<LibraryView> {
     final isSelected = selectedDomain == id;
     return Builder(
       builder: (chipContext) {
-      return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) {
-          final domain = domains.firstWhere(
-            (d) => (d['id'] ?? '') == id,
-            orElse: () => const {},
-          );
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) {
+            final domain = domains.firstWhere(
+              (d) => (d['id'] ?? '') == id,
+              orElse: () => const {},
+            );
             final desc = (domain['description']?[currentLocale] ?? '')
                 .toString();
-          if (desc.isEmpty) return;
+            if (desc.isEmpty) return;
 
-          // Remove existing tooltip if any
-          _domainTooltipEntry?.remove();
-          _domainTooltipEntry = null;
+            // Remove existing tooltip if any
+            _domainTooltipEntry?.remove();
+            _domainTooltipEntry = null;
 
-          // Calculate position right under the chip
-          final box = chipContext.findRenderObject() as RenderBox?;
-          if (box == null) return;
-          final offset = box.localToGlobal(Offset.zero);
-          final size = box.size;
+            // Calculate position right under the chip
+            final box = chipContext.findRenderObject() as RenderBox?;
+            if (box == null) return;
+            final offset = box.localToGlobal(Offset.zero);
+            final size = box.size;
 
-          final entry = OverlayEntry(
-            builder: (_) => Positioned(
-              left: offset.dx,
-              top: offset.dy + size.height + 6,
-              child: IgnorePointer(
-                ignoring: true,
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 320),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.grey900.withValues(alpha: 0.95),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
+            final entry = OverlayEntry(
+              builder: (_) => Positioned(
+                left: offset.dx,
+                top: offset.dy + size.height + 6,
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey900.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
                           BoxShadow(
                             color: AppColors.shadowLight,
                             blurRadius: 8,
                             offset: Offset(0, 4),
                           ),
-                      ],
-                    ),
-                    child: Text(
-                      desc,
+                        ],
+                      ),
+                      child: Text(
+                        desc,
                         style: const TextStyle(
                           color: AppColors.white,
                           fontSize: 12,
                           height: 1.4,
                         ),
+                      ),
                     ),
                   ),
                 ),
               ),
+            );
+            Overlay.of(chipContext).insert(entry);
+            _domainTooltipEntry = entry;
+          },
+          onExit: (_) {
+            _domainTooltipEntry?.remove();
+            _domainTooltipEntry = null;
+          },
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedDomain = id;
+                currentPage = 0;
+                hasMoreData = true;
+                _filterItems();
+              });
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 0),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : AppColors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isSelected ? AppColors.white : AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-          );
-          Overlay.of(chipContext).insert(entry);
-          _domainTooltipEntry = entry;
-        },
-        onExit: (_) {
-          _domainTooltipEntry?.remove();
-          _domainTooltipEntry = null;
-        },
-        child: GestureDetector(
-        onTap: () {
-          setState(() {
-            selectedDomain = id;
-            currentPage = 0;
-            hasMoreData = true;
-            _filterItems();
-          });
-        },
-        child: Container(
-          margin: const EdgeInsets.only(right: 0),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
           ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: isSelected ? AppColors.white : AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
+        );
       },
     );
   }
@@ -692,14 +694,14 @@ class _LibraryViewState extends State<LibraryView> {
       length: tabFormats.length,
       initialIndex: 0,
       child: Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        title: const Text('Thư Viện'),
-        elevation: 0,
-        centerTitle: true,
-        actions: [
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          title: const Text('Thư Viện'),
+          elevation: 0,
+          centerTitle: true,
+          actions: [
             IconButton(
               onPressed: () async {
                 await _loadYoutubeVideos();
@@ -707,85 +709,85 @@ class _LibraryViewState extends State<LibraryView> {
               icon: const Icon(Icons.play_circle_fill),
               tooltip: 'Tải lại YouTube',
             ),
-          IconButton(
-            onPressed: () {
-              try {
-                final domainModels = domains
-                    .where((domain) => domain != null)
-                    .map((domain) => InterventionDomainModel.fromJson(domain))
-                    .toList();
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
+            IconButton(
+              onPressed: () {
+                try {
+                  final domainModels = domains
+                      .where((domain) => domain != null)
+                      .map((domain) => InterventionDomainModel.fromJson(domain))
+                      .toList();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
                       builder: (context) => AddPostPage(domains: domainModels),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Lỗi khi mở trang thêm bài post: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.article),
-            tooltip: 'Thêm bài post',
-          ),
-          IconButton(
-            onPressed: () {
-              try {
-                final domainModels = domains
-                    .where((domain) => domain != null)
-                    .map((domain) => InterventionDomainModel.fromJson(domain))
-                    .toList();
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Lỗi khi mở trang thêm bài post: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.article),
+              tooltip: 'Thêm bài post',
+            ),
+            IconButton(
+              onPressed: () {
+                try {
+                  final domainModels = domains
+                      .where((domain) => domain != null)
+                      .map((domain) => InterventionDomainModel.fromJson(domain))
+                      .toList();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
                       builder: (context) => AddVideoPage(domains: domainModels),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Lỗi khi mở trang thêm video: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.video_library),
-            tooltip: 'Thêm video',
-          ),
-          IconButton(
-            onPressed: () {
-              try {
-                final domainModels = domains
-                    .where((domain) => domain != null)
-                    .map((domain) => InterventionDomainModel.fromJson(domain))
-                    .toList();
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Lỗi khi mở trang thêm video: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.video_library),
+              tooltip: 'Thêm video',
+            ),
+            IconButton(
+              onPressed: () {
+                try {
+                  final domainModels = domains
+                      .where((domain) => domain != null)
+                      .map((domain) => InterventionDomainModel.fromJson(domain))
+                      .toList();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
                       builder: (context) => AddBookPage(domains: domainModels),
-                  ),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Lỗi khi mở trang thêm sách: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.book),
-            tooltip: 'Thêm sách',
-          ),
-        ],
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Lỗi khi mở trang thêm sách: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.book),
+              tooltip: 'Thêm sách',
+            ),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(48),
             child: Container(
@@ -804,63 +806,63 @@ class _LibraryViewState extends State<LibraryView> {
               ),
             ),
           ),
-      ),
-      body: Column(
-        children: [
-          // Search Bar + Filter Button
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadowLight,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    onChanged: (value) {
-                      searchQuery = value;
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        if (searchQuery == value) {
-                          _searchBooks();
-                        }
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Tìm kiếm tài liệu...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+        ),
+        body: Column(
+          children: [
+            // Search Bar + Filter Button
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowLight,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) {
+                        searchQuery = value;
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          if (searchQuery == value) {
+                            _searchBooks();
+                          }
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Tìm kiếm tài liệu...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: AppColors.grey50,
                       ),
-                      filled: true,
-                      fillColor: AppColors.grey50,
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton.icon(
-                  onPressed: _openFilterSidebar,
-                  icon: const Icon(Icons.tune),
-                  label: const Text('Bộ lọc'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: _openFilterSidebar,
+                    icon: const Icon(Icons.tune),
+                    label: const Text('Bộ lọc'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.white,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          
-          // Inline filters removed; use sidebar button instead
-          
+
+            // Inline filters removed; use sidebar button instead
+
             // Tabbed content
-          Expanded(
+            Expanded(
               child: TabBarView(
                 children: tabFormats.map((f) {
                   final id = (f['id'] as num?)?.toInt();
@@ -879,8 +881,12 @@ class _LibraryViewState extends State<LibraryView> {
                   final isPost =
                       id == 3 ||
                       category == 'POST' ||
-                      (f['formatName'] ?? '').toString().toLowerCase().contains('bài viết') ||
-                      (f['formatName'] ?? '').toString().toLowerCase().contains('post');
+                      (f['formatName'] ?? '').toString().toLowerCase().contains(
+                        'bài viết',
+                      ) ||
+                      (f['formatName'] ?? '').toString().toLowerCase().contains(
+                        'post',
+                      );
                   if (isVideo) {
                     // Lazy-load videos only when the tab is opened
                     if (!isLoadingYoutube && !hasLoadedYoutube) {
@@ -893,11 +899,11 @@ class _LibraryViewState extends State<LibraryView> {
                     return const YoutubeListWidget();
                   } else if (isPdf) {
                     return RefreshIndicator(
-              onRefresh: () async {
-                currentPage = 0;
-                hasMoreData = true;
-                await _loadLibraryItems();
-              },
+                      onRefresh: () async {
+                        currentPage = 0;
+                        hasMoreData = true;
+                        await _loadLibraryItems();
+                      },
                       child: PdfListWidget(
                         items: items,
                         filteredItems: filteredItems,
@@ -960,9 +966,9 @@ class _LibraryViewState extends State<LibraryView> {
                     );
                   }
                 }).toList(),
-                      ),
-          ),
-        ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1012,18 +1018,18 @@ class _LibraryViewState extends State<LibraryView> {
         final domainCount = (v['developmentalDomainIds'] is List)
             ? (v['developmentalDomainIds'] as List).length
             : 0;
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowLight,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
           child: ListTile(
             leading: thumb == null
                 ? const Icon(Icons.play_circle_fill, color: AppColors.primary)
@@ -1042,26 +1048,26 @@ class _LibraryViewState extends State<LibraryView> {
                   ),
             title: Text(
               title.isEmpty ? 'Untitled Video' : title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                        const SizedBox(height: 4),
+                const SizedBox(height: 4),
                 if (desc.isNotEmpty)
                   Text(desc, maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 6),
-                        Text(
+                Text(
                   'Lang: $language • Age: $minAge-$maxAge ($ageGroup) • Rated: $contentRating\nDomains: ${domainNames.isEmpty ? domainCount : domainNames}\n$publishedAt',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
                     height: 1.3,
-                          ),
-                        ),
-                      ],
-                    ),
+                  ),
+                ),
+              ],
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1076,9 +1082,9 @@ class _LibraryViewState extends State<LibraryView> {
                   onPressed: id.isEmpty
                       ? null
                       : () => _confirmDeleteYoutube(id, title),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -1173,7 +1179,7 @@ class _LibraryViewState extends State<LibraryView> {
                   height: height + 48,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                children: [
+                    children: [
                       Align(
                         alignment: Alignment.topRight,
                         child: Padding(
@@ -1188,9 +1194,9 @@ class _LibraryViewState extends State<LibraryView> {
                                 padding: EdgeInsets.all(6),
                                 child: Icon(Icons.close, color: Colors.white),
                               ),
-                      ),
-                    ),
-                  ),
+                            ),
+                          ),
+                        ),
                       ),
                       Expanded(
                         child: ClipRRect(
@@ -1246,7 +1252,7 @@ class _LibraryViewState extends State<LibraryView> {
                 height: height + 48, // extra space for the close button row
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                    children: [
+                  children: [
                     // Close button row above the video to avoid iframe overlay issues
                     Align(
                       alignment: Alignment.topRight,
@@ -1272,9 +1278,9 @@ class _LibraryViewState extends State<LibraryView> {
                         borderRadius: BorderRadius.circular(12),
                         child: HtmlElementView(viewType: viewType),
                       ),
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -1294,7 +1300,7 @@ class _LibraryViewState extends State<LibraryView> {
           height: MediaQuery.of(context).size.height * 0.4,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+            children: [
               const Icon(
                 Icons.play_circle_outline,
                 size: 64,
@@ -1308,7 +1314,7 @@ class _LibraryViewState extends State<LibraryView> {
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
+                children: [
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
@@ -1324,9 +1330,9 @@ class _LibraryViewState extends State<LibraryView> {
                 ],
               ),
             ],
-                          ),
-                        ),
-                      ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1359,14 +1365,14 @@ class _LibraryViewState extends State<LibraryView> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Xóa'),
-                  ),
-                ],
-              ),
+          ),
+        ],
+      ),
     );
     if (ok != true) return;
     try {
@@ -1550,21 +1556,21 @@ class _LibraryViewState extends State<LibraryView> {
                                   filterTargetAges,
                                   tempTargetAge,
                                   (v) => setSheetState(() {
-                                  tempTargetAge = v;
+                                    tempTargetAge = v;
                                   }),
                                 ),
                                 const SizedBox(height: 16),
                                 _buildDomainSidebarSection(
                                   current: tempDomain,
                                   onChanged: (v) => setSheetState(() {
-                                  tempDomain = v;
+                                    tempDomain = v;
                                   }),
                                 ),
                                 const SizedBox(height: 16),
                                 _buildFormatSidebarSection(
                                   current: tempCategory,
                                   onChanged: (v) => setSheetState(() {
-                                  tempCategory = v;
+                                    tempCategory = v;
                                   }),
                                 ),
                               ],
@@ -1666,79 +1672,79 @@ class _LibraryViewState extends State<LibraryView> {
     final isSelected = current == id;
     return Builder(
       builder: (chipContext) {
-      return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) {
-          // Find domain description for tooltip
-          final domain = domains.firstWhere(
-            (d) => (d['id'] ?? '') == id,
-            orElse: () => const {},
-          );
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) {
+            // Find domain description for tooltip
+            final domain = domains.firstWhere(
+              (d) => (d['id'] ?? '') == id,
+              orElse: () => const {},
+            );
             final desc = (domain['description']?[currentLocale] ?? '')
                 .toString();
-          if (desc.isEmpty) return;
+            if (desc.isEmpty) return;
 
-          // Remove existing tooltip
-          _domainTooltipEntry?.remove();
-          _domainTooltipEntry = null;
+            // Remove existing tooltip
+            _domainTooltipEntry?.remove();
+            _domainTooltipEntry = null;
 
-          // Position below chip
-          final box = chipContext.findRenderObject() as RenderBox?;
-          if (box == null) return;
-          final offset = box.localToGlobal(Offset.zero);
-          final size = box.size;
+            // Position below chip
+            final box = chipContext.findRenderObject() as RenderBox?;
+            if (box == null) return;
+            final offset = box.localToGlobal(Offset.zero);
+            final size = box.size;
 
-          final entry = OverlayEntry(
-            builder: (_) => Positioned(
-              left: offset.dx,
-              top: offset.dy + size.height + 6,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 320),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.grey900.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
+            final entry = OverlayEntry(
+              builder: (_) => Positioned(
+                left: offset.dx,
+                top: offset.dy + size.height + 6,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.grey900.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
                         BoxShadow(
                           color: AppColors.shadowLight,
                           blurRadius: 8,
                           offset: Offset(0, 4),
                         ),
-                    ],
-                  ),
-                  child: Text(
-                    desc,
+                      ],
+                    ),
+                    child: Text(
+                      desc,
                       style: const TextStyle(
                         color: AppColors.white,
                         fontSize: 12,
                         height: 1.4,
                       ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-          Overlay.of(chipContext).insert(entry);
-          _domainTooltipEntry = entry;
-        },
-        onExit: (_) {
-          _domainTooltipEntry?.remove();
-          _domainTooltipEntry = null;
-        },
-        child: ChoiceChip(
-          selected: isSelected,
-          label: Text(label),
-          onSelected: (val) => onChanged(id),
-          selectedColor: AppColors.primary,
+            );
+            Overlay.of(chipContext).insert(entry);
+            _domainTooltipEntry = entry;
+          },
+          onExit: (_) {
+            _domainTooltipEntry?.remove();
+            _domainTooltipEntry = null;
+          },
+          child: ChoiceChip(
+            selected: isSelected,
+            label: Text(label),
+            onSelected: (val) => onChanged(id),
+            selectedColor: AppColors.primary,
             labelStyle: TextStyle(
               color: isSelected ? AppColors.white : AppColors.textSecondary,
             ),
-          backgroundColor: AppColors.grey100,
-          shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
-        ),
-      );
+            backgroundColor: AppColors.grey100,
+            shape: StadiumBorder(side: BorderSide(color: AppColors.border)),
+          ),
+        );
       },
     );
   }
@@ -1887,7 +1893,7 @@ class _LibraryViewState extends State<LibraryView> {
         }
         return;
       }
-      
+
       final apiService = ApiService();
       final response = await apiService.deleteBook(bookId);
 
@@ -1936,9 +1942,7 @@ class _LibraryViewState extends State<LibraryView> {
   void _viewPost(InterventionPost post) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => PostDetailPage(post: post),
-      ),
+      MaterialPageRoute(builder: (context) => PostDetailPage(post: post)),
     );
   }
 
@@ -1957,14 +1961,10 @@ class _LibraryViewState extends State<LibraryView> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lỗi khi xóa: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Lỗi khi xóa: $e'), backgroundColor: Colors.red),
       );
     }
   }
-
 }
 
 class _FilterDialog extends StatefulWidget {
@@ -2016,7 +2016,7 @@ class _FilterDialogState extends State<_FilterDialog> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -2043,7 +2043,7 @@ class _FilterDialogState extends State<_FilterDialog> {
               ],
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -2056,31 +2056,31 @@ class _FilterDialogState extends State<_FilterDialog> {
                     selectedTargetAge,
                     (value) => setState(() => selectedTargetAge = value),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   _buildFilterSection(
                     'Lĩnh Vực',
                     SampleLibraryItems.getDomains(),
                     selectedDomain,
                     (value) => setState(() => selectedDomain = value),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   _buildFilterSection(
                     'Định Dạng',
                     SampleLibraryItems.getCategories(),
                     selectedCategory,
                     (value) => setState(() => selectedCategory = value),
                   ),
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: SizedBox(
@@ -2138,34 +2138,34 @@ class _FilterDialogState extends State<_FilterDialog> {
           children: options
               .map(
                 (option) => GestureDetector(
-            onTap: () => onChanged(option),
-            child: Container(
+                  onTap: () => onChanged(option),
+                  child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 8,
                     ),
-              decoration: BoxDecoration(
+                    decoration: BoxDecoration(
                       color: selected == option
                           ? AppColors.primary
                           : AppColors.grey100,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
                         color: selected == option
                             ? AppColors.primary
                             : AppColors.border,
-                ),
-              ),
-              child: Text(
-                option,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    child: Text(
+                      option,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                         color: selected == option
                             ? AppColors.white
                             : AppColors.textSecondary,
-                ),
-              ),
-            ),
+                      ),
+                    ),
+                  ),
                 ),
               )
               .toList(),
@@ -2199,7 +2199,7 @@ class _ItemDetailsSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -2248,30 +2248,30 @@ class _ItemDetailsSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   _buildDetailSection('Mô tả', item.description),
                   _buildDetailSection(
                     'Thông tin',
                     'Loại: ${item.getFileTypeText()}\n'
-                    'Lĩnh vực: ${item.getDomainText()}\n'
-                    'Độ khó: ${item.getDifficultyText()}\n'
-                    'Độ tuổi: ${item.targetAge}\n'
+                        'Lĩnh vực: ${item.getDomainText()}\n'
+                        'Độ khó: ${item.getDifficultyText()}\n'
+                        'Độ tuổi: ${item.targetAge}\n'
                         'Lượt xem: ${item.viewCount}',
                   ),
-                  
+
                   if (item.reviews.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     _buildReviewsSection(),
                   ],
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -2369,60 +2369,60 @@ class _ItemDetailsSheet extends StatelessWidget {
           const SizedBox(height: 12),
           ...item.reviews.map(
             (review) => Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      review.userName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        Icon(Icons.star, size: 16, color: AppColors.warning),
-                        const SizedBox(width: 4),
-                        Text(
-                          review.rating.toString(),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        review.userName,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
                         ),
-                      ],
+                      ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Icon(Icons.star, size: 16, color: AppColors.warning),
+                          const SizedBox(width: 4),
+                          Text(
+                            review.rating.toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    review.comment,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  review.comment,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatDate(review.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDate(review.createdAt),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             ),
           ),
         ],
@@ -2555,10 +2555,10 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
 
       // Gọi API để lấy chi tiết sách
       final response = await _apiService.getBookById(int.parse(widget.item.id));
-      
+
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        
+
         // Kiểm tra tất cả các field có thể chứa nội dung
         final contentFile = jsonData['contentFile'] as String?;
         final content = jsonData['content'] as String?;
@@ -2578,7 +2578,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         } else if (description != null && description.isNotEmpty) {
           finalContent = description;
         }
-        
+
         if (finalContent != null && finalContent.isNotEmpty) {
           setState(() {
             bookContent = finalContent;
@@ -2748,7 +2748,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
             }
           }
           final content = utf8.decode(bytes);
-          
+
           // Parse content as JSON if possible, otherwise treat as plain text
           try {
             final jsonData = jsonDecode(content);
@@ -2835,7 +2835,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
                 ),
               ),
             ),
-          
+
           if (jsonData['content'] != null)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -2848,7 +2848,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
                 ),
               ),
             ),
-          
+
           if (jsonData['chapters'] != null)
             ...(jsonData['chapters'] as List)
                 .map((chapter) => _buildChapterWidget(chapter))
@@ -2890,7 +2890,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
                   color: AppColors.textPrimary,
                 ),
               ),
-            
+
             if (chapter['content'] != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -2914,7 +2914,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
     // Hiển thị nội dung text thông thường
     final lines = content.split('\n');
     final widgets = <Widget>[];
-    
+
     for (final line in lines) {
       if (line.startsWith('# ')) {
         // H1
@@ -3020,7 +3020,7 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
         widgets.add(const SizedBox(height: 8));
       }
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: widgets,

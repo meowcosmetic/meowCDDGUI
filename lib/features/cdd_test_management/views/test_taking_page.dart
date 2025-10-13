@@ -34,13 +34,11 @@ class _TestTakingPageState extends State<TestTakingPage> {
   DateTime startTime = DateTime.now();
   bool isCompleted = false;
   TestResult? result;
-  
 
   // Check if this is M-CHAT-R test
   bool _isMCHATRTest() {
     return widget.test.assessmentCode == 'M-CHAT-R';
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +66,10 @@ class _TestTakingPageState extends State<TestTakingPage> {
               IconButton(
                 icon: Icon(
                   Icons.close,
-                  size: ResponsiveUtils.getResponsiveIconSize(context, baseSize: 24),
+                  size: ResponsiveUtils.getResponsiveIconSize(
+                    context,
+                    baseSize: 24,
+                  ),
                 ),
                 onPressed: () => _showExitDialog(),
               ),
@@ -78,249 +79,280 @@ class _TestTakingPageState extends State<TestTakingPage> {
             child: Column(
               children: [
                 // Progress Bar
-          Container(
-            padding: ResponsiveUtils.getResponsivePadding(context),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadowLight,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Câu ${currentQuestionIndex + 1}/${widget.test.questions.length}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                Container(
+                  padding: ResponsiveUtils.getResponsivePadding(context),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.shadowLight,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    Text(
-                      '${(progress * 100).toInt()}%',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Câu ${currentQuestionIndex + 1}/${widget.test.questions.length}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            '${(progress * 100).toInt()}%',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 8)),
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: AppColors.grey200,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                ),
-              ],
-            ),
-          ),
-
-          // Question
-          Expanded(
-            child: SingleChildScrollView(
-              padding: ResponsiveUtils.getResponsivePadding(context),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Question Card
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.shadowLight,
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                      SizedBox(
+                        height: ResponsiveUtils.getResponsiveSpacing(
+                          context,
+                          baseSpacing: 8,
                         ),
-                      ],
-                    ),
+                      ),
+                      LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: AppColors.grey200,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Question
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: ResponsiveUtils.getResponsivePadding(context),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Question Header
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: currentQuestion
-                                    .getCategoryColor()
-                                    .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
+                        // Question Card
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.shadowLight,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
                               ),
-                              child: Icon(
-                                _getCategoryIcon(currentQuestion.category),
-                                color: currentQuestion.getCategoryColor(),
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Question Header
+                              Row(
                                 children: [
-                                  Text(
-                                    'Câu ${currentQuestion.questionNumber}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimary,
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: currentQuestion
+                                          .getCategoryColor()
+                                          .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      _getCategoryIcon(
+                                        currentQuestion.category,
+                                      ),
+                                      color: currentQuestion.getCategoryColor(),
+                                      size: 20,
                                     ),
                                   ),
-                                  Text(
-                                    currentQuestion.getCategoryText(),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: currentQuestion.getCategoryColor(),
-                                      fontWeight: FontWeight.w500,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Câu ${currentQuestion.questionNumber}',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        Text(
+                                          currentQuestion.getCategoryText(),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: currentQuestion
+                                                .getCategoryColor(),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
 
-                        const SizedBox(height: 20),
+                              const SizedBox(height: 20),
 
-                        // Question Text
-                        Text(
-                          currentQuestion.getQuestionText(),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: AppColors.textPrimary,
-                            height: 1.5,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-
-                        // Hint
-                        if (currentQuestion.getHint().isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryLight,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.lightbulb_outline,
-                                  color: AppColors.primary,
-                                  size: 20,
+                              // Question Text
+                              Text(
+                                currentQuestion.getQuestionText(),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  color: AppColors.textPrimary,
+                                  height: 1.5,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    currentQuestion.getHint(),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.textSecondary,
-                                      fontStyle: FontStyle.italic,
+                              ),
+
+                              // Hint
+                              if (currentQuestion.getHint().isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryLight,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.3,
+                                      ),
                                     ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.lightbulb_outline,
+                                        color: AppColors.primary,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          currentQuestion.getHint(),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: AppColors.textSecondary,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Answer Options
+                        Text(
+                          'Chọn câu trả lời:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Yes Option
+                        _buildAnswerOption(
+                          true,
+                          'Có',
+                          Icons.check_circle,
+                          Colors.green,
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // No Option
+                        _buildAnswerOption(
+                          false,
+                          'Không',
+                          Icons.cancel,
+                          Colors.red,
+                        ),
+
+                        // Extension Test (inline)
+                        if (_isMCHATRTest() &&
+                            (currentQuestionIndex == 0 ||
+                                currentQuestionIndex == 1 ||
+                                currentQuestionIndex == 2 ||
+                                currentQuestionIndex == 3 ||
+                                currentQuestionIndex == 4 ||
+                                currentQuestionIndex == 5 ||
+                                currentQuestionIndex == 6 ||
+                                currentQuestionIndex == 7 ||
+                                currentQuestionIndex == 8 ||
+                                currentQuestionIndex == 9) &&
+                            answers.containsKey(currentQuestion.questionId))
+                          _buildInlineExtensionTest(),
+
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Answer Options
-                  Text(
-                    'Chọn câu trả lời:',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Yes Option
-                  _buildAnswerOption(
-                    true,
-                    'Có',
-                    Icons.check_circle,
-                    Colors.green,
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // No Option
-                  _buildAnswerOption(false, 'Không', Icons.cancel, Colors.red),
-
-                  // Extension Test (inline)
-                  if (_isMCHATRTest() && (currentQuestionIndex == 0 || currentQuestionIndex == 1 || currentQuestionIndex == 2 || currentQuestionIndex == 3 || currentQuestionIndex == 4 || currentQuestionIndex == 5 || currentQuestionIndex == 6 || currentQuestionIndex == 7 || currentQuestionIndex == 8 || currentQuestionIndex == 9) && answers.containsKey(currentQuestion.questionId))
-                    _buildInlineExtensionTest(),
-
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ),
-
-          // Navigation Buttons
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadowLight,
-                  blurRadius: 4,
-                  offset: const Offset(0, -2),
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                if (currentQuestionIndex > 0)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _previousQuestion,
-                      child: const Text('Câu trước'),
-                    ),
+
+                // Navigation Buttons
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.shadowLight,
+                        blurRadius: 4,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
                   ),
-                if (currentQuestionIndex > 0) const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: answers.containsKey(currentQuestion.questionId)
-                        ? _nextQuestion
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.white,
-                    ),
-                    child: Text(
-                      currentQuestionIndex == widget.test.questions.length - 1
-                          ? 'Hoàn thành'
-                          : 'Câu tiếp',
-                    ),
+                  child: Row(
+                    children: [
+                      if (currentQuestionIndex > 0)
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _previousQuestion,
+                            child: const Text('Câu trước'),
+                          ),
+                        ),
+                      if (currentQuestionIndex > 0) const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed:
+                              answers.containsKey(currentQuestion.questionId)
+                              ? _nextQuestion
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.white,
+                          ),
+                          child: Text(
+                            currentQuestionIndex ==
+                                    widget.test.questions.length - 1
+                                ? 'Hoàn thành'
+                                : 'Câu tiếp',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
               ],
             ),
           ),
@@ -533,12 +565,16 @@ class _TestTakingPageState extends State<TestTakingPage> {
                         'endTime': DateTime.now().toIso8601String(),
                         'totalScore': result!.score.toDouble(),
                         'maxScore': result!.totalQuestions.toDouble(),
-                        'percentageScore': (result!.score / result!.totalQuestions) * 100,
+                        'percentageScore':
+                            (result!.score / result!.totalQuestions) * 100,
                         'correctAnswers': result!.score,
                         'totalQuestions': result!.totalQuestions,
-                        'skippedQuestions': result!.totalQuestions - result!.answeredQuestions,
+                        'skippedQuestions':
+                            result!.totalQuestions - result!.answeredQuestions,
                         'timeSpent': result!.timeSpent,
-                        'interpretation': _getInterpretation((result!.score / result!.totalQuestions) * 100),
+                        'interpretation': _getInterpretation(
+                          (result!.score / result!.totalQuestions) * 100,
+                        ),
                         'notes': 'Hoàn thành bài test ${widget.test.getName()}',
                       };
                       Navigator.pop(context, detailedResult);
@@ -623,7 +659,6 @@ class _TestTakingPageState extends State<TestTakingPage> {
     }
   }
 
-
   // Build inline extension test
   Widget _buildInlineExtensionTest() {
     return Container(
@@ -642,11 +677,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.extension,
-                color: AppColors.primary,
-                size: 24,
-              ),
+              Icon(Icons.extension, color: AppColors.primary, size: 24),
               const SizedBox(width: 8),
               Text(
                 'Câu hỏi mở rộng',
@@ -670,7 +701,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
   Widget _getExtensionQuestionContent() {
     final currentQuestion = widget.test.questions[currentQuestionIndex];
     final mainAnswer = answers[currentQuestion.questionId];
-    
+
     // Show Q_001 for question 0, Q_002 for question 1, Q_003 for question 2, Q_004 for question 3, Q_005 for question 4, Q_006 for question 5, Q_007 for question 6, Q_008 for question 7, Q_009 for question 8, Q_010 for question 9
     if (currentQuestionIndex == 0) {
       return ExtensionTestQ001(
@@ -823,12 +854,10 @@ class _TestTakingPageState extends State<TestTakingPage> {
         },
       );
     }
-    
+
     // Fallback (should not reach here)
     return const SizedBox.shrink();
   }
-
-
 
   void _completeTest() {
     final endTime = DateTime.now();

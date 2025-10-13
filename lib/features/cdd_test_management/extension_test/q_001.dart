@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class ExtensionTestQ001 extends StatefulWidget {
   final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
-  final Function(bool)? onUpdateMainResult; // Callback để cập nhật kết quả chính
+  final Function(bool)?
+  onUpdateMainResult; // Callback để cập nhật kết quả chính
   final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
-  
+
   const ExtensionTestQ001({
     Key? key,
     this.mainQuestionAnswer,
@@ -23,18 +24,9 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
 
   // Questions for TRUE path (ĐẠT examples)
   final List<Map<String, String>> truePathQuestions = [
-    {
-      'id': 'true_1',
-      'question': 'Trẻ có nhìn vào đồ vật không?',
-    },
-    {
-      'id': 'true_2', 
-      'question': 'Trẻ có chỉ vào đồ vật không?',
-    },
-    {
-      'id': 'true_3',
-      'question': 'Trẻ có nhìn và nhận xét về đồ vật không?',
-    },
+    {'id': 'true_1', 'question': 'Trẻ có nhìn vào đồ vật không?'},
+    {'id': 'true_2', 'question': 'Trẻ có chỉ vào đồ vật không?'},
+    {'id': 'true_3', 'question': 'Trẻ có nhìn và nhận xét về đồ vật không?'},
     {
       'id': 'true_4',
       'question': 'Trẻ có nhìn nếu cha/mẹ chỉ và nói "nhìn kìa!" không?',
@@ -43,18 +35,9 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
 
   // Questions for FALSE path (KHÔNG ĐẠT examples)
   final List<Map<String, String>> falsePathQuestions = [
-    {
-      'id': 'false_1',
-      'question': 'Trẻ không phản ứng gì / lờ cha/mẹ đi',
-    },
-    {
-      'id': 'false_2',
-      'question': 'Trẻ nhìn xung quanh hoặc chỗ khác',
-    },
-    {
-      'id': 'false_3',
-      'question': 'Trẻ nhìn vào ngón tay của cha/mẹ',
-    },
+    {'id': 'false_1', 'question': 'Trẻ không phản ứng gì / lờ cha/mẹ đi'},
+    {'id': 'false_2', 'question': 'Trẻ nhìn xung quanh hoặc chỗ khác'},
+    {'id': 'false_3', 'question': 'Trẻ nhìn vào ngón tay của cha/mẹ'},
   ];
 
   @override
@@ -106,9 +89,9 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Instructions
         Container(
           padding: const EdgeInsets.all(12),
@@ -123,18 +106,15 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
               Expanded(
                 child: Text(
                   'Hãy đánh giá tất cả các hành vi của con bạn. Trả lời Có/Không cho từng câu hỏi dưới đây:',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.blue,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.blue),
                 ),
               ),
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // TRUE Path Questions (ĐẠT examples)
         _buildQuestionSection(
           'Các ví dụ ĐẠT (Hành vi tích cực)',
@@ -142,9 +122,9 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
           Colors.green,
           Icons.check_circle,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // FALSE Path Questions (KHÔNG ĐẠT examples)
         _buildQuestionSection(
           'Các ví dụ KHÔNG ĐẠT (Hành vi cần hỗ trợ)',
@@ -152,18 +132,18 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
           Colors.red,
           Icons.cancel,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
         _buildSummarySection(pathColor),
-        
+
         // Frequency question (nếu cần)
         if (showFrequencyQuestion) ...[
           const SizedBox(height: 20),
           _buildFrequencyQuestion(),
         ],
-        
+
         // Final result (nếu có)
         if (finalResult != null) ...[
           const SizedBox(height: 20),
@@ -173,7 +153,12 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
     );
   }
 
-  Widget _buildQuestionSection(String title, List<Map<String, String>> questions, Color color, IconData icon) {
+  Widget _buildQuestionSection(
+    String title,
+    List<Map<String, String>> questions,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -199,17 +184,25 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
             ],
           ),
           const SizedBox(height: 16),
-          ...questions.map((questionData) => _buildQuestionCard(
-            questionData['id']!,
-            questionData['question']!,
-            color,
-          )).toList(),
+          ...questions
+              .map(
+                (questionData) => _buildQuestionCard(
+                  questionData['id']!,
+                  questionData['question']!,
+                  color,
+                ),
+              )
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionCard(String questionId, String question, Color pathColor) {
+  Widget _buildQuestionCard(
+    String questionId,
+    String question,
+    Color pathColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -223,10 +216,7 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
         children: [
           Text(
             question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -265,17 +255,23 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
   }
 
   Widget _buildSummarySection(Color pathColor) {
-    final answeredQuestions = selectedAnswers.values.where((answer) => answer != null).length;
+    final answeredQuestions = selectedAnswers.values
+        .where((answer) => answer != null)
+        .length;
     final totalQuestions = truePathQuestions.length + falsePathQuestions.length;
     final isComplete = answeredQuestions == totalQuestions;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isComplete ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isComplete
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isComplete
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -310,7 +306,7 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
               onPressed: () {
                 // Xử lý kết quả
                 _processResults();
-                
+
                 // Quay lại test chính
                 if (widget.onReturnToMainTest != null) {
                   widget.onReturnToMainTest!();
@@ -336,7 +332,7 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
         trueYesCount++;
       }
     }
-    
+
     // Đếm số câu trả lời "Có" cho FALSE path (KHÔNG ĐẠT examples)
     int falseYesCount = 0;
     for (var question in falsePathQuestions) {
@@ -344,11 +340,11 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
         falseYesCount++;
       }
     }
-    
+
     // Flow Assessment Logic
     bool hasTrueExamples = trueYesCount > 0;
     bool hasFalseExamples = falseYesCount > 0;
-    
+
     if (hasTrueExamples && !hasFalseExamples) {
       // Chỉ có ví dụ ĐẠT -> Kết quả cuối cùng: ĐẠT
       _setFinalResult(true, 'ĐẠT - Trẻ chỉ có hành vi tích cực');
@@ -370,17 +366,17 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
       );
     }
   }
-  
+
   void _setFinalResult(bool result, String message) {
     setState(() {
       finalResult = result;
     });
-    
+
     // Cập nhật kết quả chính
     if (widget.onUpdateMainResult != null) {
       widget.onUpdateMainResult!(result);
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Kết quả cuối cùng: $message'),
@@ -389,7 +385,7 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
       ),
     );
   }
-  
+
   Widget _buildFrequencyQuestion() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -418,10 +414,7 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
           const SizedBox(height: 16),
           const Text(
             'Hành động nào con bạn thực hiện thường xuyên hơn?',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 16),
           Row(
@@ -453,15 +446,19 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
       ),
     );
   }
-  
+
   Widget _buildFinalResult() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: finalResult! ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: finalResult!
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: finalResult! ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: finalResult!
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -487,7 +484,9 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
           ),
           const SizedBox(height: 8),
           Text(
-            finalResult! ? 'ĐẠT - Trẻ có hành vi phù hợp' : 'KHÔNG ĐẠT - Trẻ cần hỗ trợ thêm',
+            finalResult!
+                ? 'ĐẠT - Trẻ có hành vi phù hợp'
+                : 'KHÔNG ĐẠT - Trẻ cần hỗ trợ thêm',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -514,12 +513,12 @@ class _ExtensionTestQ001State extends State<ExtensionTestQ001> {
       ),
     );
   }
-  
+
   void _handleFrequencyAnswer(bool isPositive) {
-    String message = isPositive 
+    String message = isPositive
         ? 'ĐẠT - Trẻ thường xuyên có hành vi tích cực hơn'
         : 'KHÔNG ĐẠT - Trẻ thường xuyên có hành vi cần hỗ trợ hơn';
-    
+
     _setFinalResult(isPositive, message);
   }
 }

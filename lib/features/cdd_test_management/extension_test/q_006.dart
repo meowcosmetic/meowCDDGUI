@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class ExtensionTestQ006 extends StatefulWidget {
   final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
-  final Function(bool)? onUpdateMainResult; // Callback để cập nhật kết quả chính
+  final Function(bool)?
+  onUpdateMainResult; // Callback để cập nhật kết quả chính
   final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
-  
+
   const ExtensionTestQ006({
     Key? key,
     this.mainQuestionAnswer,
@@ -23,18 +24,9 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
 
   // Follow-up questions for "Không" case
   final List<Map<String, String>> followUpQuestions = [
-    {
-      'id': 'followup_1',
-      'question': 'Với đồ vật đó bằng cả tay không?',
-    },
-    {
-      'id': 'followup_2', 
-      'question': 'Dẫn bạn đến đồ vật đó không?',
-    },
-    {
-      'id': 'followup_3',
-      'question': 'Cố gắng tự lấy đồ vật đó không?',
-    },
+    {'id': 'followup_1', 'question': 'Với đồ vật đó bằng cả tay không?'},
+    {'id': 'followup_2', 'question': 'Dẫn bạn đến đồ vật đó không?'},
+    {'id': 'followup_3', 'question': 'Cố gắng tự lấy đồ vật đó không?'},
     {
       'id': 'followup_4',
       'question': 'Yêu cầu lấy đồ vật bằng từ ngữ hoặc tạo ra âm thanh không?',
@@ -42,7 +34,8 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
   ];
 
   // Additional question
-  final String additionalQuestion = 'Nếu bạn nói "Chỉ cho cha/mẹ xem nào", con bạn có chỉ vào không?';
+  final String additionalQuestion =
+      'Nếu bạn nói "Chỉ cho cha/mẹ xem nào", con bạn có chỉ vào không?';
 
   @override
   Widget build(BuildContext context) {
@@ -93,15 +86,15 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Case 1: Parent answered "Có" - Immediate ĐẠT
         if (isTruePath) _buildCase1Result(),
-        
+
         // Case 2: Parent answered "Không" - Follow-up questions
         if (!isTruePath) _buildCase2Assessment(),
-        
+
         // Final result (nếu có)
         if (finalResult != null) ...[
           const SizedBox(height: 20),
@@ -159,7 +152,10 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () {
-                _setFinalResult(true, 'ĐẠT - Con bạn có dùng ngón tay trỏ để yêu cầu việc gì đó');
+                _setFinalResult(
+                  true,
+                  'ĐẠT - Con bạn có dùng ngón tay trỏ để yêu cầu việc gì đó',
+                );
               },
               icon: const Icon(Icons.arrow_forward),
               label: const Text('Tiếp tục bài test'),
@@ -203,14 +199,14 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Parent example field
         _buildParentExampleField(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Follow-up Questions
         _buildQuestionSection(
           'Các ví dụ gợi ý (trả lời Có/Không)',
@@ -218,17 +214,16 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
           Colors.blue,
           Icons.help_outline,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Additional Question
         _buildAdditionalQuestion(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
-        if (finalResult == null)
-          _buildSummarySection(Colors.orange),
+        if (finalResult == null) _buildSummarySection(Colors.orange),
       ],
     );
   }
@@ -261,10 +256,7 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
           const SizedBox(height: 12),
           Text(
             'Nếu có thứ gì con bạn muốn nhưng ngoài tầm với (ví dụ như bím bim, đồ chơi, đồ ngoại tầm với), làm thế nào để con bạn lấy được chúng?',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Text(
@@ -283,7 +275,8 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
               });
             },
             decoration: const InputDecoration(
-              hintText: 'Nhập ví dụ từ phụ huynh về cách trẻ lấy đồ vật ngoài tầm với...',
+              hintText:
+                  'Nhập ví dụ từ phụ huynh về cách trẻ lấy đồ vật ngoài tầm với...',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.all(12),
             ),
@@ -294,7 +287,12 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
     );
   }
 
-  Widget _buildQuestionSection(String title, List<Map<String, String>> questions, Color color, IconData icon) {
+  Widget _buildQuestionSection(
+    String title,
+    List<Map<String, String>> questions,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -320,11 +318,15 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
             ],
           ),
           const SizedBox(height: 16),
-          ...questions.map((questionData) => _buildQuestionCard(
-            questionData['id']!,
-            questionData['question']!,
-            color,
-          )).toList(),
+          ...questions
+              .map(
+                (questionData) => _buildQuestionCard(
+                  questionData['id']!,
+                  questionData['question']!,
+                  color,
+                ),
+              )
+              .toList(),
         ],
       ),
     );
@@ -358,10 +360,7 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
           const SizedBox(height: 16),
           Text(
             additionalQuestion,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -399,7 +398,11 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
     );
   }
 
-  Widget _buildQuestionCard(String questionId, String question, Color pathColor) {
+  Widget _buildQuestionCard(
+    String questionId,
+    String question,
+    Color pathColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -413,10 +416,7 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
         children: [
           Text(
             question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -455,17 +455,24 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
   }
 
   Widget _buildSummarySection(Color pathColor) {
-    final answeredQuestions = selectedAnswers.values.where((answer) => answer != null).length;
-    final totalQuestions = followUpQuestions.length + 1; // +1 for additional question
+    final answeredQuestions = selectedAnswers.values
+        .where((answer) => answer != null)
+        .length;
+    final totalQuestions =
+        followUpQuestions.length + 1; // +1 for additional question
     final isComplete = answeredQuestions == totalQuestions;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isComplete ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isComplete
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isComplete
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -521,34 +528,40 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
         followUpYesCount++;
       }
     }
-    
+
     // Kiểm tra câu hỏi bổ sung
     bool additionalYes = selectedAnswers['additional'] == true;
-    
+
     // Assessment Logic:
     // ✅ ĐẠT nếu có "Có" ở bất kỳ câu hỏi phụ nào
     // ✅ ĐẠT nếu trẻ chỉ khi được yêu cầu (additional question = true)
     // ❌ KHÔNG ĐẠT nếu không có "Có" nào trong các câu phụ và trẻ không chỉ khi được yêu cầu
-    
+
     if (followUpYesCount > 0 || additionalYes) {
       // Có ít nhất 1 câu trả lời "Có" trong follow-up hoặc trẻ chỉ khi được yêu cầu
-      _setFinalResult(true, 'ĐẠT - Con bạn có khả năng chỉ tay hoặc yêu cầu giúp đỡ');
+      _setFinalResult(
+        true,
+        'ĐẠT - Con bạn có khả năng chỉ tay hoặc yêu cầu giúp đỡ',
+      );
     } else {
       // Không có câu trả lời "Có" nào và trẻ không chỉ khi được yêu cầu
-      _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không có khả năng chỉ tay hoặc yêu cầu giúp đỡ');
+      _setFinalResult(
+        false,
+        'KHÔNG ĐẠT - Con bạn không có khả năng chỉ tay hoặc yêu cầu giúp đỡ',
+      );
     }
   }
-  
+
   void _setFinalResult(bool result, String message) {
     setState(() {
       finalResult = result;
     });
-    
+
     // Cập nhật kết quả chính
     if (widget.onUpdateMainResult != null) {
       widget.onUpdateMainResult!(result);
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Kết quả cuối cùng: $message'),
@@ -557,7 +570,7 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
       ),
     );
   }
-  
+
   Widget _buildFinalResult() {
     // Tính toán thống kê
     int followUpYesCount = 0;
@@ -567,14 +580,18 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
       }
     }
     bool additionalYes = selectedAnswers['additional'] == true;
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: finalResult! ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: finalResult!
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: finalResult! ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: finalResult!
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -604,7 +621,9 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      finalResult! ? 'ĐẠT - Con bạn có khả năng chỉ tay và yêu cầu giúp đỡ' : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển khả năng chỉ tay',
+                      finalResult!
+                          ? 'ĐẠT - Con bạn có khả năng chỉ tay và yêu cầu giúp đỡ'
+                          : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển khả năng chỉ tay',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -616,9 +635,9 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Thống kê chi tiết
           Container(
             padding: const EdgeInsets.all(16),
@@ -666,7 +685,9 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
                     decoration: BoxDecoration(
                       color: Colors.indigo.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.indigo.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.indigo.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -691,9 +712,9 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
           Row(
             children: [
@@ -719,8 +740,13 @@ class _ExtensionTestQ006State extends State<ExtensionTestQ006> {
       ),
     );
   }
-  
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

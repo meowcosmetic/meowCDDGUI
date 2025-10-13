@@ -620,27 +620,25 @@ class _MainAppViewState extends State<MainAppView> {
             elevation: 0,
             centerTitle: true,
           ),
-          body: ResponsiveContainer(
-            child: _pages[_currentIndex],
-          ),
-          bottomNavigationBar: ResponsiveUtils.isMobile(context) 
-            ? BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                currentIndex: _currentIndex,
-                onTap: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-                selectedItemColor: AppColors.primary,
-                unselectedItemColor: AppColors.grey600,
-                backgroundColor: AppColors.white,
-                elevation: 8,
-                selectedFontSize: 12,
-                unselectedFontSize: 11,
-                items: _bottomNavItems,
-              )
-            : null,
+          body: ResponsiveContainer(child: _pages[_currentIndex]),
+          bottomNavigationBar: ResponsiveUtils.isMobile(context)
+              ? BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  currentIndex: _currentIndex,
+                  onTap: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  selectedItemColor: AppColors.primary,
+                  unselectedItemColor: AppColors.grey600,
+                  backgroundColor: AppColors.white,
+                  elevation: 8,
+                  selectedFontSize: 12,
+                  unselectedFontSize: 11,
+                  items: _bottomNavItems,
+                )
+              : null,
         );
       },
     );
@@ -662,144 +660,170 @@ class HomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          // Welcome Section
-          if (AppConfig.showWelcomeMessage) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadow,
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+              // Welcome Section
+              if (AppConfig.showWelcomeMessage) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.shadow,
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.psychology, size: 48, color: AppColors.white),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Chào mừng trở lại!',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.white,
-                    ),
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    children: [
+                      Icon(Icons.psychology, size: 48, color: AppColors.white),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Chào mừng trở lại!',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Hãy chọn danh mục bạn muốn sử dụng',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.white.withValues(alpha: 0.9),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Hãy chọn danh mục bạn muốn sử dụng',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.white.withValues(alpha: 0.9),
-                    ),
-                    textAlign: TextAlign.center,
+                ),
+                SizedBox(
+                  height: ResponsiveUtils.getResponsiveSpacing(
+                    context,
+                    baseSpacing: 24,
                   ),
-                ],
-              ),
-            ),
-            SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 24)),
-          ],
+                ),
+              ],
 
-          // Categories Grid
-          Text(
-            'Danh Mục Chính',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 16)),
-
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: ResponsiveUtils.getResponsiveColumns(context),
-              crossAxisSpacing: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 16),
-              mainAxisSpacing: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 16),
-              childAspectRatio: 1.1,
-            ),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return _buildCategoryCard(context, category);
-            },
-          ),
-
-          SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 24)),
-
-          // Quick Stats Section
-          if (AppConfig.showProgressTips) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
+              // Categories Grid
+              Text(
+                'Danh Mục Chính',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.trending_up,
-                        color: AppColors.primary,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Thống Kê Nhanh',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatItem(
-                          'Trẻ đang theo dõi',
-                          '5',
-                          Icons.child_care,
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildStatItem(
-                          'Bài test đã làm',
-                          '12',
-                          Icons.quiz,
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildStatItem(
-                          'Tài liệu đã đọc',
-                          '8',
-                          Icons.book,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              SizedBox(
+                height: ResponsiveUtils.getResponsiveSpacing(
+                  context,
+                  baseSpacing: 16,
+                ),
               ),
-            ),
-          ],
 
-          SizedBox(height: ResponsiveUtils.getResponsiveSpacing(context, baseSpacing: 32)),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: ResponsiveUtils.getResponsiveColumns(context),
+                  crossAxisSpacing: ResponsiveUtils.getResponsiveSpacing(
+                    context,
+                    baseSpacing: 16,
+                  ),
+                  mainAxisSpacing: ResponsiveUtils.getResponsiveSpacing(
+                    context,
+                    baseSpacing: 16,
+                  ),
+                  childAspectRatio: 1.1,
+                ),
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  return _buildCategoryCard(context, category);
+                },
+              ),
+
+              SizedBox(
+                height: ResponsiveUtils.getResponsiveSpacing(
+                  context,
+                  baseSpacing: 24,
+                ),
+              ),
+
+              // Quick Stats Section
+              if (AppConfig.showProgressTips) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.trending_up,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Thống Kê Nhanh',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatItem(
+                              'Trẻ đang theo dõi',
+                              '5',
+                              Icons.child_care,
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildStatItem(
+                              'Bài test đã làm',
+                              '12',
+                              Icons.quiz,
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildStatItem(
+                              'Tài liệu đã đọc',
+                              '8',
+                              Icons.book,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              SizedBox(
+                height: ResponsiveUtils.getResponsiveSpacing(
+                  context,
+                  baseSpacing: 32,
+                ),
+              ),
             ],
           ),
         );

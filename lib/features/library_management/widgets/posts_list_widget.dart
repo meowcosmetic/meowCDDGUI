@@ -98,13 +98,14 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: post.postType == PostType.INTERVENTION_METHOD
+                              color:
+                                  post.postType == PostType.INTERVENTION_METHOD
                                   ? Colors.blue
                                   : post.postType == PostType.CHECKLIST
-                                      ? Colors.green
-                                      : post.postType == PostType.GUIDELINE
-                                          ? Colors.orange
-                                          : Colors.purple,
+                                  ? Colors.green
+                                  : post.postType == PostType.GUIDELINE
+                                  ? Colors.orange
+                                  : Colors.purple,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -123,11 +124,15 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: post.isPublished ? Colors.green : Colors.grey,
+                              color: post.isPublished
+                                  ? Colors.green
+                                  : Colors.grey,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              post.isPublished ? 'Đã xuất bản' : 'Chưa xuất bản',
+                              post.isPublished
+                                  ? 'Đã xuất bản'
+                                  : 'Chưa xuất bản',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
@@ -174,16 +179,14 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                     ),
                     child: Text(
                       tag.trim(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                     ),
                   );
                 }).toList(),
               ),
             ],
-            if (post.targetAgeMinMonths != null && post.targetAgeMaxMonths != null) ...[
+            if (post.targetAgeMinMonths != null &&
+                post.targetAgeMaxMonths != null) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -257,9 +260,7 @@ class _PostsListWidgetState extends State<PostsListWidget> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Xác nhận xóa'),
-        content: Text(
-          'Bạn có chắc chắn muốn xóa bài post "${post.title}"?',
-        ),
+        content: Text('Bạn có chắc chắn muốn xóa bài post "${post.title}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

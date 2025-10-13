@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class ExtensionTestQ005 extends StatefulWidget {
   final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
-  final Function(bool)? onUpdateMainResult; // Callback để cập nhật kết quả chính
+  final Function(bool)?
+  onUpdateMainResult; // Callback để cập nhật kết quả chính
   final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
-  
+
   const ExtensionTestQ005({
     Key? key,
     this.mainQuestionAnswer,
@@ -25,34 +26,22 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
 
   // Questions for Branch 1 - ĐẠT examples
   final List<Map<String, String>> branch1Questions = [
+    {'id': 'branch1_1', 'question': 'Nhìn vào bàn tay chưa?'},
     {
-      'id': 'branch1_1',
-      'question': 'Nhìn vào bàn tay chưa?',
-    },
-    {
-      'id': 'branch1_2', 
+      'id': 'branch1_2',
       'question': 'Chuyển động ngón tay khi chơi trò ú tim chưa?',
     },
   ];
 
   // Questions for Branch 3 - KHÔNG ĐẠT examples
   final List<Map<String, String>> branch3Questions = [
-    {
-      'id': 'branch3_1',
-      'question': 'Ngọ nguậy ngón tay gần mặt con chưa?',
-    },
+    {'id': 'branch3_1', 'question': 'Ngọ nguậy ngón tay gần mặt con chưa?'},
     {
       'id': 'branch3_2',
       'question': 'Giữ bàn tay của con và để gần mắt con chưa?',
     },
-    {
-      'id': 'branch3_3',
-      'question': 'Giữ tay của mình ở cạnh bên mặt?',
-    },
-    {
-      'id': 'branch3_4',
-      'question': 'Vỗ tay ở gần mặt của con chưa?',
-    },
+    {'id': 'branch3_3', 'question': 'Giữ tay của mình ở cạnh bên mặt?'},
+    {'id': 'branch3_4', 'question': 'Vỗ tay ở gần mặt của con chưa?'},
   ];
 
   @override
@@ -104,27 +93,27 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Branch Selection Logic
         if (currentBranch.isEmpty) _buildBranchSelection(),
-        
+
         // Branch 1 - Parent answered "Có"
         if (currentBranch == 'branch1') _buildBranch1(),
-        
-        // Branch 2 - Parent answered "Không" 
+
+        // Branch 2 - Parent answered "Không"
         if (currentBranch == 'branch2') _buildBranch2(),
-        
+
         // Branch 3 - Parent described abnormal behavior
         if (currentBranch == 'branch3') _buildBranch3(),
-        
+
         // Frequency question (if needed)
         if (showFrequencyQuestion) ...[
           const SizedBox(height: 20),
           _buildFrequencyQuestion(),
         ],
-        
+
         // Final result (nếu có)
         if (finalResult != null) ...[
           const SizedBox(height: 20),
@@ -235,14 +224,14 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Parent description field
         _buildParentDescriptionField(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Branch 1 Questions
         _buildQuestionSection(
           'Các ví dụ ĐẠT (trả lời Có/Không)',
@@ -250,12 +239,11 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
           Colors.green,
           Icons.check_circle,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
-        if (finalResult == null)
-          _buildSummarySection(Colors.green),
+        if (finalResult == null) _buildSummarySection(Colors.green),
       ],
     );
   }
@@ -288,9 +276,9 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Immediate result
         Container(
           padding: const EdgeInsets.all(20),
@@ -339,7 +327,10 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    _setFinalResult(true, 'ĐẠT - Không có chuyển động ngón tay bất thường');
+                    _setFinalResult(
+                      true,
+                      'ĐẠT - Không có chuyển động ngón tay bất thường',
+                    );
                   },
                   icon: const Icon(Icons.arrow_forward),
                   label: const Text('Tiếp tục bài test'),
@@ -385,9 +376,9 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Branch 3 Questions
         _buildQuestionSection(
           'Các ví dụ KHÔNG ĐẠT (trả lời Có/Không)',
@@ -395,9 +386,9 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
           Colors.red,
           Icons.cancel,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
         if (finalResult == null && !showFrequencyQuestion)
           _buildSummarySection(Colors.red),
@@ -433,10 +424,7 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
           const SizedBox(height: 12),
           Text(
             'Hãy mô tả những chuyển động ngón tay của con bạn.',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Text(
@@ -466,7 +454,12 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
     );
   }
 
-  Widget _buildQuestionSection(String title, List<Map<String, String>> questions, Color color, IconData icon) {
+  Widget _buildQuestionSection(
+    String title,
+    List<Map<String, String>> questions,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -492,17 +485,25 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
             ],
           ),
           const SizedBox(height: 16),
-          ...questions.map((questionData) => _buildQuestionCard(
-            questionData['id']!,
-            questionData['question']!,
-            color,
-          )).toList(),
+          ...questions
+              .map(
+                (questionData) => _buildQuestionCard(
+                  questionData['id']!,
+                  questionData['question']!,
+                  color,
+                ),
+              )
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionCard(String questionId, String question, Color pathColor) {
+  Widget _buildQuestionCard(
+    String questionId,
+    String question,
+    Color pathColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -516,10 +517,7 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
         children: [
           Text(
             question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -558,17 +556,25 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
   }
 
   Widget _buildSummarySection(Color pathColor) {
-    final answeredQuestions = selectedAnswers.values.where((answer) => answer != null).length;
-    final totalQuestions = currentBranch == 'branch1' ? branch1Questions.length : branch3Questions.length;
+    final answeredQuestions = selectedAnswers.values
+        .where((answer) => answer != null)
+        .length;
+    final totalQuestions = currentBranch == 'branch1'
+        ? branch1Questions.length
+        : branch3Questions.length;
     final isComplete = answeredQuestions == totalQuestions;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isComplete ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isComplete
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isComplete
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -644,10 +650,7 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
           const SizedBox(height: 16),
           const Text(
             'Việc này có diễn ra hơn 2 lần/tuần không?',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 16),
           Row(
@@ -689,7 +692,7 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
           yesCount++;
         }
       }
-      
+
       if (yesCount > 0) {
         _setFinalResult(true, 'ĐẠT - Có ít nhất một hành vi ĐẠT');
       } else {
@@ -703,7 +706,7 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
           yesCount++;
         }
       }
-      
+
       if (yesCount > 0) {
         // Có hành vi KHÔNG ĐẠT -> Hỏi về tần suất
         setState(() {
@@ -719,23 +722,29 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
   void _handleFrequencyAnswer(bool isFrequent) {
     if (isFrequent) {
       // >2 lần/tuần -> KHÔNG ĐẠT
-      _setFinalResult(false, 'KHÔNG ĐẠT - Có hành vi bất thường và xảy ra >2 lần/tuần');
+      _setFinalResult(
+        false,
+        'KHÔNG ĐẠT - Có hành vi bất thường và xảy ra >2 lần/tuần',
+      );
     } else {
       // ≤2 lần/tuần -> ĐẠT
-      _setFinalResult(true, 'ĐẠT - Có hành vi bất thường nhưng xảy ra ≤2 lần/tuần');
+      _setFinalResult(
+        true,
+        'ĐẠT - Có hành vi bất thường nhưng xảy ra ≤2 lần/tuần',
+      );
     }
   }
-  
+
   void _setFinalResult(bool result, String message) {
     setState(() {
       finalResult = result;
     });
-    
+
     // Cập nhật kết quả chính
     if (widget.onUpdateMainResult != null) {
       widget.onUpdateMainResult!(result);
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Kết quả cuối cùng: $message'),
@@ -744,12 +753,12 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
       ),
     );
   }
-  
+
   Widget _buildFinalResult() {
     // Tính toán thống kê
     int yesCount = 0;
     int totalQuestions = 0;
-    
+
     if (currentBranch == 'branch1') {
       totalQuestions = branch1Questions.length;
       for (var question in branch1Questions) {
@@ -765,14 +774,18 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
         }
       }
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: finalResult! ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: finalResult!
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: finalResult! ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: finalResult!
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -802,7 +815,9 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      finalResult! ? 'ĐẠT - Chuyển động ngón tay bình thường' : 'KHÔNG ĐẠT - Có chuyển động ngón tay bất thường',
+                      finalResult!
+                          ? 'ĐẠT - Chuyển động ngón tay bình thường'
+                          : 'KHÔNG ĐẠT - Có chuyển động ngón tay bất thường',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -814,9 +829,9 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Thống kê chi tiết
           Container(
             padding: const EdgeInsets.all(16),
@@ -840,10 +855,14 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
                   children: [
                     Expanded(
                       child: _buildStatCard(
-                        currentBranch == 'branch1' ? 'Hành vi ĐẠT' : 'Hành vi KHÔNG ĐẠT',
+                        currentBranch == 'branch1'
+                            ? 'Hành vi ĐẠT'
+                            : 'Hành vi KHÔNG ĐẠT',
                         '$yesCount/$totalQuestions',
                         currentBranch == 'branch1' ? Colors.green : Colors.red,
-                        currentBranch == 'branch1' ? Icons.check_circle : Icons.cancel,
+                        currentBranch == 'branch1'
+                            ? Icons.check_circle
+                            : Icons.cancel,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -864,7 +883,9 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
                     decoration: BoxDecoration(
                       color: Colors.indigo.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.indigo.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.indigo.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -889,9 +910,9 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
           Row(
             children: [
@@ -917,8 +938,13 @@ class _ExtensionTestQ005State extends State<ExtensionTestQ005> {
       ),
     );
   }
-  
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

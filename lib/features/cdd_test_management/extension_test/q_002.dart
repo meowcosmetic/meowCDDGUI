@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class ExtensionTestQ002 extends StatefulWidget {
   final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
-  final Function(bool)? onUpdateMainResult; // Callback để cập nhật kết quả chính
+  final Function(bool)?
+  onUpdateMainResult; // Callback để cập nhật kết quả chính
   final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
-  
+
   const ExtensionTestQ002({
     Key? key,
     this.mainQuestionAnswer,
@@ -22,14 +23,8 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
 
   // Questions for assessment
   final List<Map<String, String>> assessmentQuestions = [
-    {
-      'id': 'assess_1',
-      'question': 'Con bạn có lờ âm thanh không?',
-    },
-    {
-      'id': 'assess_2', 
-      'question': 'Con bạn có lờ người khác đi không?',
-    },
+    {'id': 'assess_1', 'question': 'Con bạn có lờ âm thanh không?'},
+    {'id': 'assess_2', 'question': 'Con bạn có lờ người khác đi không?'},
   ];
 
   @override
@@ -81,9 +76,9 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Instructions
         Container(
           padding: const EdgeInsets.all(12),
@@ -98,18 +93,15 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
               Expanded(
                 child: Text(
                   'Hãy đánh giá các hành vi của con bạn. Trả lời Có/Không cho từng câu hỏi dưới đây:',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.blue,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.blue),
                 ),
               ),
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Assessment Questions
         _buildQuestionSection(
           'Đánh giá hành vi',
@@ -117,13 +109,12 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
           Colors.blue,
           Icons.assessment,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
-        if (finalResult == null)
-          _buildSummarySection(pathColor),
-        
+        if (finalResult == null) _buildSummarySection(pathColor),
+
         // Final result (nếu có)
         if (finalResult != null) ...[
           const SizedBox(height: 20),
@@ -133,7 +124,12 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
     );
   }
 
-  Widget _buildQuestionSection(String title, List<Map<String, String>> questions, Color color, IconData icon) {
+  Widget _buildQuestionSection(
+    String title,
+    List<Map<String, String>> questions,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -159,17 +155,25 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
             ],
           ),
           const SizedBox(height: 16),
-          ...questions.map((questionData) => _buildQuestionCard(
-            questionData['id']!,
-            questionData['question']!,
-            color,
-          )).toList(),
+          ...questions
+              .map(
+                (questionData) => _buildQuestionCard(
+                  questionData['id']!,
+                  questionData['question']!,
+                  color,
+                ),
+              )
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionCard(String questionId, String question, Color pathColor) {
+  Widget _buildQuestionCard(
+    String questionId,
+    String question,
+    Color pathColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -183,10 +187,7 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
         children: [
           Text(
             question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -225,17 +226,23 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
   }
 
   Widget _buildSummarySection(Color pathColor) {
-    final answeredQuestions = selectedAnswers.values.where((answer) => answer != null).length;
+    final answeredQuestions = selectedAnswers.values
+        .where((answer) => answer != null)
+        .length;
     final totalQuestions = assessmentQuestions.length;
     final isComplete = answeredQuestions == totalQuestions;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isComplete ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isComplete
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isComplete
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -291,31 +298,34 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
         yesCount++;
       }
     }
-    
+
     // Assessment Logic:
     // ❌ Nếu Có ít nhất 1 trong 2 → KHÔNG ĐẠT
     // ✅ Nếu Không cả 2 → ĐẠT
     bool hasAnyYes = yesCount > 0;
-    
+
     if (hasAnyYes) {
       // Có ít nhất 1 câu trả lời "Có" → KHÔNG ĐẠT
-      _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn có lờ âm thanh hoặc người khác');
+      _setFinalResult(
+        false,
+        'KHÔNG ĐẠT - Con bạn có lờ âm thanh hoặc người khác',
+      );
     } else {
       // Không có câu trả lời "Có" nào → ĐẠT
       _setFinalResult(true, 'ĐẠT - Con bạn không lờ âm thanh và người khác');
     }
   }
-  
+
   void _setFinalResult(bool result, String message) {
     setState(() {
       finalResult = result;
     });
-    
+
     // Cập nhật kết quả chính
     if (widget.onUpdateMainResult != null) {
       widget.onUpdateMainResult!(result);
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Kết quả cuối cùng: $message'),
@@ -324,7 +334,7 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
       ),
     );
   }
-  
+
   Widget _buildFinalResult() {
     // Tính toán thống kê
     int yesCount = 0;
@@ -333,14 +343,18 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
         yesCount++;
       }
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: finalResult! ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: finalResult!
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: finalResult! ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: finalResult!
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -370,7 +384,9 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      finalResult! ? 'ĐẠT - Con bạn phản ứng tốt' : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ thêm',
+                      finalResult!
+                          ? 'ĐẠT - Con bạn phản ứng tốt'
+                          : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ thêm',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -382,9 +398,9 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Thống kê chi tiết
           Container(
             padding: const EdgeInsets.all(16),
@@ -428,9 +444,9 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
           Row(
             children: [
@@ -456,8 +472,13 @@ class _ExtensionTestQ002State extends State<ExtensionTestQ002> {
       ),
     );
   }
-  
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

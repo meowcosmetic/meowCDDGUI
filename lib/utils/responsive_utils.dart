@@ -27,7 +27,8 @@ class ResponsiveUtils {
   }
 
   // Responsive width helpers
-  static double getResponsiveWidth(BuildContext context, {
+  static double getResponsiveWidth(
+    BuildContext context, {
     double? mobile,
     double? tablet,
     double? desktop,
@@ -58,7 +59,8 @@ class ResponsiveUtils {
   }
 
   // Responsive font size
-  static double getResponsiveFontSize(BuildContext context, {
+  static double getResponsiveFontSize(
+    BuildContext context, {
     required double baseFontSize,
     double? mobileMultiplier,
     double? tabletMultiplier,
@@ -77,7 +79,8 @@ class ResponsiveUtils {
   }
 
   // Responsive spacing
-  static double getResponsiveSpacing(BuildContext context, {
+  static double getResponsiveSpacing(
+    BuildContext context, {
     required double baseSpacing,
     double? mobileMultiplier,
     double? tabletMultiplier,
@@ -111,27 +114,15 @@ class ResponsiveUtils {
   // Responsive container constraints
   static BoxConstraints getResponsiveConstraints(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     if (isMobile(context)) {
-      return BoxConstraints(
-        maxWidth: screenWidth,
-        minWidth: 300,
-      );
+      return BoxConstraints(maxWidth: screenWidth, minWidth: 300);
     } else if (isTablet(context)) {
-      return BoxConstraints(
-        maxWidth: 600,
-        minWidth: 400,
-      );
+      return BoxConstraints(maxWidth: 600, minWidth: 400);
     } else if (isDesktop(context)) {
-      return BoxConstraints(
-        maxWidth: 800,
-        minWidth: 500,
-      );
+      return BoxConstraints(maxWidth: 800, minWidth: 500);
     } else {
-      return BoxConstraints(
-        maxWidth: 1000,
-        minWidth: 600,
-      );
+      return BoxConstraints(maxWidth: 1000, minWidth: 600);
     }
   }
 
@@ -149,7 +140,8 @@ class ResponsiveUtils {
   }
 
   // Responsive icon size
-  static double getResponsiveIconSize(BuildContext context, {
+  static double getResponsiveIconSize(
+    BuildContext context, {
     required double baseSize,
   }) {
     if (isMobile(context)) {
@@ -177,7 +169,8 @@ class ResponsiveUtils {
   }
 
   // Responsive border radius
-  static double getResponsiveBorderRadius(BuildContext context, {
+  static double getResponsiveBorderRadius(
+    BuildContext context, {
     required double baseRadius,
   }) {
     if (isMobile(context)) {
@@ -205,21 +198,14 @@ class ResponsiveUtils {
   }
 }
 
-enum ResponsiveLayoutType {
-  mobile,
-  tablet,
-  desktop,
-  largeDesktop,
-}
+enum ResponsiveLayoutType { mobile, tablet, desktop, largeDesktop }
 
 // Responsive Widget Builder
 class ResponsiveBuilder extends StatelessWidget {
-  final Widget Function(BuildContext context, ResponsiveLayoutType layoutType) builder;
+  final Widget Function(BuildContext context, ResponsiveLayoutType layoutType)
+  builder;
 
-  const ResponsiveBuilder({
-    Key? key,
-    required this.builder,
-  }) : super(key: key);
+  const ResponsiveBuilder({Key? key, required this.builder}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +242,11 @@ class ResponsiveContainer extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(
-          borderRadius ?? ResponsiveUtils.getResponsiveBorderRadius(context, baseRadius: 12),
+          borderRadius ??
+              ResponsiveUtils.getResponsiveBorderRadius(
+                context,
+                baseRadius: 12,
+              ),
         ),
         boxShadow: boxShadow,
       ),
@@ -297,7 +287,8 @@ class ResponsiveText extends StatelessWidget {
 
     return Text(
       text,
-      style: style?.copyWith(
+      style:
+          style?.copyWith(
             fontSize: responsiveFontSize,
             fontWeight: fontWeight,
             color: color,
@@ -335,7 +326,10 @@ class ResponsiveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final buttonSize = ResponsiveUtils.getResponsiveButtonSize(context);
-    final borderRadius = ResponsiveUtils.getResponsiveBorderRadius(context, baseRadius: 12);
+    final borderRadius = ResponsiveUtils.getResponsiveBorderRadius(
+      context,
+      baseRadius: 12,
+    );
 
     if (isOutlined) {
       return SizedBox(
@@ -345,7 +339,9 @@ class ResponsiveButton extends StatelessWidget {
           onPressed: onPressed,
           style: OutlinedButton.styleFrom(
             foregroundColor: foregroundColor,
-            side: BorderSide(color: foregroundColor ?? Theme.of(context).primaryColor),
+            side: BorderSide(
+              color: foregroundColor ?? Theme.of(context).primaryColor,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(borderRadius),
             ),

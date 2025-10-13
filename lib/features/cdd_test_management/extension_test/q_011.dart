@@ -9,14 +9,15 @@ class ExtensionTestQ011 extends StatefulWidget {
 
 class _ExtensionTestQ011State extends State<ExtensionTestQ011> {
   String? selectedAnswer;
-  
-  final String question = "Con bạn có thường xuyên có những hành vi tự kích thích (như lắc lư, vỗ tay) không?";
-  
+
+  final String question =
+      "Con bạn có thường xuyên có những hành vi tự kích thích (như lắc lư, vỗ tay) không?";
+
   final List<String> options = [
     "A. Có, con thường xuyên có hành vi này",
     "B. Thỉnh thoảng con có hành vi này",
     "C. Con hiếm khi có hành vi này",
-    "D. Con không bao giờ có hành vi này"
+    "D. Con không bao giờ có hành vi này",
   ];
 
   @override
@@ -42,34 +43,40 @@ class _ExtensionTestQ011State extends State<ExtensionTestQ011> {
             const SizedBox(height: 20),
             Text(
               'Q_011: $question',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            ...options.map((option) => RadioListTile<String>(
-              title: Text(option),
-              value: option,
-              groupValue: selectedAnswer,
-              onChanged: (String? value) {
-                setState(() {
-                  selectedAnswer = value;
-                });
-              },
-            )).toList(),
+            ...options
+                .map(
+                  (option) => RadioListTile<String>(
+                    title: Text(option),
+                    value: option,
+                    groupValue: selectedAnswer,
+                    onChanged: (String? value) {
+                      setState(() {
+                        selectedAnswer = value;
+                      });
+                    },
+                  ),
+                )
+                .toList(),
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton(
-                onPressed: selectedAnswer != null ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Đã chọn: $selectedAnswer')),
-                  );
-                  
-                  // Quay lại test chính
-                  if (widget.onReturnToMainTest != null) {
-                    widget.onReturnToMainTest!();
-                  }
-                } : null,
+                onPressed: selectedAnswer != null
+                    ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Đã chọn: $selectedAnswer')),
+                        );
+
+                        // Quay lại test chính
+                        if (widget.onReturnToMainTest != null) {
+                          widget.onReturnToMainTest!();
+                        }
+                      }
+                    : null,
                 child: const Text('Xác nhận và tiếp tục'),
               ),
             ),

@@ -9,14 +9,15 @@ class ExtensionTestQ012 extends StatefulWidget {
 
 class _ExtensionTestQ012State extends State<ExtensionTestQ012> {
   String? selectedAnswer;
-  
-  final String question = "Con bạn có khó khăn trong việc chờ đợi đến lượt mình không?";
-  
+
+  final String question =
+      "Con bạn có khó khăn trong việc chờ đợi đến lượt mình không?";
+
   final List<String> options = [
     "A. Có, con rất khó chờ đợi",
     "B. Con cần được nhắc nhở để chờ đợi",
     "C. Con chờ đợi một cách tự nhiên",
-    "D. Con rất kiên nhẫn và biết chờ đợi"
+    "D. Con rất kiên nhẫn và biết chờ đợi",
   ];
 
   @override
@@ -42,34 +43,40 @@ class _ExtensionTestQ012State extends State<ExtensionTestQ012> {
             const SizedBox(height: 20),
             Text(
               'Q_012: $question',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            ...options.map((option) => RadioListTile<String>(
-              title: Text(option),
-              value: option,
-              groupValue: selectedAnswer,
-              onChanged: (String? value) {
-                setState(() {
-                  selectedAnswer = value;
-                });
-              },
-            )).toList(),
+            ...options
+                .map(
+                  (option) => RadioListTile<String>(
+                    title: Text(option),
+                    value: option,
+                    groupValue: selectedAnswer,
+                    onChanged: (String? value) {
+                      setState(() {
+                        selectedAnswer = value;
+                      });
+                    },
+                  ),
+                )
+                .toList(),
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton(
-                onPressed: selectedAnswer != null ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Đã chọn: $selectedAnswer')),
-                  );
-                  
-                  // Quay lại test chính
-                  if (widget.onReturnToMainTest != null) {
-                    widget.onReturnToMainTest!();
-                  }
-                } : null,
+                onPressed: selectedAnswer != null
+                    ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Đã chọn: $selectedAnswer')),
+                        );
+
+                        // Quay lại test chính
+                        if (widget.onReturnToMainTest != null) {
+                          widget.onReturnToMainTest!();
+                        }
+                      }
+                    : null,
                 child: const Text('Xác nhận và tiếp tục'),
               ),
             ),

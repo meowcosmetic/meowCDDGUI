@@ -35,7 +35,9 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
   final _generatedEnController = TextEditingController();
   // Additional post fields
   final _durationController = TextEditingController(text: '20');
-  final _tagsController = TextEditingController(text: 'can thiệp,phát triển,trẻ em');
+  final _tagsController = TextEditingController(
+    text: 'can thiệp,phát triển,trẻ em',
+  );
   final _authorController = TextEditingController(text: 'Dr. Nguyen Van A');
   final _versionController = TextEditingController(text: '1.0');
 
@@ -132,10 +134,15 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
         orElse: () => {},
       );
       if (selectedDomain.isNotEmpty) {
-        _selectedDomainName = selectedDomain['displayedName'] ?? selectedDomain['name'] ?? 'Lĩnh vực can thiệp';
+        _selectedDomainName =
+            selectedDomain['displayedName'] ??
+            selectedDomain['name'] ??
+            'Lĩnh vực can thiệp';
       } else {
         // If domain not found, clear the selection
-        print('Domain with ID $_selectedDomainId not found in domains list during populate');
+        print(
+          'Domain with ID $_selectedDomainId not found in domains list during populate',
+        );
         _selectedDomainId = null;
         _selectedDomainName = null;
       }
@@ -190,22 +197,27 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
           _domains = domainsList
               .map((e) => (e as Map).cast<String, dynamic>())
               .toList();
-          
-    // Set selected domain name if we have a selected domain ID
-    if (_selectedDomainId != null) {
-      final selectedDomain = _domains.firstWhere(
-        (domain) => domain['id']?.toString() == _selectedDomainId,
-        orElse: () => {},
-      );
-      if (selectedDomain.isNotEmpty) {
-        _selectedDomainName = selectedDomain['displayedName'] ?? selectedDomain['name'] ?? 'Lĩnh vực can thiệp';
-      } else {
-        // If domain not found, clear the selection
-        print('Domain with ID $_selectedDomainId not found in domains list');
-        _selectedDomainId = null;
-        _selectedDomainName = null;
-      }
-    }
+
+          // Set selected domain name if we have a selected domain ID
+          if (_selectedDomainId != null) {
+            final selectedDomain = _domains.firstWhere(
+              (domain) => domain['id']?.toString() == _selectedDomainId,
+              orElse: () => {},
+            );
+            if (selectedDomain.isNotEmpty) {
+              _selectedDomainName =
+                  selectedDomain['displayedName'] ??
+                  selectedDomain['name'] ??
+                  'Lĩnh vực can thiệp';
+            } else {
+              // If domain not found, clear the selection
+              print(
+                'Domain with ID $_selectedDomainId not found in domains list',
+              );
+              _selectedDomainId = null;
+              _selectedDomainName = null;
+            }
+          }
         });
       }
     } catch (e) {
@@ -368,9 +380,9 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
         'title': _titleController.text.trim(),
         'book_content': selectedContent,
       };
-      
+
       print('Process data: $processData');
-      
+
       final resp = await _apiService.processInterventionGoal(processData);
 
       if (resp.statusCode == 200) {
@@ -540,20 +552,25 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
 
       // Tạo dữ liệu cho intervention-posts API
       final postData = {
-        "title": _titleController.text.trim().isNotEmpty 
-            ? _titleController.text.trim() 
+        "title": _titleController.text.trim().isNotEmpty
+            ? _titleController.text.trim()
             : _contentController.text.trim(),
         "content": {
-          "vi": _processedData?['processing_results']?['final_content']?.toString() ?? 
-                _contentController.text.trim(),
-          "en": _processedData?['processing_results']?['final_content']?.toString() ?? 
-                _contentController.text.trim(),
+          "vi":
+              _processedData?['processing_results']?['final_content']
+                  ?.toString() ??
+              _contentController.text.trim(),
+          "en":
+              _processedData?['processing_results']?['final_content']
+                  ?.toString() ??
+              _contentController.text.trim(),
         },
         "postType": "INTERVENTION_METHOD",
         "difficultyLevel": _selectedLevel,
         "targetAgeMinMonths": int.parse(_minAgeController.text),
         "targetAgeMaxMonths": int.parse(_maxAgeController.text),
-        "estimatedDurationMinutes": int.tryParse(_durationController.text.trim()) ?? 20,
+        "estimatedDurationMinutes":
+            int.tryParse(_durationController.text.trim()) ?? 20,
         "tags": _tagsController.text.trim(),
         "isPublished": false,
         "author": _authorController.text.trim(),
@@ -568,7 +585,7 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
       print('Creating new intervention post');
       print('API URL: ${AppConfig.cddAPI}/intervention-posts');
       print('itemId in payload: ${postData['criteriaId']}');
-      
+
       final resp = await _apiService.createInterventionPost(postData);
 
       if (resp.statusCode == 200 || resp.statusCode == 201) {
@@ -1267,7 +1284,8 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            onPressed: _processInterventionGoal, // Luôn cho phép bấm
+                            onPressed:
+                                _processInterventionGoal, // Luôn cho phép bấm
                             icon: _isProcessing
                                 ? const SizedBox(
                                     width: 16,
@@ -1288,7 +1306,6 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
                             ),
                           ),
                         ),
-                        
                       ],
                     ],
                   ),
@@ -1328,7 +1345,8 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
                                 ],
                               ),
                               SizedBox(
-                                height: 1200, // Chiều cao cố định cho TabBarView
+                                height:
+                                    1200, // Chiều cao cố định cho TabBarView
                                 child: TabBarView(
                                   children: [
                                     // Expert Analysis
@@ -1365,7 +1383,8 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
                                     SingleChildScrollView(
                                       padding: const EdgeInsets.all(12),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Step 1: ${_processedData!['workflow_summary']?['step_1']?.toString() ?? 'N/A'}',
@@ -1405,7 +1424,8 @@ class _AddCriteriaPageState extends State<AddCriteriaPage> {
                                     SingleChildScrollView(
                                       padding: const EdgeInsets.all(12),
                                       child: Html(
-                                        data: _processedData!['final_content']
+                                        data:
+                                            _processedData!['final_content']
                                                 ?.toString() ??
                                             'Không có dữ liệu',
                                         style: {

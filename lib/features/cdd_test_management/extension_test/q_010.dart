@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class ExtensionTestQ010 extends StatefulWidget {
   final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
-  final Function(bool)? onUpdateMainResult; // Callback để cập nhật kết quả chính
+  final Function(bool)?
+  onUpdateMainResult; // Callback để cập nhật kết quả chính
   final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
-  
+
   const ExtensionTestQ010({
     Key? key,
     this.mainQuestionAnswer,
@@ -25,30 +26,15 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
 
   // Questions for Case 1 - Positive responses (ĐẠT)
   final List<Map<String, String>> positiveResponses = [
-    {
-      'id': 'positive_1',
-      'question': 'Tìm kiếm người gọi không?',
-    },
-    {
-      'id': 'positive_2', 
-      'question': 'Nói hoặc bập bẹ không?',
-    },
-    {
-      'id': 'positive_3',
-      'question': 'Ngừng việc đang làm lại không?',
-    },
+    {'id': 'positive_1', 'question': 'Tìm kiếm người gọi không?'},
+    {'id': 'positive_2', 'question': 'Nói hoặc bập bẹ không?'},
+    {'id': 'positive_3', 'question': 'Ngừng việc đang làm lại không?'},
   ];
 
   // Questions for Case 2 - Negative responses (KHÔNG ĐẠT)
   final List<Map<String, String>> negativeResponses = [
-    {
-      'id': 'negative_1',
-      'question': 'Không trả lời / phản ứng gì không?',
-    },
-    {
-      'id': 'negative_2', 
-      'question': 'Có vẻ nghe nhưng phớt lờ bố mẹ không?',
-    },
+    {'id': 'negative_1', 'question': 'Không trả lời / phản ứng gì không?'},
+    {'id': 'negative_2', 'question': 'Có vẻ nghe nhưng phớt lờ bố mẹ không?'},
     {
       'id': 'negative_3',
       'question': 'Trả lời / phản ứng chỉ khi bố mẹ đứng trước mặt không?',
@@ -108,24 +94,24 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Case Selection Logic
         if (currentCase.isEmpty) _buildCaseSelection(),
-        
+
         // Case 1 - Parent answered "Có"
         if (currentCase == 'case1') _buildCase1Assessment(),
-        
-        // Case 2 - Parent answered "Không" 
+
+        // Case 2 - Parent answered "Không"
         if (currentCase == 'case2') _buildCase2Assessment(),
-        
+
         // Comparison question (if needed)
         if (showComparisonQuestion) ...[
           const SizedBox(height: 20),
           _buildComparisonQuestion(),
         ],
-        
+
         // Final result (nếu có)
         if (finalResult != null) ...[
           const SizedBox(height: 20),
@@ -224,14 +210,14 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Parent example field
         _buildParentExampleField(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Positive response questions
         _buildQuestionSection(
           'Các phản ứng được xem là ĐẠT:',
@@ -239,9 +225,9 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
           Colors.green,
           Icons.check_circle,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
         if (finalResult == null && !showComparisonQuestion)
           _buildSummarySection(Colors.green),
@@ -277,14 +263,14 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Parent example field
         _buildParentExampleField(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Negative response questions
         _buildQuestionSection(
           'Các phản ứng được xem là KHÔNG ĐẠT:',
@@ -292,9 +278,9 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
           Colors.red,
           Icons.cancel,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
         if (finalResult == null && !showComparisonQuestion)
           _buildSummarySection(Colors.red),
@@ -329,19 +315,16 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
           ),
           const SizedBox(height: 12),
           Text(
-            currentCase == 'case1' 
-              ? 'Cho ví dụ về cách mà trẻ phản ứng khi bạn gọi tên trẻ.'
-              : 'Khi con bạn đang mải tập trung vào một việc gì vui hoặc thú vị, con bạn làm gì khi bạn gọi tên trẻ?',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            currentCase == 'case1'
+                ? 'Cho ví dụ về cách mà trẻ phản ứng khi bạn gọi tên trẻ.'
+                : 'Khi con bạn đang mải tập trung vào một việc gì vui hoặc thú vị, con bạn làm gì khi bạn gọi tên trẻ?',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Text(
             currentCase == 'case1'
-              ? '(Nếu cha/mẹ không đưa ra ví dụ cụ thể, gợi ý bằng các ví dụ đạt:)'
-              : '(Nếu cha/mẹ không đưa ra ví dụ cụ thể, hỏi thêm theo khung dưới)',
+                ? '(Nếu cha/mẹ không đưa ra ví dụ cụ thể, gợi ý bằng các ví dụ đạt:)'
+                : '(Nếu cha/mẹ không đưa ra ví dụ cụ thể, hỏi thêm theo khung dưới)',
             style: TextStyle(
               fontSize: 14,
               fontStyle: FontStyle.italic,
@@ -356,7 +339,8 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
               });
             },
             decoration: const InputDecoration(
-              hintText: 'Nhập ví dụ từ phụ huynh về cách trẻ phản ứng khi được gọi tên...',
+              hintText:
+                  'Nhập ví dụ từ phụ huynh về cách trẻ phản ứng khi được gọi tên...',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.all(12),
             ),
@@ -367,7 +351,12 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
     );
   }
 
-  Widget _buildQuestionSection(String title, List<Map<String, String>> questions, Color color, IconData icon) {
+  Widget _buildQuestionSection(
+    String title,
+    List<Map<String, String>> questions,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -393,17 +382,25 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
             ],
           ),
           const SizedBox(height: 16),
-          ...questions.map((questionData) => _buildQuestionCard(
-            questionData['id']!,
-            questionData['question']!,
-            color,
-          )).toList(),
+          ...questions
+              .map(
+                (questionData) => _buildQuestionCard(
+                  questionData['id']!,
+                  questionData['question']!,
+                  color,
+                ),
+              )
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionCard(String questionId, String question, Color pathColor) {
+  Widget _buildQuestionCard(
+    String questionId,
+    String question,
+    Color pathColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -417,10 +414,7 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
         children: [
           Text(
             question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -486,10 +480,7 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
           const SizedBox(height: 16),
           const Text(
             'Những phản ứng nào con bạn thể hiện nhiều hơn?',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 16),
           Row(
@@ -529,17 +520,23 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
     } else if (currentCase == 'case2') {
       totalQuestions = negativeResponses.length;
     }
-    
-    final answeredQuestions = selectedAnswers.values.where((answer) => answer != null).length;
+
+    final answeredQuestions = selectedAnswers.values
+        .where((answer) => answer != null)
+        .length;
     final isComplete = answeredQuestions == totalQuestions;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isComplete ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isComplete
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isComplete
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -596,13 +593,19 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
           positiveYesCount++;
         }
       }
-      
+
       if (positiveYesCount > 0) {
         // Has positive responses -> ĐẠT
-        _setFinalResult(true, 'ĐẠT - Con bạn có phản ứng tích cực khi được gọi tên');
+        _setFinalResult(
+          true,
+          'ĐẠT - Con bạn có phản ứng tích cực khi được gọi tên',
+        );
       } else {
         // No positive responses -> KHÔNG ĐẠT
-        _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không có phản ứng tích cực khi được gọi tên');
+        _setFinalResult(
+          false,
+          'KHÔNG ĐẠT - Con bạn không có phản ứng tích cực khi được gọi tên',
+        );
       }
     } else if (currentCase == 'case2') {
       // Case 2: Check negative responses
@@ -612,10 +615,13 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
           negativeYesCount++;
         }
       }
-      
+
       if (negativeYesCount > 0) {
         // Has negative responses -> KHÔNG ĐẠT
-        _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn có phản ứng tiêu cực khi được gọi tên');
+        _setFinalResult(
+          false,
+          'KHÔNG ĐẠT - Con bạn có phản ứng tiêu cực khi được gọi tên',
+        );
       } else {
         // No negative responses -> Check if there are any positive responses
         // This would be a mixed case, so we need to show comparison question
@@ -629,23 +635,29 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
   void _handleComparisonAnswer(bool morePositive) {
     if (morePositive) {
       // More positive responses -> ĐẠT
-      _setFinalResult(true, 'ĐẠT - Con bạn có nhiều phản ứng tích cực hơn khi được gọi tên');
+      _setFinalResult(
+        true,
+        'ĐẠT - Con bạn có nhiều phản ứng tích cực hơn khi được gọi tên',
+      );
     } else {
       // More negative responses -> KHÔNG ĐẠT
-      _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn có nhiều phản ứng tiêu cực hơn khi được gọi tên');
+      _setFinalResult(
+        false,
+        'KHÔNG ĐẠT - Con bạn có nhiều phản ứng tiêu cực hơn khi được gọi tên',
+      );
     }
   }
-  
+
   void _setFinalResult(bool result, String message) {
     setState(() {
       finalResult = result;
     });
-    
+
     // Cập nhật kết quả chính
     if (widget.onUpdateMainResult != null) {
       widget.onUpdateMainResult!(result);
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Kết quả cuối cùng: $message'),
@@ -654,31 +666,35 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
       ),
     );
   }
-  
+
   Widget _buildFinalResult() {
     // Tính toán thống kê
     int positiveYesCount = 0;
     int negativeYesCount = 0;
-    
+
     for (var question in positiveResponses) {
       if (selectedAnswers[question['id']] == true) {
         positiveYesCount++;
       }
     }
-    
+
     for (var question in negativeResponses) {
       if (selectedAnswers[question['id']] == true) {
         negativeYesCount++;
       }
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: finalResult! ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: finalResult!
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: finalResult! ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: finalResult!
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -708,7 +724,9 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      finalResult! ? 'ĐẠT - Con bạn phản ứng tốt khi được gọi tên' : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển kỹ năng phản ứng',
+                      finalResult!
+                          ? 'ĐẠT - Con bạn phản ứng tốt khi được gọi tên'
+                          : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển kỹ năng phản ứng',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -720,9 +738,9 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Thống kê chi tiết
           Container(
             padding: const EdgeInsets.all(16),
@@ -747,7 +765,9 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
                     Expanded(
                       child: _buildStatCard(
                         'Trường hợp',
-                        currentCase == 'case1' ? 'Trường hợp 1' : 'Trường hợp 2',
+                        currentCase == 'case1'
+                            ? 'Trường hợp 1'
+                            : 'Trường hợp 2',
                         Colors.blue,
                         Icons.account_tree,
                       ),
@@ -792,7 +812,9 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
                     decoration: BoxDecoration(
                       color: Colors.indigo.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.indigo.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.indigo.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -817,9 +839,9 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
           Row(
             children: [
@@ -845,8 +867,13 @@ class _ExtensionTestQ010State extends State<ExtensionTestQ010> {
       ),
     );
   }
-  
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

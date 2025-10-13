@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class ExtensionTestQ004 extends StatefulWidget {
   final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
-  final Function(bool)? onUpdateMainResult; // Callback để cập nhật kết quả chính
+  final Function(bool)?
+  onUpdateMainResult; // Callback để cập nhật kết quả chính
   final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
-  
+
   const ExtensionTestQ004({
     Key? key,
     this.mainQuestionAnswer,
@@ -23,14 +24,8 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
 
   // Questions for climbing behavior assessment
   final List<Map<String, String>> climbingQuestions = [
-    {
-      'id': 'climbing_1',
-      'question': 'Trẻ có thích trèo lên cầu thang không?',
-    },
-    {
-      'id': 'climbing_2', 
-      'question': 'Trẻ có thích trèo lên ghế không?',
-    },
+    {'id': 'climbing_1', 'question': 'Trẻ có thích trèo lên cầu thang không?'},
+    {'id': 'climbing_2', 'question': 'Trẻ có thích trèo lên ghế không?'},
     {
       'id': 'climbing_3',
       'question': 'Trẻ có thích trèo lên đồ đạc trong nhà không?',
@@ -90,9 +85,9 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Instructions
         Container(
           padding: const EdgeInsets.all(12),
@@ -107,23 +102,20 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
               Expanded(
                 child: Text(
                   'Hãy đánh giá hành vi trèo leo của con bạn. Trả lời Có/Không cho từng câu hỏi dưới đây:',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.blue,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.blue),
                 ),
               ),
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Parent example field
         _buildParentExampleField(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Climbing Questions
         _buildQuestionSection(
           'Các câu hỏi gợi ý (trả lời Có/Không)',
@@ -131,13 +123,12 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
           Colors.teal,
           Icons.stairs,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
-        if (finalResult == null)
-          _buildSummarySection(pathColor),
-        
+        if (finalResult == null) _buildSummarySection(pathColor),
+
         // Final result (nếu có)
         if (finalResult != null) ...[
           const SizedBox(height: 20),
@@ -175,10 +166,7 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
           const SizedBox(height: 12),
           Text(
             'Hãy ví dụ cho tôi về một thứ nào đó mà trẻ thích trèo lên.',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Text(
@@ -197,7 +185,8 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
               });
             },
             decoration: const InputDecoration(
-              hintText: 'Nhập ví dụ từ phụ huynh về những thứ trẻ thích trèo lên...',
+              hintText:
+                  'Nhập ví dụ từ phụ huynh về những thứ trẻ thích trèo lên...',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.all(12),
             ),
@@ -208,7 +197,12 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
     );
   }
 
-  Widget _buildQuestionSection(String title, List<Map<String, String>> questions, Color color, IconData icon) {
+  Widget _buildQuestionSection(
+    String title,
+    List<Map<String, String>> questions,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -234,17 +228,25 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
             ],
           ),
           const SizedBox(height: 16),
-          ...questions.map((questionData) => _buildQuestionCard(
-            questionData['id']!,
-            questionData['question']!,
-            color,
-          )).toList(),
+          ...questions
+              .map(
+                (questionData) => _buildQuestionCard(
+                  questionData['id']!,
+                  questionData['question']!,
+                  color,
+                ),
+              )
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionCard(String questionId, String question, Color pathColor) {
+  Widget _buildQuestionCard(
+    String questionId,
+    String question,
+    Color pathColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -258,10 +260,7 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
         children: [
           Text(
             question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -300,17 +299,23 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
   }
 
   Widget _buildSummarySection(Color pathColor) {
-    final answeredQuestions = selectedAnswers.values.where((answer) => answer != null).length;
+    final answeredQuestions = selectedAnswers.values
+        .where((answer) => answer != null)
+        .length;
     final totalQuestions = climbingQuestions.length;
     final isComplete = answeredQuestions == totalQuestions;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isComplete ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isComplete
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isComplete
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -366,12 +371,12 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
         yesCount++;
       }
     }
-    
+
     // Assessment Logic:
     // ✅ ĐẠT: Có ít nhất một câu trả lời "Có"
     // ❌ KHÔNG ĐẠT: Tất cả các câu trả lời là "Không"
     bool hasAnyYes = yesCount > 0;
-    
+
     if (hasAnyYes) {
       // Có ít nhất 1 câu trả lời "Có" → ĐẠT
       _setFinalResult(true, 'ĐẠT - Con bạn có hành vi trèo leo');
@@ -380,17 +385,17 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
       _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không có hành vi trèo leo');
     }
   }
-  
+
   void _setFinalResult(bool result, String message) {
     setState(() {
       finalResult = result;
     });
-    
+
     // Cập nhật kết quả chính
     if (widget.onUpdateMainResult != null) {
       widget.onUpdateMainResult!(result);
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Kết quả cuối cùng: $message'),
@@ -399,7 +404,7 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
       ),
     );
   }
-  
+
   Widget _buildFinalResult() {
     // Tính toán thống kê
     int yesCount = 0;
@@ -408,14 +413,18 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
         yesCount++;
       }
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: finalResult! ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: finalResult!
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: finalResult! ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: finalResult!
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -445,7 +454,9 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      finalResult! ? 'ĐẠT - Con bạn có hành vi trèo leo tốt' : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển hành vi trèo leo',
+                      finalResult!
+                          ? 'ĐẠT - Con bạn có hành vi trèo leo tốt'
+                          : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển hành vi trèo leo',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -457,9 +468,9 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Thống kê chi tiết
           Container(
             padding: const EdgeInsets.all(16),
@@ -507,7 +518,9 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
                     decoration: BoxDecoration(
                       color: Colors.indigo.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.indigo.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.indigo.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,9 +545,9 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
           Row(
             children: [
@@ -560,8 +573,13 @@ class _ExtensionTestQ004State extends State<ExtensionTestQ004> {
       ),
     );
   }
-  
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

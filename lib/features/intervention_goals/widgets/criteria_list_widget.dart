@@ -79,7 +79,8 @@ class CriteriaListWidget extends StatelessWidget {
                     icon: const Icon(Icons.refresh),
                     label: const Text('Làm mới'),
                   ),
-                if (onRefresh != null && onAddNew != null) const SizedBox(width: 16),
+                if (onRefresh != null && onAddNew != null)
+                  const SizedBox(width: 16),
                 if (onAddNew != null)
                   ElevatedButton.icon(
                     onPressed: onAddNew,
@@ -103,123 +104,123 @@ class CriteriaListWidget extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           itemCount: criteria.length,
           itemBuilder: (context, index) {
-        final c = criteria[index];
-        String name = '';
-        final dn = c['displayedName'] ?? c['name'];
-        if (dn is Map) {
-          final m = dn.cast<String, dynamic>();
-          name = (m['vi'] ?? m['en'] ?? '').toString();
-        } else if (dn != null) {
-          name = dn.toString();
-        }
+            final c = criteria[index];
+            String name = '';
+            final dn = c['displayedName'] ?? c['name'];
+            if (dn is Map) {
+              final m = dn.cast<String, dynamic>();
+              name = (m['vi'] ?? m['en'] ?? '').toString();
+            } else if (dn != null) {
+              name = dn.toString();
+            }
 
-        String? desc;
-        final d = c['description'];
-        if (d is Map) {
-          final m = d.cast<String, dynamic>();
-          desc = (m['vi'] ?? m['en'])?.toString();
-        } else if (d is String) {
-          desc = d;
-        }
+            String? desc;
+            final d = c['description'];
+            if (d is Map) {
+              final m = d.cast<String, dynamic>();
+              desc = (m['vi'] ?? m['en'])?.toString();
+            } else if (d is String) {
+              desc = d;
+            }
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.flag,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.flag,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            name.isEmpty ? 'Mục tiêu can thiệp nhỏ' : name,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        name.isEmpty ? 'Mục tiêu can thiệp nhỏ' : name,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                    if (desc != null && desc.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Html(
+                          data: desc,
+                          style: {
+                            "body": Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                              fontSize: FontSize(13),
+                              color: AppColors.textSecondary,
+                              lineHeight: LineHeight(1.3),
+                            ),
+                            "p": Style(margin: Margins.only(bottom: 6)),
+                            "strong": Style(fontWeight: FontWeight.bold),
+                            "em": Style(fontStyle: FontStyle.italic),
+                            "ul": Style(margin: Margins.only(left: 16)),
+                            "ol": Style(margin: Margins.only(left: 16)),
+                            "li": Style(margin: Margins.only(bottom: 4)),
+                          },
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                if (desc != null && desc.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: Html(
-                      data: desc,
-                      style: {
-                        "body": Style(
-                          margin: Margins.zero,
-                          padding: HtmlPaddings.zero,
-                          fontSize: FontSize(13),
+                    ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Mục tiêu can thiệp',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.arrow_forward_ios,
                           color: AppColors.textSecondary,
-                          lineHeight: LineHeight(1.3),
+                          size: 16,
                         ),
-                        "p": Style(margin: Margins.only(bottom: 6)),
-                        "strong": Style(fontWeight: FontWeight.bold),
-                        "em": Style(fontStyle: FontStyle.italic),
-                        "ul": Style(margin: Margins.only(left: 16)),
-                        "ol": Style(margin: Margins.only(left: 16)),
-                        "li": Style(margin: Margins.only(bottom: 4)),
-                      },
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Mục tiêu can thiệp',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      color: AppColors.textSecondary,
-                      size: 16,
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        );
-      },
-    ),
+              ),
+            );
+          },
+        ),
         if (onAddNew != null)
           Positioned(
             bottom: 16,

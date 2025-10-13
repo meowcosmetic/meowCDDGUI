@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class ExtensionTestQ008 extends StatefulWidget {
   final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
-  final Function(bool)? onUpdateMainResult; // Callback để cập nhật kết quả chính
+  final Function(bool)?
+  onUpdateMainResult; // Callback để cập nhật kết quả chính
   final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
-  
+
   const ExtensionTestQ008({
     Key? key,
     this.mainQuestionAnswer,
@@ -24,34 +25,16 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
 
   // Questions for Case 1 - Follow-up behaviors
   final List<Map<String, String>> behaviorQuestions = [
-    {
-      'id': 'behavior_1',
-      'question': 'Chơi với 1 trẻ khác không?',
-    },
-    {
-      'id': 'behavior_2', 
-      'question': 'Nói chuyện với trẻ khác không?',
-    },
+    {'id': 'behavior_1', 'question': 'Chơi với 1 trẻ khác không?'},
+    {'id': 'behavior_2', 'question': 'Nói chuyện với trẻ khác không?'},
     {
       'id': 'behavior_3',
       'question': 'Bập bẹ hoặc phát ra âm thanh với trẻ khác không?',
     },
-    {
-      'id': 'behavior_4',
-      'question': 'Quan sát hoặc nhìn trẻ khác không?',
-    },
-    {
-      'id': 'behavior_5',
-      'question': 'Cười với trẻ khác không?',
-    },
-    {
-      'id': 'behavior_6',
-      'question': 'Ban đầu ngại ngùng nhưng sau đó cười?',
-    },
-    {
-      'id': 'behavior_7',
-      'question': 'Hào hứng với một trẻ khác không?',
-    },
+    {'id': 'behavior_4', 'question': 'Quan sát hoặc nhìn trẻ khác không?'},
+    {'id': 'behavior_5', 'question': 'Cười với trẻ khác không?'},
+    {'id': 'behavior_6', 'question': 'Ban đầu ngại ngùng nhưng sau đó cười?'},
+    {'id': 'behavior_7', 'question': 'Hào hứng với một trẻ khác không?'},
   ];
 
   @override
@@ -103,18 +86,18 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Case Selection Logic
         if (currentCase.isEmpty) _buildCaseSelection(),
-        
+
         // Case 1 - Parent answered "Có"
         if (currentCase == 'case1') _buildCase1Assessment(),
-        
-        // Case 2 - Parent answered "Không" 
+
+        // Case 2 - Parent answered "Không"
         if (currentCase == 'case2') _buildCase2Assessment(),
-        
+
         // Final result (nếu có)
         if (finalResult != null) ...[
           const SizedBox(height: 20),
@@ -213,31 +196,31 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // First question: Interest in non-siblings
         _buildQuestionCard(
           'non_siblings',
           'Con bạn có hứng thú với những đứa trẻ khác mà không phải anh/chị/em trong nhà không?',
           Colors.blue,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Parent description field (if needed)
-        if (selectedAnswers['non_siblings'] == false) _buildParentDescriptionField(),
-        
+        if (selectedAnswers['non_siblings'] == false)
+          _buildParentDescriptionField(),
+
         const SizedBox(height: 20),
-        
+
         // Behavior questions (if needed)
         if (selectedAnswers['non_siblings'] == false) _buildBehaviorQuestions(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
-        if (finalResult == null)
-          _buildSummarySection(Colors.green),
+        if (finalResult == null) _buildSummarySection(Colors.green),
       ],
     );
   }
@@ -270,18 +253,18 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // First question: Interaction in public places
         _buildQuestionCard(
           'public_interaction',
           'Khi bạn và con ở sân chơi hoặc siêu thị, con bạn có biểu hiện tương tác với những đứa trẻ khác không?',
           Colors.orange,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Follow-up question (if needed)
         if (selectedAnswers['public_interaction'] == true) ...[
           _buildQuestionCard(
@@ -291,10 +274,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
           ),
           const SizedBox(height: 20),
         ],
-        
+
         // Summary và button
-        if (finalResult == null)
-          _buildSummarySection(Colors.orange),
+        if (finalResult == null) _buildSummarySection(Colors.orange),
       ],
     );
   }
@@ -327,10 +309,7 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
           const SizedBox(height: 12),
           Text(
             'Con bạn biểu hiện tương tác như thế nào?',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Text(
@@ -386,17 +365,25 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
             ],
           ),
           const SizedBox(height: 16),
-          ...behaviorQuestions.map((questionData) => _buildQuestionCard(
-            questionData['id']!,
-            questionData['question']!,
-            Colors.blue,
-          )).toList(),
+          ...behaviorQuestions
+              .map(
+                (questionData) => _buildQuestionCard(
+                  questionData['id']!,
+                  questionData['question']!,
+                  Colors.blue,
+                ),
+              )
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionCard(String questionId, String question, Color pathColor) {
+  Widget _buildQuestionCard(
+    String questionId,
+    String question,
+    Color pathColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -410,10 +397,7 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
         children: [
           Text(
             question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -455,7 +439,8 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
     int totalQuestions = 0;
     if (currentCase == 'case1') {
       if (selectedAnswers['non_siblings'] == false) {
-        totalQuestions = 1 + behaviorQuestions.length; // non_siblings + behavior questions
+        totalQuestions =
+            1 + behaviorQuestions.length; // non_siblings + behavior questions
       } else {
         totalQuestions = 1; // just non_siblings
       }
@@ -466,17 +451,23 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
         totalQuestions = 1; // just public_interaction
       }
     }
-    
-    final answeredQuestions = selectedAnswers.values.where((answer) => answer != null).length;
+
+    final answeredQuestions = selectedAnswers.values
+        .where((answer) => answer != null)
+        .length;
     final isComplete = answeredQuestions == totalQuestions;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isComplete ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isComplete
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isComplete
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -528,10 +519,13 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
     if (currentCase == 'case1') {
       // Case 1: Check non-siblings interest first
       bool nonSiblingsInterest = selectedAnswers['non_siblings'] == true;
-      
+
       if (nonSiblingsInterest) {
         // Interested in non-siblings -> ĐẠT
-        _setFinalResult(true, 'ĐẠT - Con bạn hứng thú với trẻ khác không phải anh/chị/em');
+        _setFinalResult(
+          true,
+          'ĐẠT - Con bạn hứng thú với trẻ khác không phải anh/chị/em',
+        );
       } else {
         // Not interested in non-siblings -> Check behavior questions
         int behaviorYesCount = 0;
@@ -540,47 +534,62 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
             behaviorYesCount++;
           }
         }
-        
+
         if (behaviorYesCount > 0) {
           // Has some behaviors -> ĐẠT
-          _setFinalResult(true, 'ĐẠT - Con bạn có ít nhất một hành vi tương tác');
+          _setFinalResult(
+            true,
+            'ĐẠT - Con bạn có ít nhất một hành vi tương tác',
+          );
         } else {
           // No behaviors -> KHÔNG ĐẠT
-          _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không có hành vi tương tác nào');
+          _setFinalResult(
+            false,
+            'KHÔNG ĐẠT - Con bạn không có hành vi tương tác nào',
+          );
         }
       }
     } else if (currentCase == 'case2') {
       // Case 2: Check public interaction
       bool publicInteraction = selectedAnswers['public_interaction'] == true;
-      
+
       if (!publicInteraction) {
         // No public interaction -> KHÔNG ĐẠT
-        _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không tương tác với trẻ khác ở nơi công cộng');
+        _setFinalResult(
+          false,
+          'KHÔNG ĐẠT - Con bạn không tương tác với trẻ khác ở nơi công cộng',
+        );
       } else {
         // Has public interaction -> Check reaction frequency
         bool reactionFrequency = selectedAnswers['reaction_frequency'] == true;
-        
+
         if (reactionFrequency) {
           // Reacts more than half the time -> ĐẠT
-          _setFinalResult(true, 'ĐẠT - Con bạn phản ứng với trẻ khác hơn một nửa thời gian');
+          _setFinalResult(
+            true,
+            'ĐẠT - Con bạn phản ứng với trẻ khác hơn một nửa thời gian',
+          );
         } else {
           // Doesn't react enough -> KHÔNG ĐẠT
-          _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không phản ứng đủ với trẻ khác');
+          _setFinalResult(
+            false,
+            'KHÔNG ĐẠT - Con bạn không phản ứng đủ với trẻ khác',
+          );
         }
       }
     }
   }
-  
+
   void _setFinalResult(bool result, String message) {
     setState(() {
       finalResult = result;
     });
-    
+
     // Cập nhật kết quả chính
     if (widget.onUpdateMainResult != null) {
       widget.onUpdateMainResult!(result);
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Kết quả cuối cùng: $message'),
@@ -589,7 +598,7 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
       ),
     );
   }
-  
+
   Widget _buildFinalResult() {
     // Tính toán thống kê
     int behaviorYesCount = 0;
@@ -600,14 +609,18 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
         }
       }
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: finalResult! ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: finalResult!
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: finalResult! ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: finalResult!
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -637,7 +650,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      finalResult! ? 'ĐẠT - Con bạn có hứng thú xã hội tốt' : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển kỹ năng xã hội',
+                      finalResult!
+                          ? 'ĐẠT - Con bạn có hứng thú xã hội tốt'
+                          : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển kỹ năng xã hội',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -649,9 +664,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Thống kê chi tiết
           Container(
             padding: const EdgeInsets.all(16),
@@ -676,7 +691,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
                     Expanded(
                       child: _buildStatCard(
                         'Trường hợp',
-                        currentCase == 'case1' ? 'Trường hợp 1' : 'Trường hợp 2',
+                        currentCase == 'case1'
+                            ? 'Trường hợp 1'
+                            : 'Trường hợp 2',
                         Colors.blue,
                         Icons.account_tree,
                       ),
@@ -685,7 +702,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
                     Expanded(
                       child: _buildStatCard(
                         'Hành vi tương tác',
-                        currentCase == 'case1' ? '$behaviorYesCount/${behaviorQuestions.length}' : 'N/A',
+                        currentCase == 'case1'
+                            ? '$behaviorYesCount/${behaviorQuestions.length}'
+                            : 'N/A',
                         Colors.purple,
                         Icons.people,
                       ),
@@ -708,7 +727,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
                       Expanded(
                         child: _buildStatCard(
                           'Tương tác nơi công cộng',
-                          selectedAnswers['public_interaction'] == true ? 'Có' : 'Không',
+                          selectedAnswers['public_interaction'] == true
+                              ? 'Có'
+                              : 'Không',
                           Colors.orange,
                           Icons.public,
                         ),
@@ -717,7 +738,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
                       Expanded(
                         child: _buildStatCard(
                           'Phản ứng >50% thời gian',
-                          selectedAnswers['reaction_frequency'] == true ? 'Có' : 'Không',
+                          selectedAnswers['reaction_frequency'] == true
+                              ? 'Có'
+                              : 'Không',
                           Colors.red,
                           Icons.timer,
                         ),
@@ -732,7 +755,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
                     decoration: BoxDecoration(
                       color: Colors.indigo.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.indigo.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.indigo.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -757,9 +782,9 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
           Row(
             children: [
@@ -785,8 +810,13 @@ class _ExtensionTestQ008State extends State<ExtensionTestQ008> {
       ),
     );
   }
-  
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

@@ -6,19 +6,13 @@ import '../../../models/intervention_post.dart';
 class PostDetailPage extends StatelessWidget {
   final InterventionPost post;
 
-  const PostDetailPage({
-    super.key,
-    required this.post,
-  });
+  const PostDetailPage({super.key, required this.post});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          post.title,
-          style: const TextStyle(fontSize: 18),
-        ),
+        title: Text(post.title, style: const TextStyle(fontSize: 18)),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         elevation: 0,
@@ -38,17 +32,17 @@ class PostDetailPage extends StatelessWidget {
             // Header with post type and status
             _buildHeader(),
             const SizedBox(height: 24),
-            
+
             // Content
             _buildContent(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Additional information
             _buildAdditionalInfo(),
-            
+
             const SizedBox(height: 24),
-            
+
             // Action buttons
             _buildActionButtons(context),
           ],
@@ -64,9 +58,7 @@ class PostDetailPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primaryLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,10 +75,10 @@ class PostDetailPage extends StatelessWidget {
                   color: post.postType == PostType.INTERVENTION_METHOD
                       ? Colors.blue
                       : post.postType == PostType.CHECKLIST
-                          ? Colors.green
-                          : post.postType == PostType.GUIDELINE
-                              ? Colors.orange
-                              : Colors.purple,
+                      ? Colors.green
+                      : post.postType == PostType.GUIDELINE
+                      ? Colors.orange
+                      : Colors.purple,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -119,9 +111,9 @@ class PostDetailPage extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Title
           Text(
             post.title,
@@ -131,12 +123,16 @@ class PostDetailPage extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          
+
           if (post.author != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.person, size: 16, color: AppColors.textSecondary),
+                const Icon(
+                  Icons.person,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Tác giả: ${post.author}',
@@ -166,10 +162,7 @@ class PostDetailPage extends StatelessWidget {
         child: const Center(
           child: Text(
             'Không có nội dung',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ),
       );
@@ -197,7 +190,7 @@ class PostDetailPage extends StatelessWidget {
   Widget _buildContentDisplay(Map<String, dynamic> content) {
     // Ưu tiên hiển thị nội dung tiếng Việt
     String displayText = '';
-    
+
     if (content.containsKey('vi') && content['vi'] != null) {
       // Nội dung mới có cấu trúc {"vi": "...", "en": "..."}
       displayText = content['vi'].toString();
@@ -208,7 +201,7 @@ class PostDetailPage extends StatelessWidget {
       // Fallback to old format
       displayText = content.toString();
     }
-    
+
     return Html(
       data: displayText,
       style: {
@@ -219,22 +212,12 @@ class PostDetailPage extends StatelessWidget {
           color: AppColors.textPrimary,
           lineHeight: LineHeight(1.6),
         ),
-        "p": Style(
-          margin: Margins.only(bottom: 12),
-          fontSize: FontSize(15),
-        ),
+        "p": Style(margin: Margins.only(bottom: 12), fontSize: FontSize(15)),
         "strong": Style(fontWeight: FontWeight.bold),
         "em": Style(fontStyle: FontStyle.italic),
-        "ul": Style(
-          margin: Margins.only(left: 20, bottom: 12),
-        ),
-        "ol": Style(
-          margin: Margins.only(left: 20, bottom: 12),
-        ),
-        "li": Style(
-          margin: Margins.only(bottom: 6),
-          fontSize: FontSize(15),
-        ),
+        "ul": Style(margin: Margins.only(left: 20, bottom: 12)),
+        "ol": Style(margin: Margins.only(left: 20, bottom: 12)),
+        "li": Style(margin: Margins.only(bottom: 6), fontSize: FontSize(15)),
         "h1": Style(
           fontSize: FontSize(20),
           fontWeight: FontWeight.bold,
@@ -256,12 +239,7 @@ class PostDetailPage extends StatelessWidget {
         "blockquote": Style(
           padding: HtmlPaddings.only(left: 16),
           margin: Margins.only(bottom: 12),
-          border: Border(
-            left: BorderSide(
-              color: AppColors.primary,
-              width: 4,
-            ),
-          ),
+          border: Border(left: BorderSide(color: AppColors.primary, width: 4)),
         ),
       },
     );
@@ -288,9 +266,10 @@ class PostDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Age range
-          if (post.targetAgeMinMonths != null && post.targetAgeMaxMonths != null) ...[
+          if (post.targetAgeMinMonths != null &&
+              post.targetAgeMaxMonths != null) ...[
             _buildInfoRow(
               Icons.child_care,
               'Độ tuổi',
@@ -298,7 +277,7 @@ class PostDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
-          
+
           // Duration
           if (post.estimatedDurationMinutes != null) ...[
             _buildInfoRow(
@@ -308,7 +287,7 @@ class PostDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
-          
+
           // Difficulty level
           if (post.difficultyLevel != null) ...[
             _buildInfoRow(
@@ -318,23 +297,23 @@ class PostDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
-          
+
           // Version
           if (post.version != null) ...[
-            _buildInfoRow(
-              Icons.info_outline,
-              'Phiên bản',
-              post.version!,
-            ),
+            _buildInfoRow(Icons.info_outline, 'Phiên bản', post.version!),
             const SizedBox(height: 8),
           ],
-          
+
           // Tags
           if (post.tags != null && post.tags!.isNotEmpty) ...[
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.label, size: 16, color: AppColors.textSecondary),
+                const Icon(
+                  Icons.label,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -393,10 +372,7 @@ class PostDetailPage extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         Expanded(
           child: Text(

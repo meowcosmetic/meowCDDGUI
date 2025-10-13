@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class ExtensionTestQ007 extends StatefulWidget {
   final bool? mainQuestionAnswer; // Kết quả từ câu hỏi chính
-  final Function(bool)? onUpdateMainResult; // Callback để cập nhật kết quả chính
+  final Function(bool)?
+  onUpdateMainResult; // Callback để cập nhật kết quả chính
   final VoidCallback? onReturnToMainTest; // Callback để quay lại test chính
-  
+
   const ExtensionTestQ007({
     Key? key,
     this.mainQuestionAnswer,
@@ -25,22 +26,10 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
 
   // Questions for Case 2 - Interesting things
   final List<Map<String, String>> interestingThingsQuestions = [
-    {
-      'id': 'interesting_1',
-      'question': 'Một cái máy bay trên trời?',
-    },
-    {
-      'id': 'interesting_2', 
-      'question': 'Một chiếc xe tải trên đường?',
-    },
-    {
-      'id': 'interesting_3',
-      'question': 'Một con bò trên mặt đất?',
-    },
-    {
-      'id': 'interesting_4',
-      'question': 'Một con vật trong sân?',
-    },
+    {'id': 'interesting_1', 'question': 'Một cái máy bay trên trời?'},
+    {'id': 'interesting_2', 'question': 'Một chiếc xe tải trên đường?'},
+    {'id': 'interesting_3', 'question': 'Một con bò trên mặt đất?'},
+    {'id': 'interesting_4', 'question': 'Một con vật trong sân?'},
   ];
 
   @override
@@ -92,24 +81,24 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Case Selection Logic
         if (currentCase.isEmpty) _buildCaseSelection(),
-        
+
         // Case 1 - Parent answered "Có"
         if (currentCase == 'case1') _buildCase1Assessment(),
-        
-        // Case 2 - Parent answered "Không" 
+
+        // Case 2 - Parent answered "Không"
         if (currentCase == 'case2') _buildCase2Assessment(),
-        
+
         // Interest question (if needed)
         if (showInterestQuestion) ...[
           const SizedBox(height: 20),
           _buildInterestQuestion(),
         ],
-        
+
         // Final result (nếu có)
         if (finalResult != null) ...[
           const SizedBox(height: 20),
@@ -208,19 +197,19 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Parent example field
         _buildParentExampleField(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Follow-up questions
         _buildFollowUpQuestions(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
         if (finalResult == null && !showInterestQuestion)
           _buildSummarySection(Colors.green),
@@ -256,9 +245,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Interesting things questions
         _buildQuestionSection(
           'Có bao giờ trẻ muốn bạn nhìn thấy những thứ thú vị như:',
@@ -266,9 +255,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
           Colors.blue,
           Icons.visibility,
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Summary và button
         if (finalResult == null && !showInterestQuestion)
           _buildSummarySection(Colors.orange),
@@ -304,10 +293,7 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
           const SizedBox(height: 12),
           Text(
             'Cho tôi 1 ví dụ về thứ mà con bạn thường chỉ cho bạn xem.',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Text(
@@ -363,16 +349,16 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Question 1: How does child get attention
           _buildQuestionCard(
             'attention',
             'Làm thế nào để con thu hút sự chú ý của bạn đến thứ đó?',
             Colors.blue,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Question 2: Does child use finger to point
           _buildQuestionCard(
             'finger_point',
@@ -384,7 +370,12 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
     );
   }
 
-  Widget _buildQuestionSection(String title, List<Map<String, String>> questions, Color color, IconData icon) {
+  Widget _buildQuestionSection(
+    String title,
+    List<Map<String, String>> questions,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -410,17 +401,25 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
             ],
           ),
           const SizedBox(height: 16),
-          ...questions.map((questionData) => _buildQuestionCard(
-            questionData['id']!,
-            questionData['question']!,
-            color,
-          )).toList(),
+          ...questions
+              .map(
+                (questionData) => _buildQuestionCard(
+                  questionData['id']!,
+                  questionData['question']!,
+                  color,
+                ),
+              )
+              .toList(),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionCard(String questionId, String question, Color pathColor) {
+  Widget _buildQuestionCard(
+    String questionId,
+    String question,
+    Color pathColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -434,10 +433,7 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
         children: [
           Text(
             question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
           Row(
@@ -503,10 +499,7 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
           const SizedBox(height: 16),
           const Text(
             'Con bạn làm vậy để thể hiện sự thích thú, chứ không phải để được giúp đỡ phải không?',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 16),
           Row(
@@ -543,7 +536,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Vừa để thể hiện thích thú vừa để được giúp đỡ'),
+              child: const Text(
+                'Vừa để thể hiện thích thú vừa để được giúp đỡ',
+              ),
             ),
           ),
         ],
@@ -552,24 +547,30 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
   }
 
   Widget _buildSummarySection(Color pathColor) {
-    final answeredQuestions = selectedAnswers.values.where((answer) => answer != null).length;
+    final answeredQuestions = selectedAnswers.values
+        .where((answer) => answer != null)
+        .length;
     int totalQuestions = 0;
-    
+
     if (currentCase == 'case1') {
       totalQuestions = 2; // attention + finger_point
     } else if (currentCase == 'case2') {
       totalQuestions = interestingThingsQuestions.length;
     }
-    
+
     final isComplete = answeredQuestions == totalQuestions;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isComplete ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isComplete
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isComplete
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -621,7 +622,7 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
     if (currentCase == 'case1') {
       // Case 1: Check if child uses finger to point
       bool usesFinger = selectedAnswers['finger_point'] == true;
-      
+
       if (usesFinger) {
         // Show interest question
         setState(() {
@@ -629,7 +630,10 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
         });
       } else {
         // No finger pointing -> KHÔNG ĐẠT
-        _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không dùng ngón tay để chỉ');
+        _setFinalResult(
+          false,
+          'KHÔNG ĐẠT - Con bạn không dùng ngón tay để chỉ',
+        );
       }
     } else if (currentCase == 'case2') {
       // Case 2: Check if any interesting things
@@ -639,11 +643,11 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
           yesCount++;
         }
       }
-      
+
       if (yesCount > 0) {
         // Has interesting things -> Check if uses finger
         bool usesFinger = selectedAnswers['finger_point'] == true;
-        
+
         if (usesFinger) {
           // Show interest question
           setState(() {
@@ -651,11 +655,17 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
           });
         } else {
           // No finger pointing -> KHÔNG ĐẠT
-          _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không dùng ngón tay để chỉ');
+          _setFinalResult(
+            false,
+            'KHÔNG ĐẠT - Con bạn không dùng ngón tay để chỉ',
+          );
         }
       } else {
         // No interesting things -> KHÔNG ĐẠT
-        _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn không có hành vi chỉ tay thú vị');
+        _setFinalResult(
+          false,
+          'KHÔNG ĐẠT - Con bạn không có hành vi chỉ tay thú vị',
+        );
       }
     }
   }
@@ -669,17 +679,17 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
       _setFinalResult(false, 'KHÔNG ĐẠT - Con bạn chỉ tay chỉ để được giúp đỡ');
     }
   }
-  
+
   void _setFinalResult(bool result, String message) {
     setState(() {
       finalResult = result;
     });
-    
+
     // Cập nhật kết quả chính
     if (widget.onUpdateMainResult != null) {
       widget.onUpdateMainResult!(result);
     }
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Kết quả cuối cùng: $message'),
@@ -688,7 +698,7 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
       ),
     );
   }
-  
+
   Widget _buildFinalResult() {
     // Tính toán thống kê
     int interestingYesCount = 0;
@@ -699,14 +709,18 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
         }
       }
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: finalResult! ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: finalResult!
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: finalResult! ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: finalResult!
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.red.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -736,7 +750,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      finalResult! ? 'ĐẠT - Con bạn chỉ tay để thể hiện sự thích thú' : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển khả năng chỉ tay thú vị',
+                      finalResult!
+                          ? 'ĐẠT - Con bạn chỉ tay để thể hiện sự thích thú'
+                          : 'KHÔNG ĐẠT - Con bạn cần hỗ trợ phát triển khả năng chỉ tay thú vị',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -748,9 +764,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Thống kê chi tiết
           Container(
             padding: const EdgeInsets.all(16),
@@ -775,7 +791,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
                     Expanded(
                       child: _buildStatCard(
                         'Trường hợp',
-                        currentCase == 'case1' ? 'Trường hợp 1' : 'Trường hợp 2',
+                        currentCase == 'case1'
+                            ? 'Trường hợp 1'
+                            : 'Trường hợp 2',
                         Colors.blue,
                         Icons.account_tree,
                       ),
@@ -784,7 +802,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
                     Expanded(
                       child: _buildStatCard(
                         'Dùng ngón tay chỉ',
-                        selectedAnswers['finger_point'] == true ? 'Có' : 'Không',
+                        selectedAnswers['finger_point'] == true
+                            ? 'Có'
+                            : 'Không',
                         Colors.purple,
                         Icons.back_hand,
                       ),
@@ -807,7 +827,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
                     decoration: BoxDecoration(
                       color: Colors.indigo.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.indigo.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.indigo.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -832,9 +854,9 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
           Row(
             children: [
@@ -860,8 +882,13 @@ class _ExtensionTestQ007State extends State<ExtensionTestQ007> {
       ),
     );
   }
-  
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
