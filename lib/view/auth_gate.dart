@@ -108,12 +108,10 @@ class _AuthGateState extends State<AuthGate> {
           ? Center(
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.8,
-                height: MediaQuery.of(context).size.height * 0.8,
-                constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
+                constraints: const BoxConstraints(maxWidth: 600),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 24),
@@ -159,7 +157,7 @@ class _AuthGateState extends State<AuthGate> {
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                       ),
-                      const SizedBox(height: 32),
+                      const Spacer(),
                       SizedBox(
                         width: double.infinity,
                         height: 50,
