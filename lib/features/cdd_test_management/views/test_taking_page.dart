@@ -8,6 +8,10 @@ import '../extension_test/q_003.dart';
 import '../extension_test/q_004.dart';
 import '../extension_test/q_005.dart';
 import '../extension_test/q_006.dart';
+import '../extension_test/q_007.dart';
+import '../extension_test/q_008.dart';
+import '../extension_test/q_009.dart';
+import '../extension_test/q_010.dart';
 
 class TestTakingPage extends StatefulWidget {
   final Test test;
@@ -260,7 +264,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
                   _buildAnswerOption(false, 'Không', Icons.cancel, Colors.red),
 
                   // Extension Test (inline)
-                  if (_isMCHATRTest() && (currentQuestionIndex == 0 || currentQuestionIndex == 1 || currentQuestionIndex == 2 || currentQuestionIndex == 3 || currentQuestionIndex == 4 || currentQuestionIndex == 5) && answers.containsKey(currentQuestion.questionId))
+                  if (_isMCHATRTest() && (currentQuestionIndex == 0 || currentQuestionIndex == 1 || currentQuestionIndex == 2 || currentQuestionIndex == 3 || currentQuestionIndex == 4 || currentQuestionIndex == 5 || currentQuestionIndex == 6 || currentQuestionIndex == 7 || currentQuestionIndex == 8 || currentQuestionIndex == 9) && answers.containsKey(currentQuestion.questionId))
                     _buildInlineExtensionTest(),
 
                   const SizedBox(height: 32),
@@ -658,7 +662,7 @@ class _TestTakingPageState extends State<TestTakingPage> {
     final currentQuestion = widget.test.questions[currentQuestionIndex];
     final mainAnswer = answers[currentQuestion.questionId];
     
-    // Show Q_001 for question 0, Q_002 for question 1, Q_003 for question 2, Q_004 for question 3, Q_005 for question 4, Q_006 for question 5
+    // Show Q_001 for question 0, Q_002 for question 1, Q_003 for question 2, Q_004 for question 3, Q_005 for question 4, Q_006 for question 5, Q_007 for question 6, Q_008 for question 7, Q_009 for question 8, Q_010 for question 9
     if (currentQuestionIndex == 0) {
       return ExtensionTestQ001(
         mainQuestionAnswer: mainAnswer,
@@ -736,6 +740,66 @@ class _TestTakingPageState extends State<TestTakingPage> {
       );
     } else if (currentQuestionIndex == 5) {
       return ExtensionTestQ006(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 6) {
+      return ExtensionTestQ007(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 7) {
+      return ExtensionTestQ008(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 8) {
+      return ExtensionTestQ009(
+        mainQuestionAnswer: mainAnswer,
+        onUpdateMainResult: (bool newResult) {
+          // Cập nhật kết quả câu hỏi chính
+          final currentQuestion = widget.test.questions[currentQuestionIndex];
+          setState(() {
+            answers[currentQuestion.questionId] = newResult;
+          });
+        },
+        onReturnToMainTest: () {
+          // No need to return, just continue with main test
+          setState(() {});
+        },
+      );
+    } else if (currentQuestionIndex == 9) {
+      return ExtensionTestQ010(
         mainQuestionAnswer: mainAnswer,
         onUpdateMainResult: (bool newResult) {
           // Cập nhật kết quả câu hỏi chính
