@@ -223,8 +223,7 @@ class _AuthGateState extends State<AuthGate> {
                             // App image
                             Center(
                               child: FractionallySizedBox(
-                                widthFactor:
-                                    0.5, // chiếm 50% chiều rộng màn hình
+                                widthFactor: 0.75, // chiếm 50% chiều rộng màn hình
                                 child: AspectRatio(
                                   aspectRatio: 4 / 3,
                                   child: Container(
