@@ -5,6 +5,9 @@ class UserSession {
   static String? jwtToken;
   static String? userId; // sub from JWT
   static bool isGuest = false;
+  
+  // Get current user info
+  static String? get currentUser => userId;
 
   static Future<void> initFromPrefs() async {
     try {

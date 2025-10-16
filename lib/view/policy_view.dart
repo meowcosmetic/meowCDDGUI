@@ -17,9 +17,10 @@ import 'donation_view.dart';
 import '../uiElement/chat_dialog.dart';
 import '../uiElement/fab_utility.dart';
 import '../features/intervention_domains/views/domains_view.dart';
-import '../features/intervention_goals/views/goals_view.dart';
+import '../features/intervention_goals/views/intervention_program_view.dart';
 import '../features/intervention_methods/views/method_groups_view.dart';
 import 'login_view_html.dart';
+import 'layouts/adaptive_main_layout.dart';
 
 class PolicyView extends StatefulWidget {
   const PolicyView({super.key});
@@ -42,7 +43,83 @@ class _PolicyViewState extends State<PolicyView> {
   @override
   void initState() {
     super.initState();
-    _loadPolicy();
+    _checkPolicyStatus();
+  }
+
+  Future<void> _checkPolicyStatus() async {
+    try {
+      // Debug: Kiểm tra trạng thái user
+      final prefs = await SharedPreferences.getInstance();
+      final isGuest = prefs.getBool('guest_mode') ?? false;
+      final userToken = prefs.getString('user_token');
+      
+      print('Debug Policy Status:');
+      print('- isGuest: $isGuest');
+      print('- userToken: ${userToken != null ? 'exists' : 'null'}');
+      
+      if (isGuest) {
+        // Guest mode: kiểm tra local storage
+        final guestAccepted = prefs.getBool('guest_policy_accepted') ?? false;
+        print('- guestAccepted: $guestAccepted');
+        
+        if (guestAccepted) {
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const MainAppView()),
+            );
+          }
+          return;
+        }
+      } else if (userToken != null && userToken.isNotEmpty) {
+        // User đã đăng nhập: kiểm tra local storage trước (fallback)
+        final localAccepted = prefs.getBool('user_policy_accepted') ?? false;
+        print('- localAccepted: $localAccepted');
+        
+        if (localAccepted) {
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const MainAppView()),
+            );
+          }
+          return;
+        }
+        
+        // Nếu chưa có local storage, kiểm tra API
+        await UserSession.initFromPrefs();
+        final customerId = UserSession.userId;
+        print('- customerId: $customerId');
+        
+        if (customerId != null && customerId.isNotEmpty) {
+          try {
+            final hasRead = await PolicyService.hasUserReadPolicy(customerId: customerId);
+            print('- hasRead from API: $hasRead');
+            
+            if (hasRead) {
+              // Lưu vào local storage để lần sau không cần gọi API
+              await prefs.setBool('user_policy_accepted', true);
+              
+              if (mounted) {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const MainAppView()),
+                );
+              }
+              return;
+            }
+          } catch (apiError) {
+            print('- API Error: $apiError');
+            // API lỗi, tiếp tục hiển thị policy
+          }
+        }
+      }
+      
+      // User chưa đồng ý hoặc chưa đăng nhập, load policy để hiển thị
+      print('- Loading policy to show');
+      await _loadPolicy();
+    } catch (e) {
+      print('Error checking policy status: $e');
+      // Nếu có lỗi, vẫn load policy
+      await _loadPolicy();
+    }
   }
 
   Future<void> _loadPolicy() async {
@@ -85,6 +162,9 @@ class _PolicyViewState extends State<PolicyView> {
         _kGuestPolicyAcceptedAt,
         DateTime.now().toIso8601String(),
       );
+    } else {
+      // User đã đăng nhập: lưu local storage làm fallback
+      await prefs.setBool('user_policy_accepted', true);
     }
 
     // Nếu user đã đăng nhập và có policy data, gửi request mark policy
@@ -574,74 +654,12 @@ class _PolicyViewState extends State<PolicyView> {
 }
 
 // Main App View sau khi đồng ý chính sách
-class MainAppView extends StatefulWidget {
+class MainAppView extends StatelessWidget {
   const MainAppView({super.key});
 
   @override
-  State<MainAppView> createState() => _MainAppViewState();
-}
-
-class _MainAppViewState extends State<MainAppView> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = [
-    const HomePage(),
-    const StoreView(),
-    const DonationView(),
-    const ProfilePage(),
-  ];
-
-  final List<BottomNavigationBarItem> _bottomNavItems = [
-    const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang Chủ'),
-    const BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Cửa Hàng'),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.volunteer_activism),
-      label: 'Đóng Góp',
-    ),
-    const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ Sơ'),
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    return ResponsiveBuilder(
-      builder: (context, layoutType) {
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          floatingActionButton: FABUtility.buildSmartFAB(context),
-          appBar: AppBar(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.white,
-            title: ResponsiveText(
-              'Hỗ Trợ Trẻ Tự Kỷ',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: AppColors.white,
-            ),
-            elevation: 0,
-            centerTitle: true,
-          ),
-          body: ResponsiveContainer(child: _pages[_currentIndex]),
-          bottomNavigationBar: ResponsiveUtils.isMobile(context)
-              ? BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                  currentIndex: _currentIndex,
-                  onTap: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  selectedItemColor: AppColors.primary,
-                  unselectedItemColor: AppColors.grey600,
-                  backgroundColor: AppColors.white,
-                  elevation: 8,
-                  selectedFontSize: 12,
-                  unselectedFontSize: 11,
-                  items: _bottomNavItems,
-                )
-              : null,
-        );
-      },
-    );
+    return const AdaptiveMainLayout();
   }
 }
 
@@ -885,7 +903,7 @@ class HomePage extends StatelessWidget {
           case 'interventions':
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const GoalsView()),
+              MaterialPageRoute(builder: (context) => const InterventionProgramView()),
             );
             break;
           case 'intervention-domains':

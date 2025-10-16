@@ -12,14 +12,14 @@ import '../services/goal_service.dart';
 import '../widgets/criteria_list_widget.dart';
 import 'criteria_list_view.dart';
 
-class GoalsView extends StatefulWidget {
-  const GoalsView({super.key});
+class InterventionProgramView extends StatefulWidget {
+  const InterventionProgramView({super.key});
 
   @override
-  State<GoalsView> createState() => _GoalsViewState();
+  State<InterventionProgramView> createState() => _InterventionProgramViewState();
 }
 
-class _GoalsViewState extends State<GoalsView> {
+class _InterventionProgramViewState extends State<InterventionProgramView> {
   final InterventionGoalService _service = InterventionGoalService();
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
