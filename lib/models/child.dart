@@ -39,17 +39,19 @@ class Child {
   /// Tạo trẻ em từ JSON
   factory Child.fromJson(Map<String, dynamic> json) {
     return Child(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
+      id: json['id']?.toString() ?? '',
+      name: json['fullName'] ?? json['name'] ?? '',
       avatar: json['avatar'] ?? '',
-      age: json['age'] ?? 0,
+      age: json['currentAgeMonths'] != null 
+          ? (json['currentAgeMonths'] / 12).round() 
+          : (json['age'] ?? 0),
       gender: json['gender'] ?? '',
-      diagnosis: json['diagnosis'] ?? '',
+      diagnosis: json['developmentalDisorderDiagnosis'] ?? json['diagnosis'] ?? '',
       parentName: json['parentName'] ?? '',
       parentPhone: json['parentPhone'] ?? '',
       parentEmail: json['parentEmail'] ?? '',
       joinDate: DateTime.parse(
-        json['joinDate'] ?? DateTime.now().toIso8601String(),
+        json['registrationDate'] ?? json['joinDate'] ?? DateTime.now().toIso8601String(),
       ),
       status: json['status'] ?? 'active',
       progress: Map<String, double>.from(json['progress'] ?? {}),
@@ -172,6 +174,7 @@ class Child {
 
 /// Model mới cho child data với format JSON mới
 class ChildData {
+  final int? id; // ID của trẻ
   final String? parentId;
   final String fullName;
   final String gender;
@@ -193,6 +196,7 @@ class ChildData {
   final String status;
 
   const ChildData({
+    this.id,
     this.parentId,
     required this.fullName,
     required this.gender,
@@ -217,6 +221,7 @@ class ChildData {
   /// Tạo ChildData từ JSON
   factory ChildData.fromJson(Map<String, dynamic> json) {
     return ChildData(
+      id: json['id'] as int?,
       parentId: json['parentId']?.toString(),
       fullName: json['fullName'] as String? ?? '',
       gender: json['gender'] as String? ?? 'MALE',
@@ -245,6 +250,7 @@ class ChildData {
   /// Chuyển đổi thành JSON
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'parentId': parentId,
       'fullName': fullName,
       'gender': gender,

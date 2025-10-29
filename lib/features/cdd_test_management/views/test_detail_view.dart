@@ -630,6 +630,7 @@ class _TestDetailViewState extends State<TestDetailView> {
   }
 
   void _startTest(Test test) async {
+    print('TestDetailView: _startTest called with test: ${test.id}');
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -641,10 +642,15 @@ class _TestDetailViewState extends State<TestDetailView> {
     );
 
     // Xử lý kết quả sau khi hoàn thành test
+    print('TestDetailView: Received result from TestTakingPage: $result');
+    print('TestDetailView: widget.child: ${widget.child?.id}');
     if (result != null &&
         result is Map<String, dynamic> &&
         widget.child != null) {
+      print('TestDetailView: Calling _submitTestResult...');
       await _submitTestResult(result, test);
+    } else {
+      print('TestDetailView: Not calling _submitTestResult - result: $result, child: ${widget.child?.id}');
     }
   }
 
@@ -653,6 +659,8 @@ class _TestDetailViewState extends State<TestDetailView> {
     Test test,
   ) async {
     try {
+      print('TestDetailView: _submitTestResult called with result: $testResult');
+      print('TestDetailView: test parameter: ${test.id}');
       // Tạo TestResultModel từ kết quả test
       final now = DateTime.now();
       final testResultModel = TestResultModel(
@@ -686,7 +694,10 @@ class _TestDetailViewState extends State<TestDetailView> {
       );
 
       // Gửi kết quả lên server
+      print('TestDetailView: Calling API submitTestResult...');
       final response = await _api.submitTestResult(testResultModel);
+      print('TestDetailView: API response status: ${response.statusCode}');
+      print('TestDetailView: API response body: ${response.body}');
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (mounted) {
@@ -697,6 +708,9 @@ class _TestDetailViewState extends State<TestDetailView> {
               behavior: SnackBarBehavior.floating,
             ),
           );
+          
+          // Return to previous page with success result
+          Navigator.pop(context, true);
         }
       } else {
         if (mounted) {

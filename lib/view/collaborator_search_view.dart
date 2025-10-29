@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/collaborator_models.dart';
+import '../services/collaborator_service.dart';
+import 'collaborator_form_dialog.dart';
 
 class CollaboratorSearchView extends StatefulWidget {
   const CollaboratorSearchView({super.key});
@@ -10,13 +12,17 @@ class CollaboratorSearchView extends StatefulWidget {
 }
 
 class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
-  List<Collaborator> all = [];
-  List<Collaborator> filtered = [];
+  List<CollaboratorDetail> all = [];
+  List<CollaboratorDetail> filtered = [];
   String q = '';
   String city = 'Tất cả';
   String spec = 'Tất cả';
   String ratingFilter = 'Tất cả';
+  String statusFilter = 'Tất cả';
   bool isLoading = true;
+  int currentPage = 0;
+  int totalPages = 0;
+  bool hasMoreData = true;
 
   @override
   void initState() {
@@ -24,42 +30,226 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
     _load();
   }
 
-  void _load() {
+  void _load() async {
     setState(() {
-      all = SampleCollaborators.all();
-      filtered = all;
-      isLoading = false;
+      isLoading = true;
     });
+
+    try {
+      final response = await CollaboratorService.getCollaborators(
+        page: currentPage,
+        size: 10,
+      );
+      
+      final List<dynamic> collaboratorsData = response['content'] ?? [];
+      final List<CollaboratorDetail> collaborators = collaboratorsData
+          .map((data) => CollaboratorDetail.fromJson(data))
+          .toList();
+
+      setState(() {
+        if (currentPage == 0) {
+          all = collaborators;
+        } else {
+          all.addAll(collaborators);
+        }
+        filtered = all;
+        totalPages = response['totalPages'] ?? 0;
+        hasMoreData = currentPage < totalPages - 1;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi tải dữ liệu: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _applyFilters() {
     setState(() {
-      Iterable<Collaborator> list = all;
+      Iterable<CollaboratorDetail> list = all;
       final query = q.trim().toLowerCase();
       if (query.isNotEmpty) {
         list = list.where(
           (c) =>
-              c.name.toLowerCase().contains(query) ||
-              c.title.toLowerCase().contains(query) ||
-              c.description.toLowerCase().contains(query),
+              c.specialization.toLowerCase().contains(query) ||
+              c.organization.toLowerCase().contains(query) ||
+              c.roleName.toLowerCase().contains(query) ||
+              c.notes.vi.toLowerCase().contains(query) ||
+              c.notes.en.toLowerCase().contains(query),
         );
       }
-      if (city != 'Tất cả') {
-        list = list.where((c) => c.city == city);
-      }
-      if (spec != 'Tất cả') {
-        list = list.where((c) => c.specialties.contains(spec));
-      }
-      if (ratingFilter != 'Tất cả') {
-        final min = ratingFilter == '4.5+'
-            ? 4.5
-            : ratingFilter == '4.0+'
-            ? 4.0
-            : 3.0;
-        list = list.where((c) => c.rating >= min);
+      if (statusFilter != 'Tất cả') {
+        final status = statusFilter == 'Hoạt động'
+            ? CollaboratorStatus.ACTIVE
+            : statusFilter == 'Không hoạt động'
+            ? CollaboratorStatus.INACTIVE
+            : CollaboratorStatus.PENDING;
+        list = list.where((c) => c.status == status);
       }
       filtered = list.toList();
     });
+  }
+
+  void _searchCollaborators() async {
+    if (q.trim().isEmpty) {
+      _load();
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final response = await CollaboratorService.searchCollaborators(
+        keyword: q.trim(),
+        page: 0,
+        size: 10,
+      );
+      
+      final List<dynamic> collaboratorsData = response['content'] ?? [];
+      final List<CollaboratorDetail> collaborators = collaboratorsData
+          .map((data) => CollaboratorDetail.fromJson(data))
+          .toList();
+
+      setState(() {
+        all = collaborators;
+        filtered = collaborators;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi tìm kiếm: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _loadMore() async {
+    if (!hasMoreData || isLoading) return;
+
+    setState(() {
+      currentPage++;
+    });
+
+    try {
+      final response = await CollaboratorService.getCollaborators(
+        page: currentPage,
+        size: 10,
+      );
+      
+      final List<dynamic> collaboratorsData = response['content'] ?? [];
+      final List<CollaboratorDetail> collaborators = collaboratorsData
+          .map((data) => CollaboratorDetail.fromJson(data))
+          .toList();
+
+      setState(() {
+        all.addAll(collaborators);
+        filtered = all;
+        totalPages = response['totalPages'] ?? 0;
+        hasMoreData = currentPage < totalPages - 1;
+      });
+    } catch (e) {
+      setState(() {
+        currentPage--;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi tải thêm dữ liệu: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _addCollaborator() async {
+    final result = await showDialog<CreateCollaboratorRequest>(
+      context: context,
+      builder: (context) => CollaboratorFormDialog(
+        onCreate: (request) async {
+          try {
+            await CollaboratorService.createCollaborator(request);
+            _load(); // Reload data
+          } catch (e) {
+            rethrow;
+          }
+        },
+        onUpdate: (id, request) async {
+          // This won't be called in add mode
+        },
+      ),
+    );
+  }
+
+  void _editCollaborator(CollaboratorDetail collaborator) async {
+    await showDialog(
+      context: context,
+      builder: (context) => CollaboratorFormDialog(
+        collaborator: collaborator,
+        onCreate: (request) async {
+          // This won't be called in edit mode
+        },
+        onUpdate: (id, request) async {
+          try {
+            await CollaboratorService.updateCollaborator(id, request);
+            _load(); // Reload data
+          } catch (e) {
+            rethrow;
+          }
+        },
+      ),
+    );
+  }
+
+  void _deleteCollaborator(CollaboratorDetail collaborator) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: Text('Bạn có chắc chắn muốn xóa cộng tác viên "${collaborator.specialization}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await CollaboratorService.deleteCollaborator(collaborator.collaboratorId);
+        _load(); // Reload data
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Xóa cộng tác viên thành công'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi xóa cộng tác viên: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -69,10 +259,15 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
-        title: const Text('Tìm Cộng Tác Viên'),
+        title: const Text('Quản Lý Cộng Tác Viên'),
         centerTitle: true,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _addCollaborator,
+            tooltip: 'Thêm cộng tác viên',
+          ),
           IconButton(icon: const Icon(Icons.tune), onPressed: _showFilters),
         ],
       ),
@@ -82,20 +277,35 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
           Container(
             padding: const EdgeInsets.all(16),
             color: AppColors.white,
-            child: TextField(
-              onChanged: (v) {
-                q = v;
-                _applyFilters();
-              },
-              decoration: InputDecoration(
-                hintText: 'Tìm theo tên, chức danh, mô tả...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    onChanged: (v) {
+                      q = v;
+                      _applyFilters();
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Tìm theo chuyên môn, tổ chức, vai trò...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: AppColors.grey50,
+                    ),
+                  ),
                 ),
-                filled: true,
-                fillColor: AppColors.grey50,
-              ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: _searchCollaborators,
+                  icon: const Icon(Icons.search),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -107,21 +317,25 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _chip('TP', city == 'Tất cả', () {
-                    city = 'Tất cả';
+                  _chip('Tất cả', statusFilter == 'Tất cả', () {
+                    statusFilter = 'Tất cả';
                     _applyFilters();
                   }),
-                  ...SampleCollaborators.cities()
-                      .where((c) => c != 'Tất cả')
-                      .map(
-                        (c) => Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: _chip(c, city == c, () {
-                            city = c;
-                            _applyFilters();
-                          }),
-                        ),
-                      ),
+                  const SizedBox(width: 8),
+                  _chip('Hoạt động', statusFilter == 'Hoạt động', () {
+                    statusFilter = 'Hoạt động';
+                    _applyFilters();
+                  }),
+                  const SizedBox(width: 8),
+                  _chip('Chờ duyệt', statusFilter == 'Chờ duyệt', () {
+                    statusFilter = 'Chờ duyệt';
+                    _applyFilters();
+                  }),
+                  const SizedBox(width: 8),
+                  _chip('Không hoạt động', statusFilter == 'Không hoạt động', () {
+                    statusFilter = 'Không hoạt động';
+                    _applyFilters();
+                  }),
                 ],
               ),
             ),
@@ -134,8 +348,13 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                 ? _empty()
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: filtered.length,
-                    itemBuilder: (_, i) => _card(filtered[i]),
+                    itemCount: filtered.length + (hasMoreData ? 1 : 0),
+                    itemBuilder: (_, i) {
+                      if (i == filtered.length) {
+                        return _loadMoreButton();
+                      }
+                      return _card(filtered[i]);
+                    },
                   ),
           ),
         ],
@@ -166,7 +385,7 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
     );
   }
 
-  Widget _card(Collaborator c) {
+  Widget _card(CollaboratorDetail c) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -192,7 +411,9 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                   radius: 24,
                   backgroundColor: AppColors.primaryLight,
                   child: Text(
-                    c.name.split(' ').last.characters.first.toUpperCase(),
+                    c.specialization.isNotEmpty 
+                        ? c.specialization[0].toUpperCase()
+                        : 'C',
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -208,7 +429,7 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                         children: [
                           Expanded(
                             child: Text(
-                              c.name,
+                              c.specialization,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -216,41 +437,30 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                               ),
                             ),
                           ),
-                          if (c.isVerified)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.1),
-                                border: Border.all(color: Colors.green),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.verified,
-                                    size: 14,
-                                    color: Colors.green,
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'Đã xác minh',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.green,
-                                    ),
-                                  ),
-                                ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: c.getStatusColor().withValues(alpha: 0.1),
+                              border: Border.all(color: c.getStatusColor()),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              c.getStatusText(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: c.getStatusColor(),
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        c.title,
+                        c.roleName,
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
@@ -259,32 +469,33 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.star, size: 14, color: c.getRatingColor()),
+                          const Icon(
+                            Icons.business,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
-                          Text(
-                            '${c.rating} (${c.reviews})',
-                            style: const TextStyle(fontSize: 12),
+                          Expanded(
+                            child: Text(
+                              c.organization,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 12),
                           const Icon(
-                            Icons.place,
+                            Icons.work,
                             size: 14,
                             color: AppColors.textSecondary,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            c.city,
+                            '${c.experienceYears} năm',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            c.getPriceText(),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -295,42 +506,79 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
               ],
             ),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: c.specialties
-                  .map(
-                    (s) => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.grey100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.borderLight),
-                      ),
-                      child: Text(
-                        c.getSpecialtyText(s),
-                        style: const TextStyle(fontSize: 11),
+            if (c.certification.vi.isNotEmpty || c.certification.en.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.grey50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Chứng chỉ:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                  )
-                  .toList(),
-            ),
+                    if (c.certification.vi.isNotEmpty)
+                      Text(
+                        c.certification.vi,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    if (c.certification.en.isNotEmpty)
+                      Text(
+                        c.certification.en,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 8),
+            if (c.availability.vi.isNotEmpty || c.availability.en.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.grey50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Thời gian khả dụng:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (c.availability.vi.isNotEmpty)
+                      Text(
+                        c.availability.vi,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    if (c.availability.en.isNotEmpty)
+                      Text(
+                        c.availability.en,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      // Placeholder for call action
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('Gọi ${c.phone}')));
-                    },
-                    icon: const Icon(Icons.call),
-                    label: const Text('Gọi'),
+                    onPressed: () => _editCollaborator(c),
+                    icon: const Icon(Icons.edit),
+                    label: const Text('Sửa'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: BorderSide(color: AppColors.primary),
@@ -340,16 +588,11 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      // Placeholder for email action
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Email ${c.email}')),
-                      );
-                    },
-                    icon: const Icon(Icons.email),
-                    label: const Text('Liên hệ'),
+                    onPressed: () => _deleteCollaborator(c),
+                    icon: const Icon(Icons.delete),
+                    label: const Text('Xóa'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: Colors.red,
                       foregroundColor: AppColors.white,
                     ),
                   ),
@@ -375,6 +618,21 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
     );
   }
 
+  Widget _loadMoreButton() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: ElevatedButton(
+        onPressed: hasMoreData ? _loadMore : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        child: const Text('Tải thêm'),
+      ),
+    );
+  }
+
   void _showFilters() {
     showModalBottomSheet(
       context: context,
@@ -382,13 +640,9 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return _FilterSheet(
-          city: city,
-          spec: spec,
-          rating: ratingFilter,
-          onApply: (c, s, r) {
-            city = c;
-            spec = s;
-            ratingFilter = r;
+          status: statusFilter,
+          onApply: (s) {
+            statusFilter = s;
             _applyFilters();
           },
         );
@@ -398,15 +652,11 @@ class _CollaboratorSearchViewState extends State<CollaboratorSearchView> {
 }
 
 class _FilterSheet extends StatefulWidget {
-  final String city;
-  final String spec;
-  final String rating;
-  final void Function(String, String, String) onApply;
+  final String status;
+  final void Function(String) onApply;
 
   const _FilterSheet({
-    required this.city,
-    required this.spec,
-    required this.rating,
+    required this.status,
     required this.onApply,
   });
 
@@ -415,16 +665,12 @@ class _FilterSheet extends StatefulWidget {
 }
 
 class _FilterSheetState extends State<_FilterSheet> {
-  late String city;
-  late String spec;
-  late String rating;
+  late String status;
 
   @override
   void initState() {
     super.initState();
-    city = widget.city;
-    spec = widget.spec;
-    rating = widget.rating;
+    status = widget.status;
   }
 
   @override
@@ -453,24 +699,10 @@ class _FilterSheetState extends State<_FilterSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _section(
-                    'Thành phố',
-                    SampleCollaborators.cities(),
-                    city,
-                    (v) => setState(() => city = v),
-                  ),
-                  const SizedBox(height: 24),
-                  _section(
-                    'Chuyên môn',
-                    SampleCollaborators.specialties(),
-                    spec,
-                    (v) => setState(() => spec = v),
-                  ),
-                  const SizedBox(height: 24),
-                  _section(
-                    'Đánh giá',
-                    SampleCollaborators.ratings(),
-                    rating,
-                    (v) => setState(() => rating = v),
+                    'Trạng thái',
+                    ['Tất cả', 'Hoạt động', 'Chờ duyệt', 'Không hoạt động'],
+                    status,
+                    (v) => setState(() => status = v),
                   ),
                 ],
               ),
@@ -482,7 +714,7 @@ class _FilterSheetState extends State<_FilterSheet> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  widget.onApply(city, spec, rating);
+                  widget.onApply(status);
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(

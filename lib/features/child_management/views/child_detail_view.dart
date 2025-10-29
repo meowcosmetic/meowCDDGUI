@@ -13,6 +13,7 @@ import '../../../models/test_models.dart';
 import '../../../uiElement/selectable_text_widget.dart';
 import '../../intervention_domains/services/domain_service.dart';
 import '../../intervention_domains/models/domain_models.dart';
+import '../../../models/user_session.dart';
 import 'package:flutter_html/flutter_html.dart';
 
 class ChildDetailView extends StatefulWidget {
@@ -36,6 +37,11 @@ class _ChildDetailViewState extends State<ChildDetailView> {
   int _filterIndex = 0; // 0=Tất cả, 1=Khuyến nghị, 2=Không khuyến nghị
   bool _infoExpanded = false;
 
+  // Test results state variables
+  Map<String, Map<String, dynamic>> _testResults = {};
+  bool _isLoadingTestResults = true;
+  bool _hasTestResultsError = false;
+
   // Domain-related state variables
   List<InterventionDomainModel> _domains = [];
   bool _isLoadingDomains = true;
@@ -49,6 +55,7 @@ class _ChildDetailViewState extends State<ChildDetailView> {
     super.initState();
     _loadTests();
     _loadDomains();
+    _loadTestResults();
   }
 
   Future<void> _loadTests() async {
@@ -115,6 +122,88 @@ class _ChildDetailViewState extends State<ChildDetailView> {
     }
   }
 
+  Future<void> _loadTestResults() async {
+    setState(() {
+      _isLoadingTestResults = true;
+      _hasTestResultsError = false;
+    });
+
+    try {
+      print('Child name: ${widget.child.name}');
+      print('Child ID: ${widget.child}');
+      print('Parent name: ${widget.child.parentName}');
+      print('Loading test results for child ID: ${widget.child.id}');
+      final response = await _api.getLatestTestResultsByCategory(widget.child.id);
+      
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print('Test results API response: $responseData');
+        
+        // Parse test results by category
+        Map<String, Map<String, dynamic>> results = {};
+        
+        if (responseData is Map<String, dynamic>) {
+          responseData.forEach((category, data) {
+            if (data is Map<String, dynamic>) {
+              results[category] = {
+                'totalScore': data['totalScore'] ?? 0,
+                'maxScore': data['maxScore'] ?? 0,
+                'interpretation': data['interpretation'] ?? 'Chưa có thông tin',
+                'resultLevel': data['resultLevel'] ?? '',
+                'percentageScore': data['percentageScore'] ?? 0,
+              };
+            }
+          });
+        } else if (responseData is List) {
+          // Handle case where response is a list of test results
+          for (var testResult in responseData) {
+            if (testResult is Map<String, dynamic>) {
+              // Map testType to category
+              String category = '';
+              switch (testResult['testType']) {
+                case 'CDD_TEST':
+                  category = 'DEVELOPMENTAL_SCREENING';
+                  break;
+                case 'AUTISM_TEST':
+                  category = 'AUTISM_SCREENING';
+                  break;
+                case 'ADHD_TEST':
+                  category = 'ADHD_SCREENING';
+                  break;
+                default:
+                  continue;
+              }
+              
+              results[category] = {
+                'totalScore': testResult['totalScore'] ?? 0,
+                'maxScore': testResult['maxScore'] ?? 0,
+                'interpretation': testResult['interpretation'] ?? 'Chưa có thông tin',
+                'resultLevel': testResult['resultLevel'] ?? '',
+                'percentageScore': testResult['percentageScore'] ?? 0,
+              };
+            }
+          }
+        }
+        print('Test results: $results');
+        setState(() {
+          _testResults = results;
+          _isLoadingTestResults = false;
+        });
+      } else {
+        setState(() {
+          _hasTestResultsError = true;
+          _isLoadingTestResults = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading test results: $e');
+      setState(() {
+        _hasTestResultsError = true;
+        _isLoadingTestResults = false;
+      });
+    }
+  }
+
   void _applyTestFilter() {
     final int childAgeMonths = widget.child.age * 12;
     List<CDDTest> base = _tests;
@@ -166,56 +255,68 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Card
-            _buildHeaderCard(),
-            const SizedBox(height: 16),
-
-            // Collapsible Info Section
-            _buildCollapsibleInfoSection(),
-
-            const SizedBox(height: 16),
-
-            // Progress Details
-            _buildProgressCard(),
-
-            const SizedBox(height: 16),
-
-            // Recent Activities (moved up under Progress Details)
-            _buildRecentActivitiesCard(),
-
-            const SizedBox(height: 16),
-
-            // Tracking Button
-            _buildTrackingButton(),
-
-            const SizedBox(height: 16),
-
-            // Tests for Child
-            _buildTestsCard(),
-
-            const SizedBox(height: 16),
-
-            // Activities Section
-            _buildActivitiesCard(),
-
-            const SizedBox(height: 16),
-
-            // Notes
-            if (widget.child.notes.isNotEmpty) ...[
-              _buildNotesCard(),
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Card
+              _buildHeaderCard(),
               const SizedBox(height: 16),
-            ],
 
-            const SizedBox(height: 32),
-          ],
+              // Collapsible Info Section
+              _buildCollapsibleInfoSection(),
+
+              const SizedBox(height: 16),
+
+              // Progress Details
+              _buildProgressCard(),
+
+              const SizedBox(height: 16),
+
+              // Recent Activities (moved up under Progress Details)
+              _buildRecentActivitiesCard(),
+
+              const SizedBox(height: 16),
+
+              // Tracking Button
+              _buildTrackingButton(),
+
+              const SizedBox(height: 16),
+
+              // Tests for Child
+              _buildTestsCard(),
+
+              const SizedBox(height: 16),
+
+              // Activities Section
+              _buildActivitiesCard(),
+
+              const SizedBox(height: 16),
+
+              // Notes
+              if (widget.child.notes.isNotEmpty) ...[
+                _buildNotesCard(),
+                const SizedBox(height: 16),
+              ],
+
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _refreshData() async {
+    await Future.wait([
+      _loadTests(),
+      _loadDomains(),
+      _loadTestResults(),
+    ]);
   }
 
   Widget _buildCollapsibleInfoSection() {
@@ -248,9 +349,11 @@ class _ChildDetailViewState extends State<ChildDetailView> {
               color: AppColors.textPrimary,
             ),
           ),
-          subtitle: const Text(
-            'Cơ bản, chẩn đoán, phụ huynh, địa chỉ, trường học, chuyên gia',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          subtitle: Text(
+            UserSession.isParent 
+              ? 'Cơ bản, chẩn đoán bác sĩ, chẩn đoán tham khảo, giáo viên, chuyên gia'
+              : 'Cơ bản, chẩn đoán bác sĩ, chẩn đoán tham khảo, chuyên gia',
+            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           children: [
             const SizedBox(height: 8),
@@ -266,22 +369,32 @@ class _ChildDetailViewState extends State<ChildDetailView> {
             ]),
             const SizedBox(height: 12),
             const SizedBox(height: 8),
-            _buildTableSection('Chẩn Đoán', [
-              ['Chẩn đoán', widget.child.diagnosis],
+            _buildTableSection('Chẩn Đoán Bởi Bác Sĩ', [
+              ['Rối loạn phát triển', 'Chưa có thông tin'],
+              ['Tự kỉ', 'Chưa có thông tin'],
+              ['Tăng động giảm chú ý', 'Chưa có thông tin'],
             ]),
             const SizedBox(height: 12),
             const SizedBox(height: 8),
-            _buildTableSection('Thông Tin Phụ Huynh', [
-              ['Tên phụ huynh', widget.child.parentName],
-              ['Số điện thoại', widget.child.parentPhone],
-              ['Email', widget.child.parentEmail],
+            _buildDiagnosisSection('Chẩn Đoán Tham Khảo', [
+              _buildDiagnosisRow('Rối loạn phát triển', 'DEVELOPMENTAL_SCREENING'),
+              _buildDiagnosisRow('Tự kỉ', 'AUTISM_SCREENING'),
+              _buildDiagnosisRow('Tăng động giảm chú ý', 'ADHD_SCREENING'),
             ]),
             const SizedBox(height: 12),
             const SizedBox(height: 8),
-            _buildTableSection('Địa Chỉ & Trường Học', [
-              ['Địa chỉ', widget.child.address],
-              ['Trường học', widget.child.school],
-            ]),
+            // Chỉ hiển thị thông tin giáo viên nếu user là phụ huynh
+            if (UserSession.isParent) ...[
+              _buildTableSection(
+                'Thông Tin Giáo Viên', 
+                [
+                  ['Tên giáo viên', 'Chưa có thông tin'], // TODO: Sẽ có API để lấy thông tin giáo viên
+                  ['Số điện thoại', 'Chưa có thông tin'],
+                  ['Email', 'Chưa có thông tin'],
+                ]
+              ),
+              const SizedBox(height: 12),
+            ],
             const SizedBox(height: 12),
             const SizedBox(height: 8),
             _buildTableSection('Chuyên Gia Điều Trị', [
@@ -383,6 +496,263 @@ class _ChildDetailViewState extends State<ChildDetailView> {
         ],
       ),
     );
+  }
+
+  Widget _buildDiagnosisSection(String title, List<Widget> rows) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            color: AppColors.primaryLight,
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          ...rows,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDiagnosisRow(String diagnosis, String category) {
+    final testResult = _testResults[category];
+    final hasResult = testResult != null;
+    
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.borderLight, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 140,
+              child: Text(
+                diagnosis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _isLoadingTestResults
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : hasResult
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '${testResult!['totalScore']}/${testResult!['maxScore']}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _getResultLevelColor(testResult!['resultLevel']).withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: _getResultLevelColor(testResult!['resultLevel']),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    testResult!['resultLevel'] ?? '',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: _getResultLevelColor(testResult!['resultLevel']),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              testResult!['interpretation'],
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            if (testResult!['percentageScore'] > 0) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                '${testResult!['percentageScore']}%',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ],
+                        )
+                      : const Text(
+                          'Chưa có thông tin',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton(
+              onPressed: () => _navigateToTest(category),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                minimumSize: const Size(0, 32),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: Text(
+                hasResult ? 'Làm lại' : 'Làm bài test',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getResultLevelColor(String? resultLevel) {
+    switch (resultLevel?.toUpperCase()) {
+      case 'EXCELLENT':
+        return Colors.green;
+      case 'GOOD':
+        return Colors.lightGreen;
+      case 'FAIR':
+        return Colors.orange;
+      case 'POOR':
+        return Colors.red;
+      case 'CRITICAL':
+        return Colors.red.shade800;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _navigateToTest(String category) async {
+    // Calculate age in months from child's age (in years)
+    final ageMonths = widget.child.age * 12;
+    print('Child age: ${widget.child.age} years');
+    print('Calculated age in months: $ageMonths');
+    
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Text('Đang tải bài test $category...'),
+            ],
+          ),
+        ),
+      );
+      
+      // Call API to get tests for this category and age
+      final api = ApiService();
+      final response = await api.getTestsByAgeAndCategoryPaginated(
+        ageMonths: ageMonths,
+        category: category,
+        page: 0,
+        size: 10,
+      );
+      
+      // Close loading dialog
+      Navigator.pop(context);
+      
+      print('API Response Status: ${response.statusCode}');
+      print('API Response Body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final tests = responseData['content'] as List<dynamic>? ?? [];
+        
+        if (tests.isNotEmpty) {
+          // Navigate to TestDetailView with the first test
+          final firstTest = tests.first;
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TestDetailView(
+                testId: firstTest['id']?.toString() ?? '',
+                testTitle: firstTest['name']?.toString() ?? 'Bài test',
+                child: widget.child,
+              ),
+            ),
+          );
+          
+          // Refresh test results after completing test
+          if (result == true) {
+            print('Test completed, refreshing results...');
+            _loadTestResults();
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Không tìm thấy bài test $category cho trẻ ${ageMonths} tháng tuổi'),
+              backgroundColor: AppColors.warning,
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi tải bài test: ${response.statusCode}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      
+      print('Error calling test API: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi khi tải bài test: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   Widget _buildHeaderCard() {

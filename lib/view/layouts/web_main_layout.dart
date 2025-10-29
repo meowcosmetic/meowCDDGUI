@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
 import '../../constants/app_colors.dart';
 import '../../utils/responsive_utils.dart';
 import '../../uiElement/fab_utility.dart';
@@ -14,6 +15,10 @@ import '../specialist_connect_view.dart';
 import '../../features/intervention_goals/views/intervention_program_view.dart';
 import '../../features/intervention_domains/views/domains_view.dart';
 import '../../features/intervention_methods/views/method_groups_view.dart';
+import '../../models/user_session.dart';
+import '../auth_gate.dart';
+import '../../models/api_service.dart';
+import '../../models/user.dart';
 
 class WebMainLayout extends StatefulWidget {
   const WebMainLayout({super.key});
@@ -25,6 +30,36 @@ class WebMainLayout extends StatefulWidget {
 class _WebMainLayoutState extends State<WebMainLayout> {
   int _selectedIndex = 0;
   bool _isSidebarExpanded = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadUserSession();
+  }
+  
+  Future<void> _loadUserSession() async {
+    await UserSession.initFromPrefs();
+    
+    // Load user profile if not already loaded and user is logged in
+    if (UserSession.userId != null && UserSession.currentUserProfile == null && !UserSession.isGuest) {
+      try {
+        final api = ApiService();
+        final response = await api.getUserProfile(UserSession.userId!);
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          final userData = jsonDecode(response.body);
+          final user = User.fromJson(userData);
+          await UserSession.updateUserProfile(user);
+        }
+      } catch (e) {
+        // Handle error silently
+        print('Error loading user profile: $e');
+      }
+    }
+    
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   final List<NavigationItem> _navigationItems = [
     NavigationItem(
@@ -318,7 +353,9 @@ class _WebMainLayoutState extends State<WebMainLayout> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Người dùng',
+                                    UserSession.isGuest 
+                                      ? 'Khách' 
+                                      : UserSession.currentUserProfile?.name ?? 'Người dùng',
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -326,7 +363,9 @@ class _WebMainLayoutState extends State<WebMainLayout> {
                                     ),
                                   ),
                                   Text(
-                                    'user@example.com',
+                                    UserSession.isGuest 
+                                      ? 'Chế độ khách' 
+                                      : UserSession.currentUserProfile?.email ?? UserSession.userId ?? 'Chưa đăng nhập',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: AppColors.textSecondary,
@@ -781,8 +820,52 @@ class WebHomePage extends StatelessWidget {
 }
 
 // Web Profile Page
-class WebProfilePage extends StatelessWidget {
+class WebProfilePage extends StatefulWidget {
   const WebProfilePage({super.key});
+
+  @override
+  State<WebProfilePage> createState() => _WebProfilePageState();
+}
+
+class _WebProfilePageState extends State<WebProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    _loadUserSession();
+  }
+  
+  Future<void> _loadUserSession() async {
+    await UserSession.initFromPrefs();
+    
+    // Load user profile if not already loaded and user is logged in
+    if (UserSession.userId != null && UserSession.currentUserProfile == null && !UserSession.isGuest) {
+      try {
+        final api = ApiService();
+        final response = await api.getUserProfile(UserSession.userId!);
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          final userData = jsonDecode(response.body);
+          final user = User.fromJson(userData);
+          await UserSession.updateUserProfile(user);
+        }
+      } catch (e) {
+        // Handle error silently
+        print('Error loading user profile: $e');
+      }
+    }
+    
+    if (mounted) {
+      setState(() {});
+    }
+  }
+  
+  Future<void> _logout() async {
+    await UserSession.clearSession();
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const AuthGate()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -818,7 +901,9 @@ class WebProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Người dùng',
+                  UserSession.isGuest 
+                    ? 'Khách' 
+                    : UserSession.currentUserProfile?.name ?? 'Người dùng',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -827,7 +912,9 @@ class WebProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'user@example.com',
+                  UserSession.isGuest 
+                    ? 'Chế độ khách' 
+                    : UserSession.currentUserProfile?.email ?? UserSession.userId ?? 'Chưa đăng nhập',
                   style: TextStyle(
                     fontSize: 16,
                     color: AppColors.textSecondary,
@@ -859,12 +946,24 @@ class WebProfilePage extends StatelessWidget {
             mainAxisSpacing: 20,
             childAspectRatio: 1.5,
             children: [
-              _buildSettingsCard('Thông tin cá nhân', Icons.person_outline, () {}),
-              _buildSettingsCard('Cài đặt', Icons.settings_outlined, () {}),
-              _buildSettingsCard('Thông báo', Icons.notifications_outlined, () {}),
-              _buildSettingsCard('Trợ giúp', Icons.help_outline, () {}),
-              _buildSettingsCard('Về ứng dụng', Icons.info_outline, () {}),
-              _buildSettingsCard('Đăng xuất', Icons.logout, () {}, isDestructive: true),
+              _buildSettingsCard('Thông tin cá nhân', Icons.person_outline, () {
+                _showPersonalInfoDialog();
+              }),
+              _buildSettingsCard('Cài đặt', Icons.settings_outlined, () {
+                _showSettingsDialog();
+              }),
+              _buildSettingsCard('Thông báo', Icons.notifications_outlined, () {
+                _showNotificationsDialog();
+              }),
+              _buildSettingsCard('Trợ giúp', Icons.help_outline, () {
+                _showHelpDialog();
+              }),
+              _buildSettingsCard('Về ứng dụng', Icons.info_outline, () {
+                _showAboutDialog();
+              }),
+              _buildSettingsCard('Đăng xuất', Icons.logout, () {
+                _showLogoutDialog();
+              }, isDestructive: true),
             ],
           ),
         ],
@@ -929,6 +1028,133 @@ class WebProfilePage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+  
+  void _showPersonalInfoDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Thông tin cá nhân'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (UserSession.currentUserProfile != null) ...[
+              Text('Tên: ${UserSession.currentUserProfile!.name}'),
+              const SizedBox(height: 8),
+              Text('Email: ${UserSession.currentUserProfile!.email}'),
+              const SizedBox(height: 8),
+              Text('Số điện thoại: ${UserSession.currentUserProfile!.phone}'),
+              const SizedBox(height: 8),
+              Text('Giới tính: ${UserSession.currentUserProfile!.sex}'),
+              const SizedBox(height: 8),
+              Text('Năm sinh: ${UserSession.currentUserProfile!.yearOfBirth}'),
+              const SizedBox(height: 8),
+              Text('ID người dùng: ${UserSession.currentUserProfile!.customerId}'),
+            ] else ...[
+              Text('ID người dùng: ${UserSession.userId ?? 'Chưa có'}'),
+              const SizedBox(height: 8),
+              Text('Trạng thái: ${UserSession.isGuest ? 'Khách' : 'Đã đăng nhập'}'),
+              const SizedBox(height: 8),
+              Text('Token: ${UserSession.jwtToken != null ? 'Có' : 'Không có'}'),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cài đặt'),
+        content: const Text('Tính năng cài đặt sẽ được phát triển trong tương lai.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showNotificationsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Thông báo'),
+        content: const Text('Tính năng thông báo sẽ được phát triển trong tương lai.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Trợ giúp'),
+        content: const Text('Nếu bạn cần hỗ trợ, vui lòng liên hệ với đội ngũ phát triển.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showAboutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Về ứng dụng'),
+        content: const Text('The Happiness Journey - Ứng dụng hỗ trợ toàn diện cho trẻ tự kỷ và gia đình.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Đăng xuất'),
+        content: const Text('Bạn có chắc chắn muốn đăng xuất?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _logout();
+            },
+            child: const Text('Đăng xuất', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

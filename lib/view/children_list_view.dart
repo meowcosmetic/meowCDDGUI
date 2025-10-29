@@ -566,7 +566,7 @@ class _ChildrenListViewState extends State<ChildrenListView> {
   void _showChildDetails(ChildData childData) {
     // Convert ChildData to Child for ChildDetailView
     final child = Child(
-      id: childData.parentId ?? 'unknown',
+      id: childData.id?.toString() ?? 'unknown',
       name: childData.fullName,
       avatar: '',
       age: _calculateAge(childData.dateOfBirth),

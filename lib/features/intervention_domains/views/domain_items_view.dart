@@ -121,15 +121,15 @@ class _DomainItemsViewState extends State<DomainItemsView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  item.name,
+                                  item.name ?? 'N/A',
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                Text('VI: ${item.displayedName.vi}'),
-                                Text('EN: ${item.displayedName.en}'),
+                                Text('VI: ${item.displayedName?.vi ?? 'N/A'}'),
+                                Text('EN: ${item.displayedName?.en ?? 'N/A'}'),
                                 if (item.category != null &&
                                     item.category!.isNotEmpty) ...[
                                   const SizedBox(height: 6),
@@ -192,9 +192,9 @@ class _DomainItemEditPageState extends State<_DomainItemEditPage> {
     super.initState();
     final item = widget.item;
     if (item != null) {
-      _name.text = item.name;
-      _vi.text = item.displayedName.vi;
-      _en.text = item.displayedName.en;
+      _name.text = item.name ?? '';
+      _vi.text = item.displayedName?.vi ?? '';
+      _en.text = item.displayedName?.en ?? '';
       _descVi.text = item.description?.vi ?? '';
       _descEn.text = item.description?.en ?? '';
       _category.text = item.category ?? '';
@@ -229,18 +229,14 @@ class _DomainItemEditPageState extends State<_DomainItemEditPage> {
 
       if (widget.item == null) {
         await _service.createItem(
-          name: name,
-          displayedName: displayed,
-          description: desc,
-          category: category,
+          title: displayed,
+          domainId: 'default-domain-id', // TODO: Get actual domain ID
         );
       } else {
         await _service.updateItem(
           id: widget.item!.id,
-          name: name,
-          displayedName: displayed,
-          description: desc,
-          category: category,
+          title: displayed,
+          domainId: 'default-domain-id', // TODO: Get actual domain ID
         );
       }
       if (mounted) Navigator.pop(context, true);

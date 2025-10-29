@@ -1,5 +1,230 @@
 import 'package:flutter/material.dart';
 
+// Enum cho trạng thái collaborator
+enum CollaboratorStatus { ACTIVE, INACTIVE, PENDING }
+
+// Class cho thông tin đa ngôn ngữ
+class LocalizedText {
+  final String vi;
+  final String en;
+
+  const LocalizedText({required this.vi, required this.en});
+
+  Map<String, dynamic> toJson() => {'vi': vi, 'en': en};
+
+  factory LocalizedText.fromJson(Map<String, dynamic> json) =>
+      LocalizedText(vi: json['vi'] ?? '', en: json['en'] ?? '');
+
+  String getText(String locale) {
+    return locale == 'vi' ? vi : en;
+  }
+}
+
+// Class cho thông tin chứng chỉ
+class Certification {
+  final String vi;
+  final String en;
+
+  const Certification({required this.vi, required this.en});
+
+  Map<String, dynamic> toJson() => {'vi': vi, 'en': en};
+
+  factory Certification.fromJson(Map<String, dynamic> json) =>
+      Certification(vi: json['vi'] ?? '', en: json['en'] ?? '');
+}
+
+// Class cho thông tin khả dụng
+class Availability {
+  final String vi;
+  final String en;
+
+  const Availability({required this.vi, required this.en});
+
+  Map<String, dynamic> toJson() => {'vi': vi, 'en': en};
+
+  factory Availability.fromJson(Map<String, dynamic> json) =>
+      Availability(vi: json['vi'] ?? '', en: json['en'] ?? '');
+}
+
+// Class cho ghi chú
+class Notes {
+  final String vi;
+  final String en;
+
+  const Notes({required this.vi, required this.en});
+
+  Map<String, dynamic> toJson() => {'vi': vi, 'en': en};
+
+  factory Notes.fromJson(Map<String, dynamic> json) =>
+      Notes(vi: json['vi'] ?? '', en: json['en'] ?? '');
+}
+
+// Class chi tiết collaborator từ API
+class CollaboratorDetail {
+  final String collaboratorId;
+  final String userId;
+  final String roleId;
+  final String roleName;
+  final String specialization;
+  final int experienceYears;
+  final Certification certification;
+  final String organization;
+  final Availability availability;
+  final CollaboratorStatus status;
+  final Notes notes;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const CollaboratorDetail({
+    required this.collaboratorId,
+    required this.userId,
+    required this.roleId,
+    required this.roleName,
+    required this.specialization,
+    required this.experienceYears,
+    required this.certification,
+    required this.organization,
+    required this.availability,
+    required this.status,
+    required this.notes,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory CollaboratorDetail.fromJson(Map<String, dynamic> json) {
+    return CollaboratorDetail(
+      collaboratorId: json['collaboratorId'] ?? '',
+      userId: json['userId'] ?? '',
+      roleId: json['roleId'] ?? '',
+      roleName: json['roleName'] ?? '',
+      specialization: json['specialization'] ?? '',
+      experienceYears: json['experienceYears'] ?? 0,
+      certification: Certification.fromJson(json['certification'] ?? {}),
+      organization: json['organization'] ?? '',
+      availability: Availability.fromJson(json['availability'] ?? {}),
+      status: CollaboratorStatus.values.firstWhere(
+        (e) => e.name == json['status'],
+        orElse: () => CollaboratorStatus.PENDING,
+      ),
+      notes: Notes.fromJson(json['notes'] ?? {}),
+      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'collaboratorId': collaboratorId,
+      'userId': userId,
+      'roleId': roleId,
+      'roleName': roleName,
+      'specialization': specialization,
+      'experienceYears': experienceYears,
+      'certification': certification.toJson(),
+      'organization': organization,
+      'availability': availability.toJson(),
+      'status': status.name,
+      'notes': notes.toJson(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  String getStatusText() {
+    switch (status) {
+      case CollaboratorStatus.ACTIVE:
+        return 'Hoạt động';
+      case CollaboratorStatus.INACTIVE:
+        return 'Không hoạt động';
+      case CollaboratorStatus.PENDING:
+        return 'Chờ duyệt';
+    }
+  }
+
+  Color getStatusColor() {
+    switch (status) {
+      case CollaboratorStatus.ACTIVE:
+        return Colors.green;
+      case CollaboratorStatus.INACTIVE:
+        return Colors.red;
+      case CollaboratorStatus.PENDING:
+        return Colors.orange;
+    }
+  }
+}
+
+// Class cho request tạo collaborator
+class CreateCollaboratorRequest {
+  final String userId;
+  final String roleId;
+  final String specialization;
+  final int experienceYears;
+  final Certification certification;
+  final String organization;
+  final Availability availability;
+  final CollaboratorStatus status;
+  final Notes notes;
+
+  const CreateCollaboratorRequest({
+    required this.userId,
+    required this.roleId,
+    required this.specialization,
+    required this.experienceYears,
+    required this.certification,
+    required this.organization,
+    required this.availability,
+    required this.status,
+    required this.notes,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'roleId': roleId,
+      'specialization': specialization,
+      'experienceYears': experienceYears,
+      'certification': certification.toJson(),
+      'organization': organization,
+      'availability': availability.toJson(),
+      'status': status.name,
+      'notes': notes.toJson(),
+    };
+  }
+}
+
+// Class cho request cập nhật collaborator
+class UpdateCollaboratorRequest {
+  final String? specialization;
+  final int? experienceYears;
+  final Certification? certification;
+  final String? organization;
+  final Availability? availability;
+  final CollaboratorStatus? status;
+  final Notes? notes;
+
+  const UpdateCollaboratorRequest({
+    this.specialization,
+    this.experienceYears,
+    this.certification,
+    this.organization,
+    this.availability,
+    this.status,
+    this.notes,
+  });
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    if (specialization != null) data['specialization'] = specialization;
+    if (experienceYears != null) data['experienceYears'] = experienceYears;
+    if (certification != null) data['certification'] = certification!.toJson();
+    if (organization != null) data['organization'] = organization;
+    if (availability != null) data['availability'] = availability!.toJson();
+    if (status != null) data['status'] = status!.name;
+    if (notes != null) data['notes'] = notes!.toJson();
+    return data;
+  }
+}
+
 class Collaborator {
   final String id;
   final String name;

@@ -3,4 +3,3 @@
 
 export 'models/goal_models.dart';
 export 'services/goal_service.dart';
-export 'views/goals_view.dart';

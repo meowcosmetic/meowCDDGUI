@@ -3,16 +3,6 @@ import '../../../constants/app_colors.dart';
 import '../../../models/test_models.dart';
 import '../../../models/child.dart';
 import '../../../utils/responsive_utils.dart';
-import '../extension_test/q_001.dart';
-import '../extension_test/q_002.dart';
-import '../extension_test/q_003.dart';
-import '../extension_test/q_004.dart';
-import '../extension_test/q_005.dart';
-import '../extension_test/q_006.dart';
-import '../extension_test/q_007.dart';
-import '../extension_test/q_008.dart';
-import '../extension_test/q_009.dart';
-import '../extension_test/q_010.dart';
 
 class TestTakingPage extends StatefulWidget {
   final Test test;
@@ -554,52 +544,57 @@ class _TestTakingPageState extends State<TestTakingPage> {
             const SizedBox(height: 24),
 
             // Action Buttons
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      // Trả về kết quả chi tiết khi về trang chủ
-                      final detailedResult = {
-                        'startTime': startTime.toIso8601String(),
-                        'endTime': DateTime.now().toIso8601String(),
-                        'totalScore': result!.score.toDouble(),
-                        'maxScore': result!.totalQuestions.toDouble(),
-                        'percentageScore':
-                            (result!.score / result!.totalQuestions) * 100,
-                        'correctAnswers': result!.score,
-                        'totalQuestions': result!.totalQuestions,
-                        'skippedQuestions':
-                            result!.totalQuestions - result!.answeredQuestions,
-                        'timeSpent': result!.timeSpent,
-                        'interpretation': _getInterpretation(
-                          (result!.score / result!.totalQuestions) * 100,
-                        ),
-                        'notes': 'Hoàn thành bài test ${widget.test.getName()}',
-                      };
-                      Navigator.pop(context, detailedResult);
-                    },
-                    icon: const Icon(Icons.home),
-                    label: const Text('Về trang chủ'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textSecondary,
-                      side: BorderSide(color: AppColors.border),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
+                // Submit Test Result Button
+                SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () => _retakeTest(),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Làm lại'),
+                    onPressed: () => _submitTestResult(),
+                    icon: const Icon(Icons.upload),
+                    label: const Text('Submit Test Result'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: AppColors.success,
                       foregroundColor: AppColors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Other Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          // Chỉ về trang chủ mà không submit
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.home),
+                        label: const Text('Về trang chủ'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                          side: BorderSide(color: AppColors.border),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _retakeTest(),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Làm lại'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -702,161 +697,43 @@ class _TestTakingPageState extends State<TestTakingPage> {
     final currentQuestion = widget.test.questions[currentQuestionIndex];
     final mainAnswer = answers[currentQuestion.questionId];
 
-    // Show Q_001 for question 0, Q_002 for question 1, Q_003 for question 2, Q_004 for question 3, Q_005 for question 4, Q_006 for question 5, Q_007 for question 6, Q_008 for question 7, Q_009 for question 8, Q_010 for question 9
-    if (currentQuestionIndex == 0) {
-      return ExtensionTestQ001(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 1) {
-      return ExtensionTestQ002(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 2) {
-      return ExtensionTestQ003(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 3) {
-      return ExtensionTestQ004(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 4) {
-      return ExtensionTestQ005(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 5) {
-      return ExtensionTestQ006(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 6) {
-      return ExtensionTestQ007(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 7) {
-      return ExtensionTestQ008(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 8) {
-      return ExtensionTestQ009(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    } else if (currentQuestionIndex == 9) {
-      return ExtensionTestQ010(
-        mainQuestionAnswer: mainAnswer,
-        onUpdateMainResult: (bool newResult) {
-          // Cập nhật kết quả câu hỏi chính
-          final currentQuestion = widget.test.questions[currentQuestionIndex];
-          setState(() {
-            answers[currentQuestion.questionId] = newResult;
-          });
-        },
-        onReturnToMainTest: () {
-          // No need to return, just continue with main test
-          setState(() {});
-        },
-      );
-    }
-
-    // Fallback (should not reach here)
-    return const SizedBox.shrink();
+    // Return a simple placeholder widget since extension tests are removed
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Text(
+            'Extension Test ${currentQuestionIndex + 1}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Extension test functionality has been removed.',
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              // Continue with main test
+              setState(() {});
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+            ),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _completeTest() {
@@ -941,10 +818,8 @@ class _TestTakingPageState extends State<TestTakingPage> {
       isCompleted = true;
     });
 
-    // Trả về kết quả chi tiết cho TestDetailView
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   Navigator.pop(context, detailedResult);
-    // });
+    // Không tự động pop, ở lại trang kết quả để user có thể submit
+    print('TestTakingPage: _completeTest finished, staying on result page');
   }
 
   String _getInterpretation(double percentageScore) {
@@ -958,6 +833,40 @@ class _TestTakingPageState extends State<TestTakingPage> {
       return 'Trẻ có một số khó khăn trong phát triển. Cần can thiệp sớm và hỗ trợ chuyên môn.';
     } else {
       return 'Trẻ cần được đánh giá chi tiết hơn và can thiệp chuyên môn ngay lập tức. Kết quả cho thấy có dấu hiệu chậm phát triển.';
+    }
+  }
+
+  void _submitTestResult() async {
+    try {
+      // Tạo detailedResult để trả về cho TestDetailView
+      final detailedResult = {
+        'startTime': startTime.toIso8601String(),
+        'endTime': DateTime.now().toIso8601String(),
+        'totalScore': result!.score.toDouble(),
+        'maxScore': result!.totalQuestions.toDouble(),
+        'percentageScore': (result!.score / result!.totalQuestions) * 100,
+        'correctAnswers': result!.score,
+        'totalQuestions': result!.totalQuestions,
+        'skippedQuestions': result!.totalQuestions - result!.answeredQuestions,
+        'timeSpent': result!.timeSpent,
+        'interpretation': _getInterpretation(
+          (result!.score / result!.totalQuestions) * 100,
+        ),
+        'notes': 'Hoàn thành bài test ${widget.test.getName()}',
+      };
+      
+      print('TestTakingPage: Submitting test result: $detailedResult');
+      
+      // Trả về kết quả chi tiết cho TestDetailView để submit
+      Navigator.pop(context, detailedResult);
+    } catch (e) {
+      print('TestTakingPage: Error submitting test result: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi khi submit kết quả: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

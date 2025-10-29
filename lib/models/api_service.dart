@@ -25,6 +25,20 @@ class ApiService {
     return ApiService._(baseUrl ?? AppConfig.apiBaseUrl);
   }
 
+  // Get user profile by ID
+  Future<http.Response> getUserProfile(String userId) async {
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/customers/get/$userId');
+    final resp = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        if (UserSession.jwtToken != null) 'Authorization': 'Bearer ${UserSession.jwtToken}',
+      },
+    );
+    return resp;
+  }
+
   // Bulk fetch basic customer profiles
   Future<http.Response> fetchCustomerProfilesBulk(List<String> userIds) async {
     final uri = Uri.parse(
@@ -193,6 +207,22 @@ class ApiService {
       headers: const {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+      },
+    );
+    return resp;
+  }
+
+  /// Lấy kết quả test mới nhất theo category cho trẻ
+  Future<http.Response> getLatestTestResultsByCategory(String childId) async {
+    final uri = Uri.parse(
+      '${AppConfig.apiBaseUrl}/cdd/api/v1/neon/child-test-records/child/$childId/latest-by-category',
+    );
+    final resp = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        if (UserSession.jwtToken != null) 'Authorization': 'Bearer ${UserSession.jwtToken}',
       },
     );
     return resp;
