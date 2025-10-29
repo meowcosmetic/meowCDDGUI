@@ -158,20 +158,12 @@ class _ChildDetailViewState extends State<ChildDetailView> {
           // Handle case where response is a list of test results
           for (var testResult in responseData) {
             if (testResult is Map<String, dynamic>) {
-              // Map testType to category
-              String category = '';
-              switch (testResult['testType']) {
-                case 'CDD_TEST':
-                  category = 'DEVELOPMENTAL_SCREENING';
-                  break;
-                case 'AUTISM_TEST':
-                  category = 'AUTISM_SCREENING';
-                  break;
-                case 'ADHD_TEST':
-                  category = 'ADHD_SCREENING';
-                  break;
-                default:
-                  continue;
+              // Use testCategory directly from API response
+              String category = testResult['testCategory']?.toString() ?? '';
+              
+              if (category.isEmpty) {
+                print('Warning: testResult missing testCategory: $testResult');
+                continue;
               }
               
               results[category] = {
