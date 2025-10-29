@@ -15,6 +15,7 @@ import '../../intervention_domains/services/domain_service.dart';
 import '../../intervention_domains/models/domain_models.dart';
 import '../../../models/user_session.dart';
 import 'package:flutter_html/flutter_html.dart';
+import '../../../utils/responsive_utils.dart';
 
 class ChildDetailView extends StatefulWidget {
   final Child child;
@@ -219,84 +220,108 @@ class _ChildDetailViewState extends State<ChildDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        title: Text(
-          'Chi tiết: ${widget.child.name}',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              // TODO: Navigate to edit child page
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Tính năng sửa thông tin trẻ sẽ được phát triển',
-                  ),
-                  backgroundColor: AppColors.info,
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _refreshData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Card
-              _buildHeaderCard(),
-              const SizedBox(height: 16),
-
-              // Collapsible Info Section
-              _buildCollapsibleInfoSection(),
-
-              const SizedBox(height: 16),
-
-              // Progress Details
-              _buildProgressCard(),
-
-              const SizedBox(height: 16),
-
-              // Recent Activities (moved up under Progress Details)
-              _buildRecentActivitiesCard(),
-
-              const SizedBox(height: 16),
-
-              // Tracking Button
-              _buildTrackingButton(),
-
-              const SizedBox(height: 16),
-
-              // Tests for Child
-              _buildTestsCard(),
-
-              const SizedBox(height: 16),
-
-              // Activities Section
-              _buildActivitiesCard(),
-
-              const SizedBox(height: 16),
-
-              // Notes
-              if (widget.child.notes.isNotEmpty) ...[
-                _buildNotesCard(),
-                const SizedBox(height: 16),
-              ],
-
-              const SizedBox(height: 32),
+    // Check if we're in a web layout context (no need for Scaffold)
+    final isInWebLayout = MediaQuery.of(context).size.width >= ResponsiveUtils.tabletBreakpoint;
+    
+    return ResponsiveBuilder(
+      builder: (context, layoutType) {
+        // For web layout, return body only (Scaffold is provided by WebMainLayout)
+        if (isInWebLayout && layoutType != ResponsiveLayoutType.mobile) {
+          return _buildBody(layoutType);
+        }
+        
+        // For mobile, return full Scaffold with AppBar
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.white,
+            title: Text(
+              'Chi tiết: ${widget.child.name}',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            elevation: 0,
+            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  // TODO: Navigate to edit child page
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Tính năng sửa thông tin trẻ sẽ được phát triển',
+                      ),
+                      backgroundColor: AppColors.info,
+                    ),
+                  );
+                },
+              ),
             ],
+          ),
+          body: _buildBody(layoutType),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(ResponsiveLayoutType layoutType) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: layoutType == ResponsiveLayoutType.mobile ? double.infinity : 1200,
+        ),
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: ResponsiveUtils.getResponsivePadding(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Card
+                _buildHeaderCard(),
+                const SizedBox(height: 16),
+
+                // Collapsible Info Section
+                _buildCollapsibleInfoSection(),
+
+                const SizedBox(height: 16),
+
+                // Progress Details
+                _buildProgressCard(),
+
+                const SizedBox(height: 16),
+
+                // Recent Activities (moved up under Progress Details)
+                _buildRecentActivitiesCard(),
+
+                const SizedBox(height: 16),
+
+                // Tracking Button
+                _buildTrackingButton(),
+
+                const SizedBox(height: 16),
+
+                // Tests for Child
+                _buildTestsCard(),
+
+                const SizedBox(height: 16),
+
+                // Activities Section
+                _buildActivitiesCard(),
+
+                const SizedBox(height: 16),
+
+                // Notes
+                if (widget.child.notes.isNotEmpty) ...[
+                  _buildNotesCard(),
+                  const SizedBox(height: 16),
+                ],
+
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),

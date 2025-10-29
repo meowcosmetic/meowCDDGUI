@@ -10,6 +10,7 @@ import 'create_category_view.dart';
 import '../models/cdd_test.dart';
 import '../../../uiElement/chat_dialog.dart';
 import '../../../uiElement/fab_utility.dart';
+import '../../../view/layouts/web_main_layout.dart';
 
 class TestView extends StatefulWidget {
   const TestView({super.key});
@@ -826,15 +827,27 @@ class _TestViewState extends State<TestView> {
   }
 
   void _startTest(CDDTest test) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TestDetailView(
-          testId: test.id ?? '',
-          testTitle: test.getName('vi'),
+    // Check if we're in a web layout context
+    final webLayoutProvider = WebLayoutNavigationProvider.of(context);
+    
+    if (webLayoutProvider != null) {
+      // Use web layout navigation (in-place)
+      webLayoutProvider.onTestSelected(
+        test.id ?? '',
+        test.getName('vi'),
+      );
+    } else {
+      // Use traditional navigation (mobile)
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TestDetailView(
+            testId: test.id ?? '',
+            testTitle: test.getName('vi'),
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   IconData _getCategoryIcon(String category) {

@@ -6,6 +6,7 @@ import '../models/api_service.dart';
 import '../models/user_session.dart';
 import 'children/add_child_sheet.dart';
 import '../features/child_management/views/child_detail_view.dart';
+import 'layouts/web_main_layout.dart';
 
 class ChildrenListView extends StatefulWidget {
   const ChildrenListView({super.key});
@@ -594,10 +595,19 @@ class _ChildrenListViewState extends State<ChildrenListView> {
       therapist: 'Chưa cập nhật',
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ChildDetailView(child: child)),
-    );
+    // Check if we're in a web layout context
+    final webLayoutProvider = WebLayoutNavigationProvider.of(context);
+    
+    if (webLayoutProvider != null) {
+      // Use web layout navigation (in-place)
+      webLayoutProvider.onChildSelected(child);
+    } else {
+      // Use traditional navigation (mobile)
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ChildDetailView(child: child)),
+      );
+    }
   }
 
   void _showAddChildDialog(BuildContext context) {

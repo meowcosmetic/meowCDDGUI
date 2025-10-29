@@ -7,6 +7,7 @@ import '../../../models/test_result_model.dart';
 import '../../../models/child.dart';
 import 'test_taking_page.dart';
 import '../models/cdd_test.dart';
+import '../../../view/layouts/web_main_layout.dart';
 
 class TestDetailView extends StatefulWidget {
   final String testId;
@@ -631,26 +632,36 @@ class _TestDetailViewState extends State<TestDetailView> {
 
   void _startTest(Test test) async {
     print('TestDetailView: _startTest called with test: ${test.id}');
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TestTakingPage(
-          test: test,
-          child: widget.child, // Truyền thông tin trẻ
-        ),
-      ),
-    );
-
-    // Xử lý kết quả sau khi hoàn thành test
-    print('TestDetailView: Received result from TestTakingPage: $result');
-    print('TestDetailView: widget.child: ${widget.child?.id}');
-    if (result != null &&
-        result is Map<String, dynamic> &&
-        widget.child != null) {
-      print('TestDetailView: Calling _submitTestResult...');
-      await _submitTestResult(result, test);
+    
+    // Check if we're in a web layout context
+    final webLayoutProvider = WebLayoutTestDetailProvider.of(context);
+    
+    if (webLayoutProvider != null) {
+      // Use web layout navigation (in-place)
+      webLayoutProvider.onTestStart(test, child: widget.child);
     } else {
-      print('TestDetailView: Not calling _submitTestResult - result: $result, child: ${widget.child?.id}');
+      // Use traditional navigation (mobile)
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TestTakingPage(
+            test: test,
+            child: widget.child, // Truyền thông tin trẻ
+          ),
+        ),
+      );
+
+      // Xử lý kết quả sau khi hoàn thành test
+      print('TestDetailView: Received result from TestTakingPage: $result');
+      print('TestDetailView: widget.child: ${widget.child?.id}');
+      if (result != null &&
+          result is Map<String, dynamic> &&
+          widget.child != null) {
+        print('TestDetailView: Calling _submitTestResult...');
+        await _submitTestResult(result, test);
+      } else {
+        print('TestDetailView: Not calling _submitTestResult - result: $result, child: ${widget.child?.id}');
+      }
     }
   }
 

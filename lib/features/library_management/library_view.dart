@@ -17,6 +17,7 @@ import 'widgets/posts_list_widget.dart';
 import 'pages/post_detail_page.dart';
 import '../../models/intervention_post.dart';
 import 'package:flutter/foundation.dart';
+import '../../view/layouts/web_main_layout.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'dart:ui_web' as ui;
@@ -1933,17 +1934,35 @@ class _LibraryViewState extends State<LibraryView> {
   }
 
   void _readItem(LibraryItem item) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => _ItemReaderPage(item: item)),
-    );
+    // Check if we're in a web layout context
+    final webLayoutProvider = WebLayoutNavigationProvider.of(context);
+    
+    if (webLayoutProvider != null) {
+      // Use web layout navigation (in-place)
+      webLayoutProvider.onLibraryItemSelected(item);
+    } else {
+      // Use traditional navigation (mobile)
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ItemReaderPage(item: item)),
+      );
+    }
   }
 
   void _viewPost(InterventionPost post) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => PostDetailPage(post: post)),
-    );
+    // Check if we're in a web layout context
+    final webLayoutProvider = WebLayoutNavigationProvider.of(context);
+    
+    if (webLayoutProvider != null) {
+      // Use web layout navigation (in-place)
+      webLayoutProvider.onLibraryPostSelected(post);
+    } else {
+      // Use traditional navigation (mobile)
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => PostDetailPage(post: post)),
+      );
+    }
   }
 
   void _deletePost(InterventionPost post) async {
@@ -2455,7 +2474,7 @@ class _ItemDetailsSheet extends StatelessWidget {
     Navigator.pop(context);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => _ItemReaderPage(item: item)),
+      MaterialPageRoute(builder: (context) => ItemReaderPage(item: item)),
     );
   }
 
@@ -2525,16 +2544,21 @@ class _ItemDetailsSheet extends StatelessWidget {
   }
 }
 
-class _ItemReaderPage extends StatefulWidget {
+class ItemReaderPage extends StatefulWidget {
   final LibraryItem item;
+  final bool showScaffold;
 
-  const _ItemReaderPage({required this.item});
+  const ItemReaderPage({
+    super.key, 
+    required this.item,
+    this.showScaffold = true,
+  });
 
   @override
-  State<_ItemReaderPage> createState() => _ItemReaderPageState();
+  State<ItemReaderPage> createState() => _ItemReaderPageState();
 }
 
-class _ItemReaderPageState extends State<_ItemReaderPage> {
+class _ItemReaderPageState extends State<ItemReaderPage> {
   String? bookContent;
   bool isLoading = true;
   String? errorMessage;
@@ -2650,6 +2674,11 @@ class _ItemReaderPageState extends State<_ItemReaderPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.showScaffold) {
+      // Return content only for web layout
+      return _buildContent();
+    }
+    
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(

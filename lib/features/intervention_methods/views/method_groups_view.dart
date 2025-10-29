@@ -4,6 +4,7 @@ import '../../../constants/app_colors.dart';
 import '../models/method_group_models.dart';
 import '../services/method_group_service.dart';
 import 'methods_view.dart';
+import '../../../view/layouts/web_main_layout.dart';
 
 class MethodGroupsView extends StatefulWidget {
   const MethodGroupsView({super.key});
@@ -400,12 +401,21 @@ class _MethodGroupsViewState extends State<MethodGroupsView> {
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MethodsView(methodGroup: methodGroup),
-            ),
-          );
+          // Check if we're in a web layout context
+          final webLayoutProvider = WebLayoutNavigationProvider.of(context);
+          
+          if (webLayoutProvider != null) {
+            // Use web layout navigation (in-place)
+            webLayoutProvider.onMethodSelected(methodGroup);
+          } else {
+            // Use traditional navigation (mobile)
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MethodsView(methodGroup: methodGroup),
+              ),
+            );
+          }
         },
         borderRadius: BorderRadius.circular(8),
         child: Padding(

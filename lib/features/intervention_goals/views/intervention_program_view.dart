@@ -11,6 +11,8 @@ import '../models/goal_models.dart';
 import '../services/goal_service.dart';
 import '../widgets/criteria_list_widget.dart';
 import 'criteria_list_view.dart';
+import 'program_criteria_view.dart';
+import '../../../view/layouts/web_main_layout.dart';
 
 class InterventionProgramView extends StatefulWidget {
   const InterventionProgramView({super.key});
@@ -804,15 +806,24 @@ class _InterventionProgramViewState extends State<InterventionProgramView> {
                     onTap: () {
                       final id = int.tryParse((p['id'] ?? '').toString());
                       if (id != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => _ProgramCriteriaView(
-                              programId: id,
-                              programData: p,
+                        // Check if we're in a web layout context
+                        final webLayoutProvider = WebLayoutNavigationProvider.of(context);
+                        
+                        if (webLayoutProvider != null) {
+                          // Use web layout navigation (in-place)
+                          webLayoutProvider.onProgramSelected(p);
+                        } else {
+                          // Use traditional navigation (mobile)
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProgramCriteriaView(
+                                programId: id,
+                                programData: p,
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
                       }
                     },
                     child: Container(
